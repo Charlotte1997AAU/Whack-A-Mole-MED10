@@ -89,6 +89,22 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean holdToRotate
+        {
+            get
+            {
+                return SteamVR_Actions.default_holdToRotate;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean saveHandPosition
+        {
+            get
+            {
+                return SteamVR_Actions.default_saveHandPosition;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

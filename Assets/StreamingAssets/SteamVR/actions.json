@@ -40,6 +40,14 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/holdToRotate",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/saveHandPosition",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
