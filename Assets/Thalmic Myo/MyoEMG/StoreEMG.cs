@@ -15,6 +15,7 @@ public class StoreEMG : MonoBehaviour
     public static List<int> storeEMG07 = new List<int>();
     public static List<int> storeEMG08 = new List<int>();
     public static List<DateTime> timestamp = new List<DateTime>();
+    public static string activeCube;
     public int counter = 0;
 
     public void Update() {

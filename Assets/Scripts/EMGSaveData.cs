@@ -20,27 +20,19 @@ public class EMGSaveData : MonoBehaviour
 
     public bool saveData = false;
     public static string filename;
+    public string filePath;
+    private string logEntry;
+    private string activeCube = "";
+
+    public Hover hover;
 
     // Start is called before the first frame update
     void Start()
     {
-        string shortFilename = "RawEMG-.csv";
-        filename = AppendTimeStamp(shortFilename);
-        Debug.Log("CSV created");
+        CreateFilePath();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (saveData)
-        {
-            rawEMGRoutine(filename);
-            saveData = false;
-            Debug.Log("Data saving has begun");
-        }
-    }
-
-    public void rawEMGRoutine(string filename)
+    public void saveDataToCSV()
     {
         // Get raw EMG pod data values
         raw_emg_Pod01 = StoreEMG.storeEMG01;
@@ -52,17 +44,59 @@ public class EMGSaveData : MonoBehaviour
         raw_emg_Pod07 = StoreEMG.storeEMG07;
         raw_emg_Pod08 = StoreEMG.storeEMG08;
         raw_emg_time = StoreEMG.timestamp;
-        Debug.Log("Raw EMG done");
+        if(hover.activeCube == null)
+        {
+            activeCube = "null";
+        } else
+        {
+            activeCube = hover.activeCube.name;
+        }
 
         // The sizes of EMG 01 and 06 are +1 element bigger than the others
         // This is fixed by trimming them in the savePrc function
 
-
         // ------------------------- Raw EMG -------------------------
-        // Write raw EMG into a CSV file
-        FunctionsCSV csv = new FunctionsCSV();
-        csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time);
-        Debug.Log("Raw EMG CSV file created!");
+        // Write raw EMG into a CSV file       
+
+        for (int i = 0; i < raw_emg_Pod01.Count; i++)
+        {
+            logEntry = $"{raw_emg_Pod01[i]}, {raw_emg_Pod02[i]}, {raw_emg_Pod03[i]}, " +
+                              $"{raw_emg_Pod04[i]}, {raw_emg_Pod05[i]}, {raw_emg_Pod06[i]}, {raw_emg_Pod07[i]}, " +
+                              $"{raw_emg_Pod08[i]}, {raw_emg_time[i]}, {activeCube}";
+        
+            File.AppendAllLines(filePath, new List<string> { logEntry });
+        }
+    }
+
+    private string GetUniqueFilePath(string directory, string baseFileName, string extension)
+    {
+        int counter = 1;
+        string filePath;
+
+        do
+        {
+            string numberedFileName = $"{baseFileName}_{counter:D2}.{extension}";
+            filePath = Path.Combine(directory, numberedFileName);
+            counter++;
+        }
+        while (File.Exists(filePath));
+
+        return filePath;
+    }
+
+    public string CreateFilePath()
+    {
+        string directoryPath = Path.Combine(Application.dataPath, "MED10", "Logs");
+
+        // Ensure the directory exists
+        Directory.CreateDirectory(directoryPath);
+
+        // Generate a unique file name
+        filePath = GetUniqueFilePath(directoryPath, "log", "csv");
+
+        File.WriteAllText(filePath, "EMG1, EMG2, EMG3, EMG4, EMG5, EMG6, EMG7, EMG8, Timestamp, Active Cube\n");
+
+        return filePath;
     }
 
     public void resetEMGholders()

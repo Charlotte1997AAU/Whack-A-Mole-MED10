@@ -1,15 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+
 
 public class triggerBox : MonoBehaviour
 {
     public Hover hoverScript;
     public Logger logger;
+    public EMGSaveData saver;
 
     private bool isInside = false;
     private float requriedTime = 5.0f;
     public float timeInside = 0f;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("GameController"))
+        {
+            saver.resetEMGholders();
+        }
+    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -20,7 +31,6 @@ public class triggerBox : MonoBehaviour
             {
                 cubeRenderer.material = hoverScript.GestureColor;
                 logger.LogIfGestureReady(true);
-                Debug.Log("Changed to gesture ready: " + hoverScript.activeCube.name);
             }
             
             if (!isInside)
@@ -31,10 +41,11 @@ public class triggerBox : MonoBehaviour
             timeInside += Time.deltaTime;
             if (timeInside >= requriedTime)
             {
-                Debug.Log("we have made it");
+                saver.saveDataToCSV();
                 hoverScript.DeactivateCube();
                 hoverScript.activeCubeCollider.enabled = false;
                 hoverScript.ActivateCube();
+                Debug.Log("we have made it");
             }
         }
     }

@@ -36,10 +36,11 @@ public class Logger : MonoBehaviour
         readyForGesture = isReadyForGesture;
     }
 
-    public void LogActivatedCube(string cubeName)
+    public string LogActivatedCube(string cubeName)
     {
         currentActivatedCube = cubeName; // Store activated cube name
         isCubeActivated = true; // Mark as activated
+        return currentActivatedCube;
     }
 
     public void LogDeactivatedCube()
