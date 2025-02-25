@@ -14,6 +14,9 @@ public class triggerBox : MonoBehaviour
     private float requriedTime = 5.0f;
     public float timeInside = 0f;
 
+    public GameObject tracker;
+    public static List<Vector3> trackerPositions = new List<Vector3>();
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("GameController"))
@@ -26,6 +29,7 @@ public class triggerBox : MonoBehaviour
     {
         if (other.CompareTag("GameController"))
         {
+            trackerPositions.Add(trackerPos());
             Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
             if (cubeRenderer != null)
             {
@@ -67,5 +71,16 @@ public class triggerBox : MonoBehaviour
             isInside = false;
             timeInside = 0f;
         }
+    }
+
+    public Vector3 trackerPos()
+    {
+        float trackerX = tracker.transform.position.x;
+        float trackerY = tracker.transform.position.y;
+        float trackerZ = tracker.transform.position.z;
+
+        Vector3 trackerPosition = new Vector3(trackerX, trackerY, trackerZ);
+
+        return trackerPosition;
     }
 }

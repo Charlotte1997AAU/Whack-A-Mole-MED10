@@ -16,7 +16,7 @@ public class SaveRoutine : MonoBehaviour
     private List<int> raw_emg_Pod06;
     private List<int> raw_emg_Pod07;
     private List<int> raw_emg_Pod08;
-    private List<DateTime> raw_emg_time;
+    private List<float> raw_emg_time;
     private List<string> raw_cube;
 
     private List<float> prc_emg_Pod01;
@@ -27,7 +27,7 @@ public class SaveRoutine : MonoBehaviour
     private List<float> prc_emg_Pod06;
     private List<float> prc_emg_Pod07;
     private List<float> prc_emg_Pod08;
-    private List<DateTime> prc_emg_time;
+    private List<float> prc_emg_time;
 
     // Name of the CSV file to be created
     public static string filename;
@@ -88,7 +88,7 @@ public class SaveRoutine : MonoBehaviour
         // ------------------------- Raw EMG -------------------------
         // Write raw EMG into a CSV file
         FunctionsCSV csv = new FunctionsCSV();
-        csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time, raw_cube);
+       // csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time, raw_cube);
         UnityEngine.Debug.Log("Raw EMG CSV file created!");
     }
 

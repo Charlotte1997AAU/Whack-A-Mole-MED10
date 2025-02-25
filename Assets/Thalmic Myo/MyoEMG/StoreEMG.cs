@@ -14,8 +14,7 @@ public class StoreEMG : MonoBehaviour
     public static List<int> storeEMG06 = new List<int>();
     public static List<int> storeEMG07 = new List<int>();
     public static List<int> storeEMG08 = new List<int>();
-    public static List<DateTime> timestamp = new List<DateTime>();
-    public static string activeCube;
+    public static List<float> timestamp = new List<float>();
     public int counter = 0;
 
     public void Update() {
@@ -28,6 +27,12 @@ public class StoreEMG : MonoBehaviour
         // The EMG Pod 08 is unreadable during the first loop iteration. i.e. In the first loop the emg[] size is 7, not 8
         if (counter > 2)
         {
+            if (emg.Length == 0)
+            {
+                Debug.LogError("Error in Myo armband connection");
+                return;
+            }
+
             // Store data in lists
             storeEMG01.Add(emg[0]);   // Get current EMG
             storeEMG02.Add(emg[1]);
@@ -39,9 +44,9 @@ public class StoreEMG : MonoBehaviour
             storeEMG08.Add(emg[7]);
             //storeEMG08.Add(0);
 
-            timestamp.Add(DateTime.Now);   // Get current local time and date
+            timestamp.Add(Time.time);
 
-            counter = counter + 1;
+            counter = counter + 1;  
         }
 
         else { counter = counter + 1; }

@@ -16,7 +16,8 @@ public class EMGSaveData : MonoBehaviour
     private List<int> raw_emg_Pod06;
     private List<int> raw_emg_Pod07;
     private List<int> raw_emg_Pod08;
-    private List<DateTime> raw_emg_time;
+    private List<float> raw_emg_time;
+    private List<Vector3> trackerPos;
 
     public bool saveData = false;
     public static string filename;
@@ -25,6 +26,7 @@ public class EMGSaveData : MonoBehaviour
     private string activeCube = "";
 
     public Hover hover;
+    public triggerBox triggerBox;
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +46,9 @@ public class EMGSaveData : MonoBehaviour
         raw_emg_Pod07 = StoreEMG.storeEMG07;
         raw_emg_Pod08 = StoreEMG.storeEMG08;
         raw_emg_time = StoreEMG.timestamp;
-        if(hover.activeCube == null)
+        trackerPos = triggerBox.trackerPositions;
+
+        if (hover.activeCube == null)
         {
             activeCube = "null";
         } else
@@ -62,7 +66,7 @@ public class EMGSaveData : MonoBehaviour
         {
             logEntry = $"{raw_emg_Pod01[i]}, {raw_emg_Pod02[i]}, {raw_emg_Pod03[i]}, " +
                               $"{raw_emg_Pod04[i]}, {raw_emg_Pod05[i]}, {raw_emg_Pod06[i]}, {raw_emg_Pod07[i]}, " +
-                              $"{raw_emg_Pod08[i]}, {raw_emg_time[i]}, {activeCube}";
+                              $"{raw_emg_Pod08[i]}, {raw_emg_time[i]}, {activeCube}, {trackerPos[i].x}, {trackerPos[i].y}, {trackerPos[i].z}";
         
             File.AppendAllLines(filePath, new List<string> { logEntry });
         }
@@ -94,7 +98,7 @@ public class EMGSaveData : MonoBehaviour
         // Generate a unique file name
         filePath = GetUniqueFilePath(directoryPath, "log", "csv");
 
-        File.WriteAllText(filePath, "EMG1, EMG2, EMG3, EMG4, EMG5, EMG6, EMG7, EMG8, Timestamp, Active Cube\n");
+        File.WriteAllText(filePath, "EMG1, EMG2, EMG3, EMG4, EMG5, EMG6, EMG7, EMG8, Timestamp, ActiveCube, trackerX, trackerY, trackerZ\n");
 
         return filePath;
     }
@@ -111,14 +115,6 @@ public class EMGSaveData : MonoBehaviour
         StoreEMG.storeEMG07.Clear();
         StoreEMG.storeEMG08.Clear();
         StoreEMG.timestamp.Clear();
-    }
-
-        public string AppendTimeStamp(string fileName)
-    {
-        return string.Concat(
-            Path.GetFileNameWithoutExtension(fileName),
-            DateTime.Now.ToString("yyyy-MM-dd-HH.mm.ss"),
-            Path.GetExtension(fileName)
-            );
+        triggerBox.trackerPositions.Clear();
     }
 }
