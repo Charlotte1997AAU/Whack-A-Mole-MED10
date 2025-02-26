@@ -13,17 +13,22 @@ public class Hover : MonoBehaviour
     public GameObject[] cubes;
     public GameObject activeCube;
     public Collider activeCubeCollider;
+    public int iterations = 1;
 
     private bool cubeActivated = false;
     private Collider cubesCollider;
-    private static List<int> boxes = new List<int>() { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8 };
+    public CubeSpawner cubeSpawner;
+    private static List<int> boxes = new List<int>();
 
     //public static List<int> storeEMG08 = new List<int>();
     private int boxNumber;
 
     private void Start()
     {
+        boxes = GenerateList(iterations);
         boxes = ShuffleList(boxes);
+        cubeSpawner.SpawnCubes();
+        cubeSpawner.cubePrefab.SetActive(false);
         cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
         if (cubes.Length == 0) return;
     }
@@ -67,9 +72,32 @@ private void Update()
         return list;
     }
 
+    private List<int> GenerateList(int size)
+    {
+        if (cubeSpawner.cubesAlongX == 0 || cubeSpawner.cubesAlongY == 0)
+        {
+            Debug.Log("Amount of cubes not set");
+        }
+        int amountOfBoxes = cubeSpawner.cubesAlongX * cubeSpawner.cubesAlongY;
+
+        List<int> tempBoxes = new List<int>();    
+        // Step 1: Populate the initial list with values 0 to 8    
+        for (int i = 0; i < amountOfBoxes; i++)    
+        {        
+            tempBoxes.Add(i);    
+        }    
+        // Step 2: Duplicate the list 'size' times    
+        List<int> originalList = new List<int>(tempBoxes);    
+        for (int i = 0; i < size; i++)    
+        {        
+            tempBoxes.AddRange(originalList);    
+        }    
+        return tempBoxes;
+    }
 
 
-    public GameObject ActivateCube()
+
+        public GameObject ActivateCube()
     {   
         if(boxes.Count == 0)
         {
@@ -79,13 +107,9 @@ private void Update()
 
         if (boxes.Count > 0)
         {
-            Debug.Log("Here is the length of the list: " + boxes.Count);
-            Debug.Log("Shuffled List: " + string.Join(", ", boxes));
             int randomIndex = UnityEngine.Random.Range(0, boxes.Count);
-            Debug.Log("This is the index: " + randomIndex);
             boxNumber = boxes[randomIndex];
             boxes.RemoveAt(randomIndex);
-            Debug.Log("This is the boxNumber" + boxNumber);
             GameObject randomCube = cubes[boxNumber];
 
             Renderer cubeRenderer = randomCube.GetComponent<Renderer>();
