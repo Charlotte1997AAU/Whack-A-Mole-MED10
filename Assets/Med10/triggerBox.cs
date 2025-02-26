@@ -50,6 +50,7 @@ public class triggerBox : MonoBehaviour
                 hoverScript.activeCubeCollider.enabled = false;
                 hoverScript.ActivateCube();
                 Debug.Log("we have made it");
+                timeInside = 0f;
             }
         }
     }
