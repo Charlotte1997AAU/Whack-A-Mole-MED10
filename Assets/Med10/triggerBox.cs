@@ -9,6 +9,7 @@ public class triggerBox : MonoBehaviour
     public Hover hoverScript;
     public Logger logger;
     public EMGSaveData saver;
+    public resetPosition resetScript;
 
     private bool isInside = false;
     private float requriedTime = 5.0f;
@@ -48,7 +49,7 @@ public class triggerBox : MonoBehaviour
                 saver.saveDataToCSV();
                 hoverScript.DeactivateCube();
                 hoverScript.activeCubeCollider.enabled = false;
-                hoverScript.ActivateCube();
+                resetScript.resetPosReady();
                 Debug.Log("we have made it");
                 timeInside = 0f;
             }
