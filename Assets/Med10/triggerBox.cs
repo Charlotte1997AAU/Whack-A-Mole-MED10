@@ -35,7 +35,6 @@ public class triggerBox : MonoBehaviour
             if (cubeRenderer != null)
             {
                 cubeRenderer.material = hoverScript.GestureColor;
-                logger.LogIfGestureReady(true);
             }
             
             if (!isInside)
@@ -66,7 +65,6 @@ public class triggerBox : MonoBehaviour
                 if (cubeRenderer != null)
                 {
                     cubeRenderer.material = hoverScript.HighLightColor;
-                    logger.LogIfGestureReady(false);
                 }
             }
 

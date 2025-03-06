@@ -88,7 +88,7 @@ public class SaveRoutine : MonoBehaviour
         // ------------------------- Raw EMG -------------------------
         // Write raw EMG into a CSV file
         FunctionsCSV csv = new FunctionsCSV();
-       // csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time, raw_cube);
+        //csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time, raw_cube);
         UnityEngine.Debug.Log("Raw EMG CSV file created!");
     }
 

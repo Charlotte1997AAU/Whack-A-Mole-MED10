@@ -18,7 +18,9 @@ public class Hover : MonoBehaviour
     private bool cubeActivated = false;
     private Collider cubesCollider;
     public CubeSpawner cubeSpawner;
+    public HardwareDataLogger dataLogger;
     private static List<int> boxes = new List<int>();
+
 
     //public static List<int> storeEMG08 = new List<int>();
     private int boxNumber;
@@ -31,6 +33,8 @@ public class Hover : MonoBehaviour
         cubeSpawner.cubePrefab.SetActive(false);
         cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
         if (cubes.Length == 0) return;
+        //ActivateCube();
+        //logger.StartLogging();
     }
 
 private void Update()
@@ -38,6 +42,7 @@ private void Update()
         if (Input.GetMouseButtonDown(0))
         {
             ActivateCube();
+            //dataLogger.CollectData();
         }
         if (Input.GetMouseButtonDown(1))
         {
@@ -66,7 +71,7 @@ private void Update()
                 list[j] = temp;
             }
 
-            Debug.Log("Testing the list: " + string.Join(", ", list));
+            //Debug.Log("Testing the list: " + string.Join(", ", list));
         }
 
         return list;
@@ -122,7 +127,6 @@ private void Update()
                 activeCubeCollider.enabled = true;
                 Debug.Log("Activated Cube: " + randomCube.name);
                 logger.LogActivatedCube(activeCube.name);
-                logger.LogIfGestureReady(false);
             }
         }
 
@@ -139,7 +143,6 @@ private void Update()
             cubeRenderer.material = gridColor; 
             cubeActivated = false;
             logger.LogDeactivatedCube();
-            logger.LogIfGestureReady(false);
             Debug.Log("Deactivated Cube: " + activeCube.name);
         }
 
