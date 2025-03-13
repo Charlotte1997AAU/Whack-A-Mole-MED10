@@ -74,9 +74,9 @@ public class LogStore
         SessionId = sessionID;
         this.LogType = logType; ;
         logs.Add("Timestamp", new List<string>());
-        logs.Add("Framecount", new List<string>());
-        logs.Add("SessionID", new List<string>());
-        logs.Add("Email", new List<string>());
+        //logs.Add("Framecount", new List<string>());
+        //logs.Add("SessionID", new List<string>());
+        //logs.Add("Email", new List<string>());
         if (headers != null) {
             foreach (string header in headers)
             {
@@ -170,11 +170,11 @@ public class LogStore
     private void AddCommonColumns()
     {
         string timeStamp = GetTimeStamp();
-        string frameCount = GetFrameCount();
+        //string frameCount = GetFrameCount();
         AddToDictIfNotExists(CurrentLogRow, "Timestamp", timeStamp);
-        AddToDictIfNotExists(CurrentLogRow, "Framecount", frameCount);
-        AddToDictIfNotExists(CurrentLogRow, "SessionID", SessionId);
-        AddToDictIfNotExists(CurrentLogRow, "Email", email);
+        //AddToDictIfNotExists(CurrentLogRow, "Framecount", frameCount);
+        //AddToDictIfNotExists(CurrentLogRow, "SessionID", SessionId);
+        //AddToDictIfNotExists(CurrentLogRow, "Email", email);
     }
 
     //Terminates the current row 
@@ -355,7 +355,8 @@ public class LogStore
 
     private string GetFrameCount()
     {
-        return Time.frameCount == 0 ? "-1" : Time.frameCount.ToString();
+        //  return Time.frameCount == 0 ? "-1" : Time.frameCount.ToString();
+        return "-1";
     }
 
 }

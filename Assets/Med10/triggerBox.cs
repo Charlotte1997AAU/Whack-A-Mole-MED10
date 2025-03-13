@@ -8,7 +8,6 @@ public class triggerBox : MonoBehaviour
 {
     public Hover hoverScript;
     public Logger logger;
-    public EMGSaveData saver;
     public resetPosition resetScript;
 
     private bool isInside = false;
@@ -17,14 +16,6 @@ public class triggerBox : MonoBehaviour
 
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("GameController"))
-        {
-            saver.resetEMGholders();
-        }
-    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -41,16 +32,16 @@ public class triggerBox : MonoBehaviour
             {
                 isInside = true;
                 timeInside = 0f;
+                hoverScript.setCurrentState(2);
             }
             timeInside += Time.deltaTime;
             if (timeInside >= requriedTime)
             {
-                saver.saveDataToCSV();
                 hoverScript.DeactivateCube();
                 hoverScript.activeCubeCollider.enabled = false;
                 resetScript.resetPosReady();
-                Debug.Log("we have made it");
                 timeInside = 0f;
+                hoverScript.setGestureComplete(true);
             }
         }
     }
@@ -67,9 +58,15 @@ public class triggerBox : MonoBehaviour
                     cubeRenderer.material = hoverScript.HighLightColor;
                 }
             }
-
             isInside = false;
             timeInside = 0f;
+
+            if (!hoverScript.getGestureComplete())
+            {
+                hoverScript.setCurrentState(4);
+                hoverScript.setCurrentEvent(1);
+                hoverScript.setCurrentEvent(0);
+            }
         }
     }
 

@@ -18,7 +18,7 @@ public class WriteToCSV
     public WriteToCSV(LogStore logStore, string savePath, string filePrefix, string fileExtension)
     {
         this.fileName = filePrefix + "_" +
-                        DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_ffff") + "_" + logStore.Label + fileExtension;
+                        DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss") + "_" + logStore.Label + fileExtension;
         Init(logStore, savePath);
     }
 

@@ -15,11 +15,14 @@ public class Hover : MonoBehaviour
     public Collider activeCubeCollider;
     public int iterations = 1;
 
+    private int gesturesCount = 0;
     private bool cubeActivated = false;
-    private Collider cubesCollider;
     public CubeSpawner cubeSpawner;
-    public HardwareDataLogger dataLogger;
     private static List<int> boxes = new List<int>();
+    public ThalmicMyo stopLogging;
+    private int currentState = 3; // Moving to rest position
+    private int eventKey = 0;     // Event is none
+    private bool gestureComplete = false;
 
 
     //public static List<int> storeEMG08 = new List<int>();
@@ -47,7 +50,23 @@ private void Update()
         if (Input.GetMouseButtonDown(1))
         {
             DeactivateCube();
+            stopLogging.StopEmgCoroutine();
+            foreach (int[] item in stopLogging.emgBuffer)
+            {
+                Debug.Log(string.Join(", ", item));
+            }
         }
+
+        if (getGestureComplete())
+        {
+            Debug.Log("Gesture completed ");
+            setCurrentEvent(1);
+            setGestureComplete(false);
+        } else
+        {
+            setCurrentEvent(0);
+        }
+
     }
 
     public List<int> ShuffleList(List<int> list)
@@ -126,7 +145,8 @@ private void Update()
                 activeCubeCollider = activeCube.GetComponent<BoxCollider>();
                 activeCubeCollider.enabled = true;
                 Debug.Log("Activated Cube: " + randomCube.name);
-                logger.LogActivatedCube(activeCube.name);
+                setCurrentState(1);
+                logger.LogActivatedCube(activeCube.name, activeCube.transform.position);
             }
         }
 
@@ -144,9 +164,46 @@ private void Update()
             cubeActivated = false;
             logger.LogDeactivatedCube();
             Debug.Log("Deactivated Cube: " + activeCube.name);
+            gesturesCount++;
         }
-
+        setCurrentState(3);
         activeCube = null;
-    } 
-    
+    }
+
+
+    public void setGestureComplete(bool completed)
+    {
+        gestureComplete = completed;
+    }
+
+    public bool getGestureComplete()
+    {
+        return gestureComplete;
+    }
+
+    public int getGesturesCount()
+    {
+        return gesturesCount;
+    }
+    public void setCurrentEvent(int eventInt)
+    {
+        eventKey = eventInt;
+    }
+
+    public int getEvents()
+    {
+        return eventKey;
+    }
+
+    public void setCurrentState(int stateKey)
+    {
+        currentState = stateKey;
+    }
+
+
+    public int getCurrentState()
+    {
+        return currentState;
+    }
+
 }

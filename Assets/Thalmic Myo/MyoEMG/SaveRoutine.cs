@@ -16,8 +16,7 @@ public class SaveRoutine : MonoBehaviour
     private List<int> raw_emg_Pod06;
     private List<int> raw_emg_Pod07;
     private List<int> raw_emg_Pod08;
-    private List<float> raw_emg_time;
-    private List<string> raw_cube;
+    private List<DateTime> raw_emg_time;
 
     private List<float> prc_emg_Pod01;
     private List<float> prc_emg_Pod02;
@@ -27,7 +26,7 @@ public class SaveRoutine : MonoBehaviour
     private List<float> prc_emg_Pod06;
     private List<float> prc_emg_Pod07;
     private List<float> prc_emg_Pod08;
-    private List<float> prc_emg_time;
+    private List<DateTime> prc_emg_time;
 
     // Name of the CSV file to be created
     public static string filename;
@@ -50,7 +49,7 @@ public class SaveRoutine : MonoBehaviour
         }
 
         // If saving is called
-        if (saveSwitch == 2)                
+        if (saveSwitch == 2)
         {
             saveSwitch = 3;                 // Avoids it entering a saving loop and moving to step 2
 
@@ -59,7 +58,7 @@ public class SaveRoutine : MonoBehaviour
             filename = AppendTimeStamp(shortFilename);
 
             // Only the raw data is being recorded. The data will be further processed offline in MatLab
-            saveDataToCSV(filename);        // Uncomment if saving the raw EMG
+            rawEMGRoutine(filename);        // Uncomment if saving the raw EMG
             //prcEMGRoutine(filename);      // Uncomment if saving the processed or filtered EMG
 
             saveSwitch = 4;                 // Notify ClientRoutine_KIRA.cs that the file has been saved
@@ -67,7 +66,7 @@ public class SaveRoutine : MonoBehaviour
     }
 
     // ============================== Save raw values to CSV ==============================
-    public void saveDataToCSV(string filename)
+    public void rawEMGRoutine(string filename)
     {
         // Get raw EMG pod data values
         raw_emg_Pod01 = StoreEMG.storeEMG01;
@@ -88,11 +87,11 @@ public class SaveRoutine : MonoBehaviour
         // ------------------------- Raw EMG -------------------------
         // Write raw EMG into a CSV file
         FunctionsCSV csv = new FunctionsCSV();
-        //csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time, raw_cube);
+        csv.saveRawList(filename, raw_emg_Pod01, raw_emg_Pod02, raw_emg_Pod03, raw_emg_Pod04, raw_emg_Pod05, raw_emg_Pod06, raw_emg_Pod07, raw_emg_Pod08, raw_emg_time);
         UnityEngine.Debug.Log("Raw EMG CSV file created!");
     }
 
-    /*
+
     // ============================== Save moving average values to CSV by name ==============================
     public void prcEMGRoutine(string filename)
     {
@@ -153,7 +152,7 @@ public class SaveRoutine : MonoBehaviour
         UnityEngine.Debug.Log("Processed EMG CSV creating... (3/3)");
 
     }
-    */
+
 
     // ============================== Function to reset all variables that store data for the CSV ==============================
     public void resetEMGholders()
@@ -171,7 +170,7 @@ public class SaveRoutine : MonoBehaviour
 
 
         // Empty processed EMG data holders
-        EMG01_Controller.avg_emg_Pod01.Clear();  
+        EMG01_Controller.avg_emg_Pod01.Clear();
         EMG02_Controller.avg_emg_Pod02.Clear();
         EMG03_Controller.avg_emg_Pod03.Clear();
         EMG04_Controller.avg_emg_Pod04.Clear();

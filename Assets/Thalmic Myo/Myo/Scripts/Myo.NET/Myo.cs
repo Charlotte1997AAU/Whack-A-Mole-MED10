@@ -222,7 +222,7 @@ namespace Thalmic.Myo
                 libmyo.event_get_emg(evt, 6),
                 libmyo.event_get_emg(evt, 7),
             };
-
+            EmgData(this, new EmgDataEventArgs(this, timestamp, emg));
             emgData = emg;
         }
     }

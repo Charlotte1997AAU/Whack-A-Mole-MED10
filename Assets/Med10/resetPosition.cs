@@ -7,21 +7,18 @@ public class resetPosition : MonoBehaviour
 
     public Hover hoverScript;
     public Logger logger;
-    public EMGSaveData saver;
-    public Collider sphereCollider;
+    private Collider sphereCollider;
     public Material startColor;
 
     private bool isInside = false;
     private float requiredTime = 5.0f;
     private float timeInside = 0.0f;
 
-    private void OnTriggerEnter(Collider other)
+    private void Start()
     {
-        if(other.CompareTag("GameController"))
-        {
-            Debug.Log("Log at vi starter med at reste??");
-        }
+        hoverScript = FindObjectOfType<Hover>();
     }
+
     private void OnTriggerStay(Collider other)
     {
         Renderer sphereRenderer = this.GetComponent<Renderer>();
@@ -33,11 +30,15 @@ public class resetPosition : MonoBehaviour
             }
         }
 
+        hoverScript.setCurrentState(0);
+
         if (!isInside)
         {
             isInside = true;
             timeInside = 0f;
+            hoverScript.setCurrentState(4); 
         }
+
         timeInside += Time.deltaTime;
         if (timeInside >= requiredTime)
         {
@@ -45,8 +46,9 @@ public class resetPosition : MonoBehaviour
             sphereCollider.enabled = false;
             sphereRenderer.material = startColor;
             hoverScript.ActivateCube();
-            Debug.Log("Done resting - maybe log this????");
             timeInside = 0f;
+            hoverScript.setCurrentState(1);
+            Debug.Log("Current State: " + hoverScript.getCurrentState());
         }
     }
 

@@ -6,7 +6,8 @@ using System.IO;
 using System;
 using System.Linq;
 
-public class FunctionsCSV : MonoBehaviour {
+public class FunctionsCSV : MonoBehaviour
+{
 
     // Parameters for saving to CSV
     private List<string[]> rowHeader = new List<string[]>();
@@ -47,12 +48,10 @@ public class FunctionsCSV : MonoBehaviour {
     private List<float> avg_emg_Pod08 = new List<float>();
     private List<float> avg_emg_time;
 
-    private string activecube;
-    public Logger logger;
-
 
     // ==================================== Save raw EMG to CSV file (array) ====================================
-    public void saveRawArray(string filename, int[] emg_list, DateTime timestamp) {
+    public void saveRawArray(string filename, int[] emg_list, DateTime timestamp)
+    {
         string[] rowDataTemp = new string[9];
 
         emg_Pod01 = emg_list[0];
@@ -74,20 +73,20 @@ public class FunctionsCSV : MonoBehaviour {
         rowDataTemp[6] = emg_Pod07.ToString();
         rowDataTemp[7] = emg_Pod08.ToString();
         rowDataTemp[8] = timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        rowDataTemp[9] = logger.LogActivatedCube(activecube);
 
 
         string newLine = rowDataTemp[0] + "," + rowDataTemp[1] + "," +
             rowDataTemp[2] + "," + rowDataTemp[3] + "," + rowDataTemp[4] + "," +
-            rowDataTemp[5] + "," + rowDataTemp[6] + "," + rowDataTemp[7] + "," + rowDataTemp[8] + "," + rowDataTemp[9] +
+            rowDataTemp[5] + "," + rowDataTemp[6] + "," + rowDataTemp[7] + "," + rowDataTemp[8] +
             Environment.NewLine;
 
         string filePath = getPath(filename);
 
         // If the file doesn't exist, create it and add header
-        if (!File.Exists(filePath)) {
+        if (!File.Exists(filePath))
+        {
             // Creating First row of titles 
-            string[] rowHeader = new string[10];
+            string[] rowHeader = new string[9];
 
             rowHeader[0] = "EMG - Pod01";
             rowHeader[1] = "EMG - Pod02";
@@ -98,10 +97,10 @@ public class FunctionsCSV : MonoBehaviour {
             rowHeader[6] = "EMG - Pod07";
             rowHeader[7] = "EMG - Pod08";
             rowHeader[8] = "Timestamp";
-            rowHeader[9] = "Active Cube";
+
             string newHeader = rowHeader[0] + "," + rowHeader[1] + "," +
                 rowHeader[2] + "," + rowHeader[3] + "," + rowHeader[4] + "," +
-                rowHeader[5] + "," + rowHeader[6] + "," + rowHeader[7] + "," + rowHeader[8] + "," + rowHeader[9] +
+                rowHeader[5] + "," + rowHeader[6] + "," + rowHeader[7] + "," + rowHeader[8] +
                 Environment.NewLine;
 
             File.WriteAllText(filePath, newHeader);
@@ -112,7 +111,7 @@ public class FunctionsCSV : MonoBehaviour {
 
 
     // ==================================== Save raw EMG to CSV file (list) ====================================
-    public void saveRawList(string filename, List<int> dat_01, List<int> dat_02, List<int> dat_03, List<int> dat_04, List<int> dat_05, List<int> dat_06, List<int> dat_07, List<int> dat_08, List<DateTime> dat_time, List<string> activeCube)
+    public void saveRawList(string filename, List<int> dat_01, List<int> dat_02, List<int> dat_03, List<int> dat_04, List<int> dat_05, List<int> dat_06, List<int> dat_07, List<int> dat_08, List<DateTime> dat_time)
     {
         // Identify the array with the least elements
         int[] compareLen = { dat_01.Count, dat_02.Count, dat_03.Count, dat_04.Count, dat_05.Count, dat_06.Count, dat_07.Count, dat_08.Count };
@@ -164,7 +163,7 @@ public class FunctionsCSV : MonoBehaviour {
         }
 
         // Prepare data to be converted to string
-        string[] rowDataTemp = new string[10];
+        string[] rowDataTemp = new string[9];
 
         for (int i = 0; i < len; i++)
         {
@@ -174,11 +173,9 @@ public class FunctionsCSV : MonoBehaviour {
             }
             rowDataTemp[8] = newTime_dat[i].ToString("yyyy-MM-dd HH:mm:ss.fff");
 
-            rowDataTemp[9] = activeCube[-1];
-
             string newLine = rowDataTemp[0] + "," + rowDataTemp[1] + "," +
             rowDataTemp[2] + "," + rowDataTemp[3] + "," + rowDataTemp[4] + "," +
-            rowDataTemp[5] + "," + rowDataTemp[6] + "," + rowDataTemp[7] + "," + rowDataTemp[8] + "," + rowDataTemp[9] +
+            rowDataTemp[5] + "," + rowDataTemp[6] + "," + rowDataTemp[7] + "," + rowDataTemp[8] +
             Environment.NewLine;
 
             string filePath = getPath(filename);
@@ -187,7 +184,7 @@ public class FunctionsCSV : MonoBehaviour {
             if (!File.Exists(filePath))
             {
                 // Creating First row of titles 
-                string[] rowHeader = new string[10];
+                string[] rowHeader = new string[9];
 
                 rowHeader[0] = "Raw EMG - Pod01";
                 rowHeader[1] = "Raw EMG - Pod02";
@@ -198,11 +195,10 @@ public class FunctionsCSV : MonoBehaviour {
                 rowHeader[6] = "Raw EMG - Pod07";
                 rowHeader[7] = "Raw EMG - Pod08";
                 rowHeader[8] = "Timestamp";
-                rowHeader[9] = "activeCube Cube";
 
                 string newHeader = rowHeader[0] + "," + rowHeader[1] + "," +
                     rowHeader[2] + "," + rowHeader[3] + "," + rowHeader[4] + "," +
-                    rowHeader[5] + "," + rowHeader[6] + "," + rowHeader[7] + "," + rowHeader[8] + "," + rowHeader[9] +
+                    rowHeader[5] + "," + rowHeader[6] + "," + rowHeader[7] + "," + rowHeader[8] +
                     Environment.NewLine;
 
                 File.WriteAllText(filePath, newHeader);
@@ -233,10 +229,12 @@ public class FunctionsCSV : MonoBehaviour {
         dat_08 = TrimToSizeFloat(dat_08, len);
 
         // Check in terminal that the size of the timestamp array is the same
-        if (dat_time.Length == len) {
+        if (dat_time.Length == len)
+        {
             UnityEngine.Debug.Log("Length of the timestamp array and emg array are the same");
         }
-        else {
+        else
+        {
             UnityEngine.Debug.Log("Length of the timestamp array and emg array are NOT the same");
         }
 
@@ -386,15 +384,15 @@ public class FunctionsCSV : MonoBehaviour {
     // Following method is used to retrive the relative path as device platform
     public string getPath(string filename)
     {
-        #if UNITY_EDITOR
-                return Application.dataPath + "/Thalmic Myo/MyoEMG/CSV/" + filename;
-        #elif UNITY_ANDROID
+#if UNITY_EDITOR
+        return Application.dataPath + "/Thalmic Myo/MyoEMG/CSV/" + filename;
+#elif UNITY_ANDROID
                 return Application.persistentDataPath+filename;
-        #elif UNITY_IPHONE
+#elif UNITY_IPHONE
                 return Application.persistentDataPath+"/"+filename;
-        #else
+#else
                 return Application.dataPath +"/"+filename;
-        #endif
+#endif
     }
 
     // ==================================== Convert string arrays into int[] ====================================
