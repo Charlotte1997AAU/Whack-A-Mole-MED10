@@ -17,7 +17,7 @@ public class Hover : MonoBehaviour
     public int iterations = 1;
 
     private int gesturesCount = 0;
-    private bool cubeActivated = false;
+    public bool cubeActivated = false;
     public CubeSpawner cubeSpawner;
     private static List<int> boxes = new List<int>();
     public ThalmicMyo stopLogging;
@@ -34,7 +34,7 @@ public class Hover : MonoBehaviour
 
     private void Start()
     {
-        gestureAnim = gestureSignifier.GetComponent<Animator>();
+        gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
         boxes = GenerateList(iterations);
         boxes = ShuffleList(boxes);
         cubeSpawner.SpawnCubes();
@@ -128,7 +128,6 @@ private void Update()
 
         public GameObject ActivateCube()
     {
-        string currentAnim = logger.goalGesture.ToString();
         if(boxes.Count == 0)
         {
             Debug.Log("No boxes :(");
@@ -137,8 +136,6 @@ private void Update()
 
         if (boxes.Count > 0)
         {
-            Debug.Log("Curent animation: " + currentAnim);
-            gestureAnim.SetTrigger(currentAnim);
             int randomIndex = UnityEngine.Random.Range(0, boxes.Count);
             boxNumber = boxes[randomIndex];
             boxes.RemoveAt(randomIndex);
