@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class resetPosition : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class resetPosition : MonoBehaviour
     public Material startColor;
     public GameObject handAnchor;
     private Transform handTransform;
+    private SliderFill sliderFill;
+
 
     private bool isInside = false;
     public float requiredTime = 3.0f;
@@ -21,6 +24,9 @@ public class resetPosition : MonoBehaviour
     {
         hoverScript = FindObjectOfType<Hover>();
         handTransform = handAnchor.GetComponent<Transform>();
+        sliderFill = FindObjectOfType<SliderFill>();
+
+
     }
 
     private void Update()
@@ -53,6 +59,8 @@ public class resetPosition : MonoBehaviour
         }
 
         timeInside += Time.deltaTime;
+        sliderFill.FillSliderOverTime(requiredTime);
+
         if (timeInside >= requiredTime)
         {
             sphereCollider = this.GetComponent<Collider>();
@@ -61,6 +69,7 @@ public class resetPosition : MonoBehaviour
             hoverScript.ActivateCube();
             timeInside = 0f;
             hoverScript.setCurrentState(1);
+            sliderFill.resetSlider();
             Debug.Log("Current State: " + hoverScript.getCurrentState());
         }
     }

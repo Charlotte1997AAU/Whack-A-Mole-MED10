@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using TMPro;
 
 
 public class triggerBox : MonoBehaviour
@@ -9,14 +10,24 @@ public class triggerBox : MonoBehaviour
     public Hover hoverScript;
     public Logger logger;
     public resetPosition resetScript;
+    //private TextMeshPro timerText;
+    private SliderFill sliderFill;
+
 
     private bool isInside = false;
-    private float requriedTime = 5.0f;
+    public float requriedTime = 5.0f;
     public float timeInside = 0f;
     public int attempts = 1;
 
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
+
+    private void Start()
+    {
+       // timerText = GameObject.Find("TimerText").GetComponent<TextMeshPro>();
+        sliderFill = FindObjectOfType<SliderFill>();
+
+    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -36,6 +47,11 @@ public class triggerBox : MonoBehaviour
                 hoverScript.setCurrentState(2);
             }
             timeInside += Time.deltaTime;
+            sliderFill.FillSliderOverTime(requriedTime);
+         
+           // timerText.gameObject.SetActive(true);
+           // timerText.text = $"{timeInside:F1} / {requriedTime}";
+            
             if (timeInside >= requriedTime)
             {
                 hoverScript.DeactivateCube();
@@ -43,6 +59,8 @@ public class triggerBox : MonoBehaviour
                 resetScript.resetPosReady();
                 timeInside = 0f;
                 hoverScript.setGestureComplete(true);
+                sliderFill.resetSlider();
+           //     timerText.gameObject.SetActive(false);
                 //attempts = 1;
             }
         }
