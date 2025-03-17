@@ -76,7 +76,7 @@ public class LoggingManager : MonoBehaviour
 
     private string filePath;
     private char fieldSeperator = ';';
-    private string sessionID = "";
+    public string sessionID = "";
     private string deviceID = "";
     private string filestamp;
 

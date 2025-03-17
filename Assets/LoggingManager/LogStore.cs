@@ -75,7 +75,7 @@ public class LogStore
         this.LogType = logType; ;
         logs.Add("Timestamp", new List<string>());
         //logs.Add("Framecount", new List<string>());
-        //logs.Add("SessionID", new List<string>());
+        logs.Add("SessionID", new List<string>());
         //logs.Add("Email", new List<string>());
         if (headers != null) {
             foreach (string header in headers)
@@ -173,7 +173,7 @@ public class LogStore
         //string frameCount = GetFrameCount();
         AddToDictIfNotExists(CurrentLogRow, "Timestamp", timeStamp);
         //AddToDictIfNotExists(CurrentLogRow, "Framecount", frameCount);
-        //AddToDictIfNotExists(CurrentLogRow, "SessionID", SessionId);
+        AddToDictIfNotExists(CurrentLogRow, "SessionID", SessionId);
         //AddToDictIfNotExists(CurrentLogRow, "Email", email);
     }
 

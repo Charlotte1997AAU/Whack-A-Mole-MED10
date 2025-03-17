@@ -3,22 +3,15 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Thalmic.Myo;
 
 public class MyoLogger : MonoBehaviour
-{
-    bool log = true;
-    int samplingFrequency = 4; // 5ms, = 125Hz, 4ms = 200Hz, 2ms = 500Hz
-    List<int> numbers = new List<int>();
-    List<int> emgData = new List<int>();
+{ 
     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-    Task sampleTask;
     Stopwatch writeStopwatch = new Stopwatch();
     private LoggingManager loggingManager;
-    private bool manualFramecount = true;
 
     //  public GameObject thalmicMyo;
     //   private ThalmicMyo myo;
@@ -63,7 +56,6 @@ public class MyoLogger : MonoBehaviour
 
     public void StopLog() {
         cancellationTokenSource.Cancel();
-        //sampleTask.Wait();
         writeStopwatch.Stop();
         loggingManager.SaveLog("Med10", false);
         TimeSpan writeTs = writeStopwatch.Elapsed;

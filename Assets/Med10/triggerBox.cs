@@ -13,6 +13,7 @@ public class triggerBox : MonoBehaviour
     private bool isInside = false;
     private float requriedTime = 5.0f;
     public float timeInside = 0f;
+    public int attempts = 1;
 
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
@@ -42,6 +43,7 @@ public class triggerBox : MonoBehaviour
                 resetScript.resetPosReady();
                 timeInside = 0f;
                 hoverScript.setGestureComplete(true);
+                //attempts = 1;
             }
         }
     }
@@ -63,6 +65,7 @@ public class triggerBox : MonoBehaviour
 
             if (!hoverScript.getGestureComplete())
             {
+                hoverScript.setAttempts();
                 hoverScript.setCurrentState(4);
                 hoverScript.setCurrentEvent(1);
                 hoverScript.setCurrentEvent(0);

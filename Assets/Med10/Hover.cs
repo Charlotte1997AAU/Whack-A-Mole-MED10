@@ -1,7 +1,6 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System;
+using TMPro;
 
 public class Hover : MonoBehaviour
 {
@@ -13,6 +12,8 @@ public class Hover : MonoBehaviour
     public GameObject[] cubes;
     public GameObject activeCube;
     public Collider activeCubeCollider;
+    public GameObject gestureSignifier;
+    private Animator gestureAnim;
     public int iterations = 1;
 
     private int gesturesCount = 0;
@@ -23,6 +24,9 @@ public class Hover : MonoBehaviour
     private int currentState = 3; // Moving to rest position
     private int eventKey = 0;     // Event is none
     private bool gestureComplete = false;
+    private int attempts = 1;
+    public TextMeshProUGUI textField;
+    public string visibleText;
 
 
     //public static List<int> storeEMG08 = new List<int>();
@@ -30,6 +34,7 @@ public class Hover : MonoBehaviour
 
     private void Start()
     {
+        gestureAnim = gestureSignifier.GetComponent<Animator>();
         boxes = GenerateList(iterations);
         boxes = ShuffleList(boxes);
         cubeSpawner.SpawnCubes();
@@ -122,7 +127,8 @@ private void Update()
 
 
         public GameObject ActivateCube()
-    {   
+    {
+        string currentAnim = logger.goalGesture.ToString();
         if(boxes.Count == 0)
         {
             Debug.Log("No boxes :(");
@@ -131,6 +137,8 @@ private void Update()
 
         if (boxes.Count > 0)
         {
+            Debug.Log("Curent animation: " + currentAnim);
+            gestureAnim.SetTrigger(currentAnim);
             int randomIndex = UnityEngine.Random.Range(0, boxes.Count);
             boxNumber = boxes[randomIndex];
             boxes.RemoveAt(randomIndex);
@@ -145,6 +153,7 @@ private void Update()
                 activeCubeCollider = activeCube.GetComponent<BoxCollider>();
                 activeCubeCollider.enabled = true;
                 Debug.Log("Activated Cube: " + randomCube.name);
+                textField.text = "";
                 setCurrentState(1);
                 logger.LogActivatedCube(activeCube.name, activeCube.transform.position);
             }
@@ -155,6 +164,7 @@ private void Update()
 
     public void DeactivateCube()
     {
+        gestureAnim.SetTrigger("rest");
         if (activeCube == null) return; 
 
         Renderer cubeRenderer = activeCube.GetComponent<Renderer>();
@@ -164,7 +174,9 @@ private void Update()
             cubeActivated = false;
             logger.LogDeactivatedCube();
             Debug.Log("Deactivated Cube: " + activeCube.name);
+            textField.text = "Rest";
             gesturesCount++;
+            attempts = 1;
         }
         setCurrentState(3);
         activeCube = null;
@@ -200,10 +212,18 @@ private void Update()
         currentState = stateKey;
     }
 
-
     public int getCurrentState()
     {
         return currentState;
     }
 
+    public void setAttempts()
+    {
+        attempts++;
+    }
+
+    public int getAttempts()
+    {
+        return attempts;
+    }
 }

@@ -9,14 +9,27 @@ public class resetPosition : MonoBehaviour
     public Logger logger;
     private Collider sphereCollider;
     public Material startColor;
+    public GameObject handAnchor;
+    private Transform handTransform;
 
     private bool isInside = false;
-    private float requiredTime = 5.0f;
+    public float requiredTime = 3.0f;
     private float timeInside = 0.0f;
+    public bool SetRestPosition = false;
 
     private void Start()
     {
         hoverScript = FindObjectOfType<Hover>();
+        handTransform = handAnchor.GetComponent<Transform>();
+    }
+
+    private void Update()
+    {
+        if (SetRestPosition)
+        {
+            transform.position = handTransform.transform.position;
+            SetRestPosition = false;
+        }
     }
 
     private void OnTriggerStay(Collider other)

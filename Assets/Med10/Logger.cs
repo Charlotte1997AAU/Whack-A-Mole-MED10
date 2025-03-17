@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class Logger : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class Logger : MonoBehaviour
     private triggerBox triggerBox; // Reference to triggerBox script to access tracker position, gestures completed and current state
     private Hover hover; // Reference to overall numbers and other values 
     private int gesturesCompleted = 0; // Counter for how many times a gesture has been performed sucessfully
+    private LoggingManager loggingManager; // Reference to get sessionID
+
 
     private Dictionary<int, string> testStates = new Dictionary<int, string>()
     {
@@ -33,14 +36,15 @@ public class Logger : MonoBehaviour
         {1, "Successful Gesture" }
     };
 
-    public enum currentGesture { Fist, Pinch, Pronation, Supination, Flexion, Extension, Rest }
-    [SerializeField] private currentGesture goalGesture; // Which gesture is supposed to be trained in this run
+    public enum currentGesture { fist, pinch, pronation, supination, flexion, extension, rest }
+    [SerializeField] public currentGesture goalGesture; // Which gesture is supposed to be trained in this run
 
 
     private List<string> logEntries = new List<string>(); // List to accumulate log entries
 
     private void Start()
     {
+        loggingManager = FindObjectOfType<LoggingManager>();
         triggerBox = FindObjectOfType<triggerBox>();
         hover = FindObjectOfType<Hover>();
 
@@ -71,11 +75,11 @@ public class Logger : MonoBehaviour
             gesturesCompleted = hover.getGesturesCount();
             string currentState = testStates[hover.getCurrentState()];
             string currentEvent = testEvents[hover.getEvents()];
+            int currentAttempts = hover.getAttempts();
 
             // If the cube is activated, continue logging it
             string logEntry = 
                 $"{timestamp}; " +
-                $"{IDnumber}; " +
                 $"{frameNumber}; " +
                 $"{(isCubeActivated ? currentActivatedCube : "None")}; " +
                 $"{(isCubeActivated ? (float?)cubeCoordinates.x : null)}; " +
@@ -86,6 +90,7 @@ public class Logger : MonoBehaviour
                 $"{triggerBox.trackerPos().z}; " +
                 $"{goalGesture}; " +
                 $"{gesturesCompleted}; " +
+                $"{(isCubeActivated ? (int?)currentAttempts : null)}; " +
                 $"{currentState}; " +
                 $"{currentEvent};"
                 ;
@@ -108,13 +113,18 @@ public class Logger : MonoBehaviour
         // Generate a unique file name
         filePath = GetUniqueFilePath(directoryPath, "Unity_log", "csv");
 
-        // Create the file with headers
-        File.WriteAllText(filePath, "Timestamp; ID; FrameNumber; ActivatedCube; ActiveCubeX; ActiveCubeY; ActiveCubeZ; TrackerX; TrackerY; TrackerZ; GoalGesture; GesturesAtempted; State; Event \n");
+        string IDstring = loggingManager.sessionID;
+        Debug.Log("ID string: " + IDstring);
 
-        File.AppendAllLines(filePath, logEntries);
+
+        // Create the file with headers
+        File.WriteAllText(filePath, "ID; Timestamp; FrameNumber; ActivatedCube; ActiveCubeX; ActiveCubeY; ActiveCubeZ; TrackerX; TrackerY; TrackerZ; GoalGesture; GesturesAtempted; AttemptsInCube; State; Event \n");
+
+        var updatedLogEntries = logEntries.Select(entry => IDstring + ";" + entry).ToList();
+
+        File.AppendAllLines(filePath, updatedLogEntries);
 
         StopCoroutine(LogRoutine());
-
     }
 
 
