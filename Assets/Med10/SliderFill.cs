@@ -5,25 +5,37 @@ using System.Collections;
 public class SliderFill : MonoBehaviour
 {
     public Slider slider;
+    public float elapsedTime = 0f;
+    public bool isFilling = false;
 
-    public IEnumerator FillSliderOverTime(float duration)
+    private float startValue;
+    private float targetValue = 1f;
+
+    private void Start()
     {
-        float startValue = slider.value;
-        float targetValue = 1f; // Full slider value
-        float elapsedTime = 0f;  // Reset elapsed time at the start of the coroutine
+        startValue = slider.value;
+    }
 
-        while (elapsedTime < duration)
+    public void FillSliderOverTime(float duration)
+    {
+        if (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime; // Increment elapsed time
             slider.value = Mathf.Lerp(startValue, targetValue, elapsedTime / duration);
-            yield return null; // Wait for the next frame
         }
-
-        slider.value = targetValue;
+        else
+        {
+            slider.value = 0; // Ensure slider is filled at the end
+            isFilling = false; // Stop filling once completed
+        }
     }
 
-    public void resetSlider()
+
+    public void resetTimer()
     {
-        slider.value = 0f;
+        slider.value = 0;
+        elapsedTime = 0f;
+        isFilling = false; // Optionally stop the filling
     }
+
 }

@@ -13,8 +13,11 @@ public class Hover : MonoBehaviour
     public GameObject activeCube;
     public Collider activeCubeCollider;
     public GameObject gestureSignifier;
+    private Animator activeHandAnimation;
     private Animator gestureAnim;
     public int iterations = 1;
+    public GameObject hannesHand;
+    private string currentAnim;
 
     private int gesturesCount = 0;
     public bool cubeActivated = false;
@@ -40,6 +43,8 @@ public class Hover : MonoBehaviour
         cubeSpawner.SpawnCubes();
         cubeSpawner.cubePrefab.SetActive(false);
         cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
+        activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
+        currentAnim = logger.goalGesture.ToString();
         if (cubes.Length == 0) return;
         //ActivateCube();
         //logger.StartLogging();
@@ -145,6 +150,12 @@ private void Update()
             if (cubeRenderer != null && !cubeActivated)
             {
                 cubeActivated = true;
+                Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
+                for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+                {
+                    gestureSignifierRenderer[renders].enabled = true;
+                }
+
                 cubeRenderer.material = HighLightColor;
                 activeCube = randomCube;
                 activeCubeCollider = activeCube.GetComponent<BoxCollider>();
@@ -161,7 +172,8 @@ private void Update()
 
     public void DeactivateCube()
     {
-        gestureAnim.SetTrigger("rest");
+        activeHandAnimation.SetTrigger("rest");
+        activeHandAnimation.ResetTrigger(currentAnim);
         if (activeCube == null) return; 
 
         Renderer cubeRenderer = activeCube.GetComponent<Renderer>();

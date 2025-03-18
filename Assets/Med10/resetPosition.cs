@@ -69,7 +69,7 @@ public class resetPosition : MonoBehaviour
             hoverScript.ActivateCube();
             timeInside = 0f;
             hoverScript.setCurrentState(1);
-            sliderFill.resetSlider();
+            sliderFill.resetTimer();
             Debug.Log("Current State: " + hoverScript.getCurrentState());
         }
     }
@@ -83,7 +83,7 @@ public class resetPosition : MonoBehaviour
             {
             sphereRenderer.material = hoverScript.HighLightColor;
             }
-            
+            sliderFill.resetTimer();
             isInside = false;
             timeInside = 0f;
         }

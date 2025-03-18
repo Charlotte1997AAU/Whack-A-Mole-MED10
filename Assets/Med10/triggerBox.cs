@@ -12,13 +12,16 @@ public class triggerBox : MonoBehaviour
     public resetPosition resetScript;
     //private TextMeshPro timerText;
     private SliderFill sliderFill;
-
+    public GameObject hannesHand;
+    private Animator activeHandAnimation;
+    private Animator gestureAnim;
+    public GameObject gestureSignifier;
 
     private bool isInside = false;
     public float requriedTime = 5.0f;
     public float timeInside = 0f;
     public int attempts = 1;
-
+    private string currentAnim;
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
 
@@ -26,6 +29,24 @@ public class triggerBox : MonoBehaviour
     {
        // timerText = GameObject.Find("TimerText").GetComponent<TextMeshPro>();
         sliderFill = FindObjectOfType<SliderFill>();
+        activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
+        gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
+        currentAnim = logger.goalGesture.ToString();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Entered Once");
+        activeHandAnimation.SetTrigger(currentAnim);
+        gestureAnim.ResetTrigger(currentAnim);
+        gestureAnim.ResetTrigger("rest");
+        
+        Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
+        for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+        {
+            gestureSignifierRenderer[renders].enabled = false;
+        }
+
 
     }
 
@@ -43,11 +64,15 @@ public class triggerBox : MonoBehaviour
             if (!isInside)
             {
                 isInside = true;
+                sliderFill.isFilling = true;
                 timeInside = 0f;
                 hoverScript.setCurrentState(2);
             }
+
             timeInside += Time.deltaTime;
             sliderFill.FillSliderOverTime(requriedTime);
+            Debug.Log("We have entered the box");
+            
          
            // timerText.gameObject.SetActive(true);
            // timerText.text = $"{timeInside:F1} / {requriedTime}";
@@ -59,7 +84,7 @@ public class triggerBox : MonoBehaviour
                 resetScript.resetPosReady();
                 timeInside = 0f;
                 hoverScript.setGestureComplete(true);
-                sliderFill.resetSlider();
+                sliderFill.resetTimer();
            //     timerText.gameObject.SetActive(false);
                 //attempts = 1;
             }
@@ -78,6 +103,7 @@ public class triggerBox : MonoBehaviour
                     cubeRenderer.material = hoverScript.HighLightColor;
                 }
             }
+            sliderFill.resetTimer();
             isInside = false;
             timeInside = 0f;
 
