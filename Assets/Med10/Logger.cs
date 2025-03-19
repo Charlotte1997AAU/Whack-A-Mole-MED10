@@ -27,13 +27,14 @@ public class Logger : MonoBehaviour
         {1, "Moving to Box" },
         {2, "In box" },
         {3, "Moving to rest position" },
-        {4, "Exited early" }
+        {4, "Exited early" },
+        {5, "MVC" }
     };
 
     private Dictionary<int, string> testEvents = new Dictionary<int, string>()
     {
         {0, "" },
-        {1, "Successful Gesture" }
+        {1, "Successful Gesture" },
     };
 
     public enum currentGesture { fist, pinch, pronation, supination, flexion, extension, rest }

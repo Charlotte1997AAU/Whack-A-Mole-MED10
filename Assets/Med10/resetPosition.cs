@@ -13,24 +13,44 @@ public class resetPosition : MonoBehaviour
     public GameObject handAnchor;
     private Transform handTransform;
     private SliderFill sliderFill;
-
+    public TextMeshProUGUI textField;
+    private Renderer sphereRenderer;
 
     private bool isInside = false;
     public float requiredTime = 3.0f;
     private float timeInside = 0.0f;
+    private float MVCtime = 0f;
     public bool SetRestPosition = false;
+    public bool getMVC = false;
 
     private void Start()
     {
         hoverScript = FindObjectOfType<Hover>();
         handTransform = handAnchor.GetComponent<Transform>();
         sliderFill = FindObjectOfType<SliderFill>();
-
-
+        sphereCollider = GetComponent<Collider>();
+        sphereRenderer = GetComponent<Renderer>();
     }
 
     private void Update()
     {
+        if (getMVC)
+        {
+            textField.text = "100% POWER!";
+            hoverScript.setCurrentState(5);
+            MVCtime += Time.deltaTime;
+            sliderFill.FillSliderOverTime(requiredTime);
+            if (MVCtime > requiredTime)
+            {  
+                hoverScript.setCurrentState(0);
+                sphereCollider.enabled = true;
+                sphereRenderer.enabled = true;
+                sliderFill.resetTimer();
+                textField.text = "Rest";
+                getMVC = false;
+            }
+        }
+
         if (SetRestPosition)
         {
             transform.position = handTransform.transform.position;

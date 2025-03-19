@@ -9,7 +9,7 @@ public class Signifier : MonoBehaviour
     private Vector3 endPosition;    // Target position (where you want to move the object)
     private Animator gestureAnim;
     private Logger logger;
-    public float duration = 5f;    // Time duration to reach the target position
+    public float duration = 2.5f;    // Time duration to reach the target position
     private float offsetX = -0.13f;
     private float offsetY = 0.13f;
     public float offsetZ = -0.5f;
@@ -41,19 +41,36 @@ public class Signifier : MonoBehaviour
                 triggerActivated = true;
             }
 
-            startPosition = new Vector3(hover.activeCube.transform.position.x - offsetX, hover.activeCube.transform.position.y - offsetY, hover.activeCube.transform.position.z - offsetZ);
-            endPosition = new Vector3(hover.activeCube.transform.position.x - offsetX, hover.activeCube.transform.position.y - offsetY, hover.activeCube.transform.position.z);
+            startPosition = new Vector3(hover.activeCube.transform.position.x, hover.activeCube.transform.position.y, hover.activeCube.transform.position.z - offsetZ);
+            endPosition = new Vector3(hover.activeCube.transform.position.x, hover.activeCube.transform.position.y, hover.activeCube.transform.position.z);
+
+            // Increase the time elapsed
+            timeElapsed += Time.deltaTime;
+
+            // Calculate the fraction of time elapsed
+            float t = timeElapsed / duration;
 
             if (timeElapsed < duration)
             {
-                // Increase the time elapsed
-                timeElapsed += Time.deltaTime;
-
-                // Calculate the fraction of time elapsed
-                float t = timeElapsed / duration;
-
+                if (currentAnim == "supination")
+                {
+                    Quaternion startRotation = Quaternion.Euler(0f, 0f, -90f);
+                    Quaternion endRotation = Quaternion.Euler(0f, 0f, -180f);
+                    transform.position = Vector3.Lerp(startPosition, endPosition, t);
+                    transform.rotation = Quaternion.Lerp(startRotation, endRotation, t);
+                }
+                else if (currentAnim == "pronation")
+                {
+                    Quaternion startRotation = Quaternion.Euler(0f, 0f, -90f);
+                    Quaternion endRotation = Quaternion.Euler(0f, 0f, 0f);
+                    transform.position = Vector3.Lerp(startPosition, endPosition, t);
+                    transform.rotation = Quaternion.Lerp(startRotation, endRotation, t);
+                }
+                else
+                {
+                    transform.position = Vector3.Lerp(startPosition, endPosition, t);
+                }
                 // Move the object using Lerp
-                transform.position = Vector3.Lerp(startPosition, endPosition, t);
             }
             else
             {

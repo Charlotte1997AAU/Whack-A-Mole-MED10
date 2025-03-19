@@ -25,6 +25,14 @@ public class triggerBox : MonoBehaviour
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
 
+    private Transform startPosition;
+    private Transform endPosition;
+    private float offsetX = -0.13f;
+    private float offsetY = 0.13f;
+    private float offsetZ = -0.5f;
+    private float timeElapsed = 0f;
+
+
     private void Start()
     {
        // timerText = GameObject.Find("TimerText").GetComponent<TextMeshPro>();
@@ -39,8 +47,7 @@ public class triggerBox : MonoBehaviour
         Debug.Log("Entered Once");
         activeHandAnimation.SetTrigger(currentAnim);
         gestureAnim.ResetTrigger(currentAnim);
-        gestureAnim.ResetTrigger("rest");
-        
+        gestureAnim.ResetTrigger("rest");  
         Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
         for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
         {
