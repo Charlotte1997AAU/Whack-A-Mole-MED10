@@ -135,6 +135,7 @@ private void Update()
     {
         if(boxes.Count == 0)
         {
+            textField.text = "Done :D";
             Debug.Log("No boxes :(");
             return activeCube;
         }
@@ -160,7 +161,7 @@ private void Update()
                 activeCube = randomCube;
                 activeCubeCollider = activeCube.GetComponent<BoxCollider>();
                 activeCubeCollider.enabled = true;
-                Debug.Log("Activated Cube: " + randomCube.name);
+                Debug.Log("Activated Cube: " + randomCube.name + " | Boxes left: " + boxes.Count);
                 textField.text = "";
                 setCurrentState(1);
                 logger.LogActivatedCube(activeCube.name, activeCube.transform.position);
