@@ -7,6 +7,7 @@ def get_id_from_csv(file_path, id_label):
 
     return df[id_label].iloc[0]
 
+
 def compareIDs(unityFile, EMGFile):
     unityID = get_id_from_csv(unityFile, 'ID')
     EMGID = get_id_from_csv(EMGFile, 'SessionID')
