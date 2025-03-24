@@ -93,7 +93,7 @@ public class Logger : MonoBehaviour
                 $"{gesturesCompleted}; " +
                 $"{(isCubeActivated ? (int?)currentAttempts : null)}; " +
                 $"{currentState}; " +
-                $"{currentEvent};"
+                $"{currentEvent}"
                 ;
 
             // Write the log entry to the file
