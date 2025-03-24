@@ -3,12 +3,12 @@ import os
 
 output_folder = "Data_CleanUp_C"
 gesture_files = [
-    "Pre-Pilot test C/Unity_Extension_C.csv",
-    "Pre-Pilot test C/Unity_fist_C.csv",
-    "Pre-Pilot test C/Unity_Flexion_C.csv",
-    "Pre-Pilot test C/Unity_Pinch_C.csv",
-    "Pre-Pilot test C/Unity_Supination_C.csv",
-    "Pre-Pilot test C/Unity_Pronation_C.csv"
+    "merged_file.csv",
+    #"Pre-Pilot test C/Unity_fist_C.csv",
+    #"Pre-Pilot test C/Unity_Flexion_C.csv",
+    #"Pre-Pilot test C/Unity_Pinch_C.csv",
+    #"Pre-Pilot test C/Unity_Supination_C.csv",
+    #"Pre-Pilot test C/Unity_Pronation_C.csv"
 ]
 
 # Iterate over the files, load them, strip spaces, and save with a new name

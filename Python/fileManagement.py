@@ -29,7 +29,7 @@ def mergeEMGandUnityData(unityFile, emgFile):
 
     mergedDfs = pd.merge_asof(emgDf, unityDf, on='Timestamp', direction='nearest')
     mergedDfs = mergedDfs.drop(columns=['SessionID'])
-    mergedDfs.to_csv('merged_file.csv', index=False)
+    mergedDfs.to_csv('merged_file.csv', index=False, sep=";")
 
 # Example usage:
 unityData = "Pre-Pilot test C/Unity_extension_C.csv"
