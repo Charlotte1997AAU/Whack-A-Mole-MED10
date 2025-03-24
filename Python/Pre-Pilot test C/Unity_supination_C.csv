@@ -1,4 +1,4 @@
-ID; Timestamp; FrameNumber; ActivatedCube; ActiveCubeX; ActiveCubeY; ActiveCubeZ; TrackerX; TrackerY; TrackerZ; GoalGesture; GesturesAtempted; AttemptsInCube; State; Event 
+ID; Timestamp; FrameNumber; ActivatedCube; ActiveCubeX; ActiveCubeY; ActiveCubeZ; TrackerX; TrackerY; TrackerZ; GoalGesture; GesturesAtempted; AttemptsInCube; State; Event
 7c7e1a38-a441-4356-8ee1-00b5be9dba27;2025-03-21 12:45:03.7766; 1; None; ; ; ; 0; 0; 0; supination; 0; ; Moving to rest position; 
 7c7e1a38-a441-4356-8ee1-00b5be9dba27;2025-03-21 12:45:04.5187; 2; None; ; ; ; 0; 0; 0; supination; 0; ; Moving to rest position; 
 7c7e1a38-a441-4356-8ee1-00b5be9dba27;2025-03-21 12:45:04.5666; 3; None; ; ; ; 0.2375845; 0.6386393; 0.08941317; supination; 0; ; Moving to rest position; 
