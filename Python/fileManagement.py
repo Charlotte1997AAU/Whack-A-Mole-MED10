@@ -27,13 +27,17 @@ def mergeEMGandUnityData(unityFile, emgFile):
     unityDf['Timestamp'] = pd.to_datetime(unityDf['Timestamp'])
     emgDf['Timestamp'] = pd.to_datetime(emgDf['Timestamp'])
 
-    mergedDfs = pd.merge_asof(emgDf, unityDf, on='Timestamp', direction='nearest')
+
+    gesture = unityDf['GoalGesture'].iloc[0]
+    print(f"current gesture: {gesture}")
+
+    mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp', direction='nearest')
     mergedDfs = mergedDfs.drop(columns=['SessionID'])
-    mergedDfs.to_csv('merged_file.csv', index=False, sep=";")
+    mergedDfs.to_csv(f'Data_CleanUp_L/merged_file_{gesture}_L.csv', index=False, sep=";")
 
 # Example usage:
-unityData = "Pre-Pilot test C/Unity_extension_C.csv"
-EMGdata = "Pre-Pilot test C/EMG_extension_C.csv"
+unityData = "Pre-Pilot test L/Unity_supination_L.csv"
+EMGdata = "Pre-Pilot test L/EMG_supination_L.csv"
 
 compareIDs(unityData, EMGdata)
 

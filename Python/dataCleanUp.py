@@ -1,14 +1,14 @@
 import pandas as pd
 import os
 
-output_folder = "Data_CleanUp_C"
+output_folder = "Data_CleanUp_L"
 gesture_files = [
-    "merged_file.csv",
-    #"Pre-Pilot test C/Unity_fist_C.csv",
-    #"Pre-Pilot test C/Unity_Flexion_C.csv",
-    #"Pre-Pilot test C/Unity_Pinch_C.csv",
-    #"Pre-Pilot test C/Unity_Supination_C.csv",
-    #"Pre-Pilot test C/Unity_Pronation_C.csv"
+    "Data_CleanUp_L/merged_file_extension_L.csv",
+    "Data_CleanUp_L/merged_file_fist_L.csv",
+    "Data_CleanUp_L/merged_file_flexion_L.csv",
+    "Data_CleanUp_L/merged_file_pinch_L.csv",
+    "Data_CleanUp_L/merged_file_pronation_L.csv",
+    "Data_CleanUp_L/merged_file_supination_L.csv"
 ]
 
 # Iterate over the files, load them, strip spaces, and save with a new name
