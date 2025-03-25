@@ -119,7 +119,7 @@ public class Logger : MonoBehaviour
 
 
         // Create the file with headers
-        File.WriteAllText(filePath, "ID;Timestamp;FrameNumber;ActivatedCube;ActiveCubeX;ActiveCubeY;ActiveCubeZ;TrackerX;TrackerY;TrackerZ;GoalGesture;GesturesAtempted;AttemptsInCube;State;Event\n");
+        File.WriteAllText(filePath, "ID;Timestamp;FrameNumber;ActivatedCube;ActiveCubeX;ActiveCubeY;ActiveCubeZ;TrackerX;TrackerY;TrackerZ;GoalGesture;GesturesAttempted;AttemptsInCube;State;Event\n");
 
         var updatedLogEntries = logEntries.Select(entry => IDstring + ";" + entry).ToList();
 
