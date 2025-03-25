@@ -2,15 +2,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-df = pd.read_csv("Data_CleanUp_C/merged_file_cleaned.csv", delimiter=";")
+df = pd.read_csv("Data_CleanUp_C/merged_file_pinch_C_cleaned.csv", delimiter=";")
 
-def plot_emg_with_states(df, states_to_include, color_shading=True, show_lines=True):
+
+def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, color_shading=True, show_lines=True):
     """
-    Plots EMG signals over time with optional color-coded state regions and vertical lines.
+    Plots selected EMG signals over time with optional color-coded state regions and vertical lines.
 
     Parameters:
     df (DataFrame): The dataset containing EMG and state information.
     states_to_include (list): List of states to include in visualization.
+    emg_signals_to_include (list): List of EMG signals to plot (e.g., [1, 3, 5] to plot EMG1, EMG3, and EMG5).
     color_shading (bool): If True, colors background regions for selected states.
     show_lines (bool): If True, shows vertical dashed lines at state change points.
     """
@@ -23,7 +25,12 @@ def plot_emg_with_states(df, states_to_include, color_shading=True, show_lines=T
 
     # Plot EMG signals
     plt.figure(figsize=(12, 6))
-    for i in range(1, 9):  # EMG1 to EMG8
+
+    # If emg_signals_to_include is None, include all EMG signals (EMG1 to EMG8)
+    emg_signals_to_include = emg_signals_to_include or list(range(1, 9))  # Default to all 8 signals if not specified
+
+    # Plot only the selected EMG signals
+    for i in emg_signals_to_include:  # Loop through the selected EMG signals
         plt.plot(df["Timestamp"], df[f"EMG{i}"], label=f"EMG{i}")
 
     # Find min and max EMG values for better text positioning
@@ -59,12 +66,12 @@ def plot_emg_with_states(df, states_to_include, color_shading=True, show_lines=T
         for _, row in state_changes.iterrows():
             plt.axvline(x=row["Timestamp"], color="black", linestyle="--", alpha=0.6)
             plt.text(row["Timestamp"], min_emg_value - 10, row["State"],
-                     rotation=90, verticalalignment='bottom', fontsize=10, color="black", fontweight='bold')  # Bolder text here
+                     rotation=90, verticalalignment='bottom', fontsize=10, color="black", fontweight='bold')
 
     # Formatting the plot
     plt.xlabel("Time", fontsize=14, fontweight='bold')  # Bold label for x-axis
     plt.ylabel("EMG Signal", fontweight='bold')  # Bold label for y-axis
-    plt.title("EMG Signals Over Time with State Annotations", fontsize=16, fontweight='bold')
+    plt.title("EMG Signals for EMG4 and EMG5 (Pinch Gesture)", fontsize=16, fontweight='bold')  #EMG Signals Over Time with State Annotations
     plt.legend()
     plt.grid(True)
 
@@ -78,8 +85,12 @@ def plot_emg_with_states(df, states_to_include, color_shading=True, show_lines=T
     # Show the plot
     plt.show()
 
+
 # Choose which states to include
 states_to_include = ["MVC", "In box", "Moving to Box", "Resting", "Moving to rest position"]
 
+# Choose which EMG signals to include, e.g., plot only EMG1, EMG3, and EMG5
+emg_signals_to_include = [4, 5]
+
 # Call function with color_shading=True to enable shaded regions, or False for vertical lines
-plot_emg_with_states(df, states_to_include, color_shading=True)
+plot_emg_with_states(df, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
