@@ -80,19 +80,19 @@ public class Logger : MonoBehaviour
 
             // If the cube is activated, continue logging it
             string logEntry = 
-                $"{timestamp}; " +
-                $"{frameNumber}; " +
-                $"{(isCubeActivated ? currentActivatedCube : "None")}; " +
-                $"{(isCubeActivated ? (float?)cubeCoordinates.x : null)}; " +
-                $"{(isCubeActivated ? (float?)cubeCoordinates.y : null)}; " +
-                $"{(isCubeActivated ? (float?)cubeCoordinates.z : null)}; " +
-                $"{triggerBox.trackerPos().x}; " +
-                $"{triggerBox.trackerPos().y}; " +
-                $"{triggerBox.trackerPos().z}; " +
-                $"{goalGesture}; " +
-                $"{gesturesCompleted}; " +
-                $"{(isCubeActivated ? (int?)currentAttempts : null)}; " +
-                $"{currentState}; " +
+                $"{timestamp};" +
+                $"{frameNumber};" +
+                $"{(isCubeActivated ? currentActivatedCube : "None")};" +
+                $"{(isCubeActivated ? (float?)cubeCoordinates.x : null)};" +
+                $"{(isCubeActivated ? (float?)cubeCoordinates.y : null)};" +
+                $"{(isCubeActivated ? (float?)cubeCoordinates.z : null)};" +
+                $"{triggerBox.trackerPos().x};" +
+                $"{triggerBox.trackerPos().y};" +
+                $"{triggerBox.trackerPos().z};" +
+                $"{goalGesture};" +
+                $"{gesturesCompleted};" +
+                $"{(isCubeActivated ? (int?)currentAttempts : null)};" +
+                $"{currentState};" +
                 $"{currentEvent}"
                 ;
 
@@ -119,7 +119,7 @@ public class Logger : MonoBehaviour
 
 
         // Create the file with headers
-        File.WriteAllText(filePath, "ID; Timestamp; FrameNumber; ActivatedCube; ActiveCubeX; ActiveCubeY; ActiveCubeZ; TrackerX; TrackerY; TrackerZ; GoalGesture; GesturesAtempted; AttemptsInCube; State; Event \n");
+        File.WriteAllText(filePath, "ID;Timestamp;FrameNumber;ActivatedCube;ActiveCubeX;ActiveCubeY;ActiveCubeZ;TrackerX;TrackerY;TrackerZ;GoalGesture;GesturesAtempted;AttemptsInCube;State;Event\n");
 
         var updatedLogEntries = logEntries.Select(entry => IDstring + ";" + entry).ToList();
 
