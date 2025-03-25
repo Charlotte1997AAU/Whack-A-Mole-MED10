@@ -102,10 +102,6 @@ gesture_name = "supination"  # choose which gesture to look at. "extension", "fi
 #plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
 
 #--------------------Best fitting line from here on---------------------------------
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
 def plot_all_emg_trends(df):
     """
     Plots the best-fit lines for all EMG signals (EMG1 to EMG8) on the same graph.
