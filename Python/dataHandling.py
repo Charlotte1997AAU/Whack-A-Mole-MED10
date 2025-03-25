@@ -71,7 +71,7 @@ def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, col
     # Formatting the plot
     plt.xlabel("Time", fontsize=14, fontweight='bold')  # Bold label for x-axis
     plt.ylabel("EMG Signal", fontweight='bold')  # Bold label for y-axis
-    plt.title("EMG Signals for EMG4 and EMG5 (Pinch Gesture)", fontsize=16, fontweight='bold')  #EMG Signals Over Time with State Annotations
+    plt.title("EMG Signals Over Time with State Annotations (Pinch Gesture)", fontsize=16, fontweight='bold')  #EMG Signals Over Time with State Annotations
     plt.legend()
     plt.grid(True)
 
@@ -90,7 +90,7 @@ def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, col
 states_to_include = ["MVC", "In box", "Moving to Box", "Resting", "Moving to rest position"]
 
 # Choose which EMG signals to include, e.g., plot only EMG1, EMG3, and EMG5
-emg_signals_to_include = [4, 5]
+emg_signals_to_include = [1,2,3,4,5,6,7,8]
 
 # Call function with color_shading=True to enable shaded regions, or False for vertical lines
 plot_emg_with_states(df, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
