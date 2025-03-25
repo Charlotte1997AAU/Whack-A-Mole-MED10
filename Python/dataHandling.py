@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
@@ -98,7 +99,64 @@ emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 
 # Example usage:
 gesture_name = "supination"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
-plot_emg_with_states(gesture_name,
-                     states_to_include,
-                     emg_signals_to_include=emg_signals_to_include,
-                     color_shading=True)
+#plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
+
+#--------------------Best fitting line from here on---------------------------------
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def plot_all_emg_trends(df):
+    """
+    Plots the best-fit lines for all EMG signals (EMG1 to EMG8) on the same graph.
+
+    Parameters:
+    df (DataFrame): The dataset containing EMG and state information.
+    """
+
+    # Convert Timestamp column to datetime format
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+
+    # Convert timestamps to numerical values (seconds since start)
+    df["Time_Seconds"] = (df["Timestamp"] - df["Timestamp"].iloc[0]).dt.total_seconds()
+
+    # Set up the figure
+    plt.figure(figsize=(12, 6))
+
+    # Define a color map for different EMG channels
+    colors = ["blue", "green", "red", "purple", "orange", "brown", "pink", "cyan"]
+
+    # Loop through all EMG signals (EMG1 to EMG8)
+    for i in range(1, 9):
+        x = df["Time_Seconds"].values
+        y = df[f"EMG{i}"].values
+
+        # Compute best-fit line using linear regression (y = mx + b)
+        m, b = np.polyfit(x, y, 1)
+        best_fit_line = m * x + b
+
+        # Plot best-fit line for the EMG channel
+        plt.plot(df["Timestamp"], best_fit_line, label=f"EMG{i} (Slope: {m:.6f})", color=colors[i-1], linestyle="--", linewidth=2)
+
+    # Formatting the plot
+    plt.xlabel("Time", fontsize=14, fontweight='bold')  # Bold label for x-axis
+    plt.ylabel("EMG Signal", fontsize=14, fontweight='bold')  # Bold label for y-axis
+    plt.title("Best-Fit Trends for All EMG Signals", fontsize=16, fontweight='bold')
+    plt.legend()
+    plt.grid(True)
+
+    # Remove the timestamp from the x-axis by hiding the xticks
+    plt.xticks([])  # This removes the x-axis tick labels
+
+    # Make y-axis ticks bold and larger
+    plt.tick_params(axis='y', labelsize=12, labelcolor='black', width=2)
+    plt.yticks(fontweight='bold', fontsize=14)
+
+    # Show the plot
+    plt.show()
+
+
+# Example usage:
+df = pd.read_csv("Data_CleanUp_C/merged_file_pinch_C_cleaned.csv", delimiter=";")  # Change file if needed
+plot_all_emg_trends(df)  # Call function to visualize best-fit trends
+
