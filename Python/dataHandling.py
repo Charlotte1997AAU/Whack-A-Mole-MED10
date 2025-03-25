@@ -1,21 +1,24 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-
-df = pd.read_csv("Data_CleanUp_C/merged_file_pinch_C_cleaned.csv", delimiter=";")
 
 
-def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, color_shading=True, show_lines=True):
+def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
+                         show_lines=True):
     """
     Plots selected EMG signals over time with optional color-coded state regions and vertical lines.
+    The CSV file is dynamically loaded based on the gesture name.
 
     Parameters:
-    df (DataFrame): The dataset containing EMG and state information.
+    gesture_name (str): The name of the gesture to focus on (e.g., "pinch").
     states_to_include (list): List of states to include in visualization.
     emg_signals_to_include (list): List of EMG signals to plot (e.g., [1, 3, 5] to plot EMG1, EMG3, and EMG5).
     color_shading (bool): If True, colors background regions for selected states.
     show_lines (bool): If True, shows vertical dashed lines at state change points.
     """
+
+    # Load the appropriate CSV file based on the gesture_name
+    file_path = f"Data_CleanUp_C/merged_file_{gesture_name}_C_cleaned.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
+    df = pd.read_csv(file_path, delimiter=";")
 
     # Convert Timestamp column to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"])
@@ -71,7 +74,8 @@ def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, col
     # Formatting the plot
     plt.xlabel("Time", fontsize=14, fontweight='bold')  # Bold label for x-axis
     plt.ylabel("EMG Signal", fontweight='bold')  # Bold label for y-axis
-    plt.title("EMG Signals Over Time with State Annotations (Pinch Gesture)", fontsize=16, fontweight='bold')  #EMG Signals Over Time with State Annotations
+    plt.title(f"EMG Signals Over Time with State Annotations ({gesture_name.capitalize()} Gesture)", fontsize=16,
+              fontweight='bold')  # Dynamic title based on gesture
     plt.legend()
     plt.grid(True)
 
@@ -90,7 +94,11 @@ def plot_emg_with_states(df, states_to_include, emg_signals_to_include=None, col
 states_to_include = ["MVC", "In box", "Moving to Box", "Resting", "Moving to rest position"]
 
 # Choose which EMG signals to include, e.g., plot only EMG1, EMG3, and EMG5
-emg_signals_to_include = [1,2,3,4,5,6,7,8]
+emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 
-# Call function with color_shading=True to enable shaded regions, or False for vertical lines
-plot_emg_with_states(df, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
+# Example usage:
+gesture_name = "supination"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
+plot_emg_with_states(gesture_name,
+                     states_to_include,
+                     emg_signals_to_include=emg_signals_to_include,
+                     color_shading=True)
