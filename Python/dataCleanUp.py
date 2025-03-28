@@ -1,14 +1,14 @@
 import pandas as pd
 import os
 
-output_folder = "Data_CleanUp_L"
+output_folder = "Data_CleanUp_C"
 gesture_files = [
-    "Data_CleanUp_L/merged_file_extension_L.csv",
-    "Data_CleanUp_L/merged_file_fist_L.csv",
-    "Data_CleanUp_L/merged_file_flexion_L.csv",
-    "Data_CleanUp_L/merged_file_pinch_L.csv",
-    "Data_CleanUp_L/merged_file_pronation_L.csv",
-    "Data_CleanUp_L/merged_file_supination_L.csv"
+    "Data_CleanUp_C/merged_file_extension_C.csv",
+    "Data_CleanUp_C/merged_file_fist_C.csv",
+    "Data_CleanUp_C/merged_file_flexion_C.csv",
+    "Data_CleanUp_C/merged_file_pinch_C.csv",
+    "Data_CleanUp_C/merged_file_pronation_C.csv",
+    "Data_CleanUp_C/merged_file_supination_C.csv"
 ]
 
 # Iterate over the files, load them, strip spaces, and save with a new name
@@ -29,7 +29,7 @@ for file in gesture_files:
     df = df[['Index'] + [col for col in df.columns if col != 'Index']]
 
     # Step 2: Remove rows after the first occurrence where 'GesturesAtempted' == 25 and 'Event' == 'Successful Gesture'
-    success_row_index = df[(df['GesturesAtempted'] == 25) & (df['Event'] == 'Successful Gesture')].index
+    success_row_index = df[(df['GesturesAttempted'] == 25) & (df['Event'] == 'Successful Gesture')].index
 
     if not success_row_index.empty:
         # Find the first row index where the condition is met and remove that row and all rows after it

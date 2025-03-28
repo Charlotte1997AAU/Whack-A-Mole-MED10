@@ -33,11 +33,11 @@ def mergeEMGandUnityData(unityFile, emgFile):
 
     mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp', direction='nearest')
     mergedDfs = mergedDfs.drop(columns=['SessionID'])
-    mergedDfs.to_csv(f'Data_CleanUp_L/merged_file_{gesture}_L.csv', index=False, sep=";")
+    mergedDfs.to_csv(f'Data_CleanUp_C/merged_file_{gesture}_L.csv', index=False, sep=";")
 
 # Example usage:
-unityData = "Pre-Pilot test L/Unity_supination_L.csv"
-EMGdata = "Pre-Pilot test L/EMG_supination_L.csv"
+unityData = "Pre-Pilot test C/Unity_supination_C.csv"
+EMGdata = "Pre-Pilot test C/EMG_supination_C.csv"
 
 compareIDs(unityData, EMGdata)
 
