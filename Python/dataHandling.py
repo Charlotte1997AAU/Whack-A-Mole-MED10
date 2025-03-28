@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -151,8 +153,23 @@ def plot_all_emg_trends(df):
     # Show the plot
     plt.show()
 
+gesture_files_All = [
+    "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
+    "Data_CleanUp_L/merged_file_fist_L_cleaned.csv",
+    "Data_CleanUp_L/merged_file_flexion_L_cleaned.csv",
+    "Data_CleanUp_L/merged_file_pinch_L_cleaned.csv",
+    "Data_CleanUp_L/merged_file_pronation_L_cleaned.csv",
+    "Data_CleanUp_L/merged_file_supination_L_cleaned.csv",
+    "Data_CleanUp_C/merged_file_extension_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_fist_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_flexion_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_pinch_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_pronation_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_supination_C_cleaned.csv"
+]
 
 # Example usage:
-df = pd.read_csv("Data_CleanUp_C/merged_file_pinch_C_cleaned.csv", delimiter=";")  # Change file if needed
-plot_all_emg_trends(df)  # Call function to visualize best-fit trends
+for file in gesture_files_All:
+    df = pd.read_csv(file, delimiter=";")  # Change file if needed
+    plot_all_emg_trends(df)  # Call function to visualize best-fit trends
 
