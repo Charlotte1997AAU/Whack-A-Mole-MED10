@@ -17,7 +17,7 @@ def featureCorrelation(filePath: str, saveImage: bool):
     """
     data = pd.read_csv(filePath, sep=';', header=0, skipinitialspace=True)
     data.drop(columns=['Index', 'Timestamp', 'ID', 'FrameNumber', 'ActivatedCube',
-                       'ActiveCubeZ', 'GoalGesture', 'GesturesAtempted', 'AttemptsInCube',
+                       'ActiveCubeZ', 'GoalGesture', 'GesturesAttempted', 'AttemptsInCube',
                        'State', 'Event'], inplace=True)
 
     match = re.search(r"merged_file_(.*?)_cleaned\.csv", filePath)
