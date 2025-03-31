@@ -2,7 +2,7 @@ import pandas as pd
 import scipy.stats as stats
 
 # Example: Load your dataset
-filepath = f"Data_CleanUp_C/merged_file_fist_C_cleaned.csv"
+filepath = f"Data_CleanUp_C/merged_file_pinch_C_cleaned.csv"
 df = pd.read_csv(filepath, delimiter=';', skipinitialspace=True)
 df.columns = df.columns.str.strip()  # Remove any leading/trailing spaces from column names
 
