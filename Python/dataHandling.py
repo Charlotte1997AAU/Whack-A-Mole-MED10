@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
+import featureSelection
 
 
 def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
@@ -153,6 +154,60 @@ def plot_all_emg_trends(df):
     # Show the plot
     plt.show()
 
+
+def visualizeMAV():
+    data = pd.read_csv("Data_CleanUp_L/merged_file_fist_L_cleaned.csv", sep=";")
+    mavList = []
+    meanMav = []
+    for start in range(0, len(data)-200+1, 100):
+        currentWindow = data[start:start+200]
+        mav = featureSelection.calcMAV(currentWindow, columns=["EMG1", "EMG2", "EMG3", "EMG4", "EMG5", "EMG6", "EMG7", "EMG8"])
+        mavList.append(mav)
+        mean = float(np.mean(mav))
+        meanMav.append(mean)
+
+    print(meanMav)
+
+    x = np.arange(len(meanMav))
+    meanMav = np.array(meanMav)
+
+    plt.plot(x, meanMav)
+    plt.xlabel("X-axis")
+    plt.ylabel("Y-axis")
+    plt.title("MeanMav")
+    plt.legend()  # Show legend
+    plt.grid(True)  # Add grid for better visibility
+
+    # Show the plot
+    plt.show()
+
+    x = np.arange(len(mavList))  # [0, 1, 2, 3, 4] (length of data)
+
+    # Convert list of arrays into a NumPy array for easy indexing
+    mavList = np.array(mavList)
+
+    fig, axes = plt.subplots(8, 1, figsize=(10, 12), sharex=True)  # 8 rows, 1 column
+
+    for i in range(8):  # Loop through the 8 EMG channels
+        axes[i].plot(x, mavList[:, i], label=f"Channel {i + 1}", color=f"C{i}")
+        axes[i].set_ylabel(f"Ch {i + 1}")  # Label Y-axis for each channel
+        axes[i].legend(loc="upper right")
+        axes[i].grid(True)
+
+    # Common X-axis label
+    axes[-1].set_xlabel("Time (samples)")
+
+    # Set a common title
+    fig.suptitle("EMG Channel Signals", fontsize=14)
+
+    # Adjust layout for better spacing
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+    # Show plot
+    plt.show()
+
+visualizeMAV()
+
 gesture_files_All = [
     "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
     "Data_CleanUp_L/merged_file_fist_L_cleaned.csv",
@@ -169,7 +224,7 @@ gesture_files_All = [
 ]
 
 # Example usage:
-for file in gesture_files_All:
-    df = pd.read_csv(file, delimiter=";")  # Change file if needed
-    plot_all_emg_trends(df)  # Call function to visualize best-fit trends
+#for file in gesture_files_All:
+    #df = pd.read_csv(file, delimiter=";")  # Change file if needed
+    #plot_all_emg_trends(df)  # Call function to visualize best-fit trends
 
