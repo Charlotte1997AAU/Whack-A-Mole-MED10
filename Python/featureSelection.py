@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 windowSize = 40
 stepSize = 20
-filePath = "Data_CleanUp_C/merged_file_extension_C_cleaned.csv"
 columns = ["EMG1", "EMG2", "EMG3", "EMG4", "EMG5", "EMG6", "EMG7", "EMG8"]
 columnsForTracker = ["TrackerX", "TrackerY", "TrackerZ"]
 columnsForCubePos = ["ActivatedCube", "ActiveCubeX", "ActiveCubeY"]
@@ -35,6 +35,7 @@ def createDataFrameWithCalculations(windowSize, stepSize, filePath):
         sscList = []
         wflList = []
         trackerPosList = []
+        currentGesture = data['GoalGesture'].iloc[0]
 
         # Loop through the data using the window size and step size
         for start in range(0, len(dfs) - windowSize + 1, stepSize):
@@ -84,6 +85,7 @@ def createDataFrameWithCalculations(windowSize, stepSize, filePath):
         wflDFColumns = [f"EMG{i}WFL" for i in range(1, 9)]
         trackerColumns = ["trackerX", "trackerY", "trackerZ"]
         activeCubeColumns = ["activeCube", "activeCubeX", "activeCubeY"]
+        goalGesture = ["GoalGesture"]
 
         minRows = mavSlopeDF.shape[0]
         mavDF = mavDF[:minRows]
@@ -92,9 +94,16 @@ def createDataFrameWithCalculations(windowSize, stepSize, filePath):
         wflDF = wflDF[:minRows]
         trackerPos = trackerPos[:minRows]
         cubeDF = pd.DataFrame([activeCube] * minRows, columns=columnsForCubePos)
+        activatedCubeString = cubeDF["ActivatedCube"]
+        activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
+        activatedCubeString = activatedCubeString.astype(int)
+        cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+        cubeDF.insert(0, "ActivatedCube", activatedCubeString)
+        gestureDF = pd.DataFrame([currentGesture] * minRows)
 
-        allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos])
-        allColumns = mavColumns + mavSlopeColumns + ZCColumns + sscDFColumns + wflDFColumns + activeCubeColumns + trackerColumns
+        allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos, gestureDF])
+        allColumns = mavColumns + mavSlopeColumns + ZCColumns + sscDFColumns + wflDFColumns + activeCubeColumns \
+                     + trackerColumns + goalGesture
 
         featuredDataSet = pd.DataFrame(allFeatures, columns=allColumns)
         processedData.append(featuredDataSet)
@@ -189,12 +198,12 @@ def calcAvgTracker(data, columns):
 
 
 gesture_files = [
-    "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
-    "Data_CleanUp_L/merged_file_fist_L_cleaned.csv",
-    "Data_CleanUp_L/merged_file_flexion_L_cleaned.csv",
-    "Data_CleanUp_L/merged_file_pinch_L_cleaned.csv",
-    "Data_CleanUp_L/merged_file_pronation_L_cleaned.csv",
-    "Data_CleanUp_L/merged_file_supination_L_cleaned.csv"
+    "Data_CleanUp_C/merged_file_extension_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_fist_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_flexion_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_pinch_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_pronation_C_cleaned.csv",
+    "Data_CleanUp_C/merged_file_supination_C_cleaned.csv"
 ]
 
 finalFiles = []
@@ -203,16 +212,9 @@ for file in gesture_files:
     finalFiles.append(cleanData)
 
 finalDataset = pd.concat(finalFiles, ignore_index=True)
-finalDataset.to_csv("test Data set/testData_L.csv", index=False)
+le = LabelEncoder()
+finalDataset["GoalGesture"] = le.fit_transform(finalDataset["GoalGesture"])
+finalDataset = finalDataset.apply(pd.to_numeric)
+print(finalDataset.dtypes)
+finalDataset.to_csv("test Data set/testData_C.csv", index=False)
 print("overall dataset created")
-
-
-event_names = ["Cube 0", "Cube 1", "Cube 2", "Cube 3", "Cube 4", "Cube 5", "Cube 6", "Cube 7", "Cube 8", "Cube 9", "Cube 10", "Cube 11", "Cube 12"]
-
-# Load DataFrame (assuming CSV is read into 'df')
-df = pd.read_csv("test Data set/testData_C.csv", delimiter=",")  # Adjust delimiter if needed
-
-# Create a dictionary to store counts
-event_counts = {event: (df["activeCube"] == event).sum() for event in event_names}
-
-print(event_counts)
