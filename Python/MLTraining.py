@@ -10,7 +10,10 @@ import dataPreProcessing
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import joblib
 from sklearn.preprocessing import StandardScaler
-import open3d as o3d
+from skl2onnx.common.data_types import FloatTensorType
+from skl2onnx import to_onnx
+import onnxruntime as rt
+import numpy as np
 
 # Load the dataset
 df = pd.read_csv("test Data set/testData_L.csv")
@@ -26,6 +29,7 @@ dfTest.to_csv("test Data set/testSet_L.csv", index=False)
 dfNormalized = dfTrain
 
 X = dfNormalized.drop(columns=['GoalGesture'])  # Features
+X = X.astype(np.float32)
 y = dfNormalized['GoalGesture']  # Target
 
 # Split the dataset into training and testing (with stratification for balanced classes)
@@ -56,6 +60,21 @@ print(f"Best parameters: {grid_search.best_params_}")
 
 # Best model after tuning
 best_model = grid_search.best_estimator_
+
+initial_type = [('float_input', FloatTensorType([None, X.shape[1]]))]
+
+# Convert to ONNX with the correct input type
+onnxModel = to_onnx(best_model, X[:1], initial_types=initial_type)
+with open("SGD_Model.onnx", "wb") as f:
+    f.write(onnxModel.SerializeToString())
+
+sess = rt.InferenceSession("SGD_Model.onnx", providers=["CPUExecutionProvider"])
+input_name = sess.get_inputs()[0].name
+label_name = sess.get_outputs()[0].name
+
+# Ensure X_test is of the right type (float32 numpy array)
+onnx_pred = sess.run([label_name], {input_name: X_test.to_numpy().astype(np.float32)})[0]
+
 
 # Evaluate the best model on the test set
 y_pred_best = best_model.predict(X_test)
