@@ -15,7 +15,22 @@ for output in model.graph.output:
     if output.name == "output_label":
         output.name = "final_label"
 
+
+for node in nodesToRemove:
+    model.graph.node.remove(node)
+
 onnx.save(model, "modified_sgd_model.onnx")
 
-for output in model.graph.output:
+modified_model = onnx.load("modified_sgd_model.onnx")
+
+for output in modified_model.graph.output:
+    print(output.name)
+
+
+print("Nodes:")
+for node in modified_model.graph.node:
+    print(node.op_type)
+
+print("\nOutputs:")
+for output in modified_model.graph.output:
     print(output.name)
