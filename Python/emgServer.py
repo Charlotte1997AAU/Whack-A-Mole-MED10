@@ -32,3 +32,98 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+"""
+using NativeWebSocket;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+
+public class EMGStreamer : MonoBehaviour
+{
+    WebSocket websocket;
+
+    // EMG buffer
+    List<float[]> slidingWindow = new List<float[]>();
+    const int windowSize = 40;
+    const int overlap = 20;
+    const int numChannels = 8;
+
+    async void Start()
+    {
+        websocket = new WebSocket("ws://localhost:8765");
+
+        websocket.OnOpen += () =>
+        {
+            Debug.Log("✅ Connected to Python WebSocket server");
+        };
+
+        websocket.OnError += (e) =>
+        {
+            Debug.LogError("❌ WebSocket Error: " + e);
+        };
+
+        websocket.OnClose += (e) =>
+        {
+            Debug.Log("🔌 WebSocket closed");
+        };
+
+        websocket.OnMessage += (bytes) =>
+        {
+            string prediction = Encoding.UTF8.GetString(bytes);
+            Debug.Log("🧠 Prediction: " + prediction);
+
+            // TODO: Handle gesture actions here (e.g. grab, punch)
+        };
+
+        await websocket.Connect();
+    }
+
+    void Update()
+    {
+        // Simulate one EMG sample per frame (at ~200Hz)
+        float[] emgSample = GenerateFakeEMG();
+        slidingWindow.Add(emgSample);
+
+        if (slidingWindow.Count >= windowSize)
+        {
+            string message = FlattenWindow(slidingWindow);
+            websocket.SendText(message);
+
+            // Slide the window by `overlap`
+            slidingWindow.RemoveRange(0, overlap);
+        }
+
+        // Required to handle WebSocket events on main thread
+        websocket.DispatchMessageQueue();
+    }
+
+    float[] GenerateFakeEMG()
+    {
+        float[] sample = new float[numChannels];
+        for (int i = 0; i < numChannels; i++)
+        {
+            sample[i] = Random.Range(0f, 0.2f); // Simulate muscle signal
+        }
+        return sample;
+    }
+
+    string FlattenWindow(List<float[]> window)
+    {
+        List<string> flat = new List<string>();
+        foreach (var row in window)
+        {
+            foreach (var val in row)
+            {
+                flat.Add(val.ToString("F4"));
+            }
+        }
+        return string.Join(",", flat);
+    }
+
+    private async void OnApplicationQuit()
+    {
+        await websocket.Close();
+    }
+}
+
+"""
