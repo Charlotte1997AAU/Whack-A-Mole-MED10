@@ -33,68 +33,62 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 """
-using NativeWebSocket;
+using UnityEngine;
+using WebSocketSharp;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 
 public class EMGStreamer : MonoBehaviour
 {
-    WebSocket websocket;
+    private WebSocket ws;
 
-    // EMG buffer
-    List<float[]> slidingWindow = new List<float[]>();
-    const int windowSize = 40;
-    const int overlap = 20;
-    const int numChannels = 8;
+    private List<float[]> slidingWindow = new List<float[]>();
+    private const int windowSize = 40;
+    private const int overlap = 20;
+    private const int numChannels = 8;
 
-    async void Start()
+    void Start()
     {
-        websocket = new WebSocket("ws://localhost:8765");
+        ws = new WebSocket("ws://localhost:8765");
 
-        websocket.OnOpen += () =>
+        ws.OnOpen += (sender, e) =>
         {
             Debug.Log("✅ Connected to Python WebSocket server");
         };
 
-        websocket.OnError += (e) =>
+        ws.OnMessage += (sender, e) =>
         {
-            Debug.LogError("❌ WebSocket Error: " + e);
+            Debug.Log("🧠 Prediction: " + e.Data);
+
+            // TODO: Handle prediction actions here
         };
 
-        websocket.OnClose += (e) =>
+        ws.OnError += (sender, e) =>
+        {
+            Debug.LogError("❌ WebSocket Error: " + e.Message);
+        };
+
+        ws.OnClose += (sender, e) =>
         {
             Debug.Log("🔌 WebSocket closed");
         };
 
-        websocket.OnMessage += (bytes) =>
-        {
-            string prediction = Encoding.UTF8.GetString(bytes);
-            Debug.Log("🧠 Prediction: " + prediction);
-
-            // TODO: Handle gesture actions here (e.g. grab, punch)
-        };
-
-        await websocket.Connect();
+        ws.Connect();
     }
 
     void Update()
     {
-        // Simulate one EMG sample per frame (at ~200Hz)
         float[] emgSample = GenerateFakeEMG();
         slidingWindow.Add(emgSample);
 
         if (slidingWindow.Count >= windowSize)
         {
             string message = FlattenWindow(slidingWindow);
-            websocket.SendText(message);
+            ws.Send(message);
 
-            // Slide the window by `overlap`
+            // Slide window
             slidingWindow.RemoveRange(0, overlap);
         }
-
-        // Required to handle WebSocket events on main thread
-        websocket.DispatchMessageQueue();
     }
 
     float[] GenerateFakeEMG()
@@ -102,28 +96,14 @@ public class EMGStreamer : MonoBehaviour
         float[] sample = new float[numChannels];
         for (int i = 0; i < numChannels; i++)
         {
-            sample[i] = Random.Range(0f, 0.2f); // Simulate muscle signal
+            sample[i] = Random.Range(0f, 0.2f);
         }
         return sample;
     }
 
     string FlattenWindow(List<float[]> window)
     {
-        List<string> flat = new List<string>();
-        foreach (var row in window)
-        {
-            foreach (var val in row)
-            {
-                flat.Add(val.ToString("F4"));
-            }
-        }
-        return string.Join(",", flat);
-    }
-
-    private async void OnApplicationQuit()
-    {
-        await websocket.Close();
-    }
-}
+        StringBuilder builder = new StringBuilder();
+        foreach (var row
 
 """
