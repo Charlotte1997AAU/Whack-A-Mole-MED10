@@ -53,7 +53,7 @@ public class EMGStreamer : MonoBehaviour
 
         ws.OnOpen += (sender, e) =>
         {
-            Debug.Log("✅ Connected to Python WebSocket server");
+            Debug.Log("Connected to Python WebSocket server");
         };
 
         ws.OnMessage += (sender, e) =>
@@ -70,7 +70,7 @@ public class EMGStreamer : MonoBehaviour
 
         ws.OnClose += (sender, e) =>
         {
-            Debug.Log("🔌 WebSocket closed");
+            Debug.Log("WebSocket closed");
         };
 
         ws.Connect();
@@ -104,6 +104,28 @@ public class EMGStreamer : MonoBehaviour
     string FlattenWindow(List<float[]> window)
     {
         StringBuilder builder = new StringBuilder();
-        foreach (var row
+        foreach (var row in window)
+        {
+            foreach (var val in row)
+            {
+                builder.AppendFormat("{0:F4},", val);
+            }
+        }
+        if (builder.Length > 0)
+        {
+            builder.Length--; // remove last comma
+        }
+        return builder.ToString();
+    }
+
+    void OnApplicationQuit()
+    {
+        if (ws != null && ws.IsAlive)
+        {
+            ws.Close();
+        }
+    }
+}
+
 
 """
