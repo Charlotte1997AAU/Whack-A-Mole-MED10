@@ -4,6 +4,7 @@ import asyncio
 import websockets
 import numpy as np
 import pandas as pd
+import featureSelection
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
@@ -14,6 +15,7 @@ def modelPredict(emg_window):
     emg_array_transposed = emg_window.T
     df = pd.DataFrame(emg_array_transposed, columns=[
     'trackerX', 'trackerY', 'trackerZ', 'EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
+    df = featureSelection.createDataFrameWithCalculationsTest(df)
     print(df)
     return df
 
