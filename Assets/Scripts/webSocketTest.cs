@@ -11,12 +11,15 @@ public class webSocketTest : MonoBehaviour
     private Dictionary<string, List<float>> slidingWindow = new Dictionary<string, List<float>>();  // Store sliding window for each channel
     private const int windowSize = 40;  // Number of EMG samples for each window
     private const int overlap = 20;    // Overlap between windows (40 samples with 20 overlap)
-    private const int numChannels = 8; // Number of EMG channels
+    private const int numChannels = 11; // Number of EMG channels
+    private GameObject tracker;
+    private Vector3 trackerPos; // Position of tracker
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
 
     void Start()
     {
+        tracker = GameObject.Find("Tracker");
         ws = new WebSocket("ws://localhost:8765");
 
         ws.OnOpen += (sender, e) =>
@@ -46,50 +49,56 @@ public class webSocketTest : MonoBehaviour
 
     void Update()
     {
-        if (emgDataForSocket.Count == numChannels)
+        trackerPos = tracker.transform.position;
+        emgDataForSocket["trackerX"] = trackerPos.x;
+        emgDataForSocket["trackerY"] = trackerPos.y;
+        emgDataForSocket["trackerZ"] = trackerPos.z;
+
+        // Update sliding window with new data for each channel
+        foreach (var entry in emgDataForSocket)
         {
-            // Update sliding window with new data for each channel
-            foreach (var entry in emgDataForSocket)
+            string channelKey = entry.Key;
+
+            // Ensure there's a list for this channel in the sliding window
+            if (!slidingWindow.ContainsKey(channelKey))
             {
-                string channelKey = entry.Key;
-
-                // Ensure there's a list for this channel in the sliding window
-                if (!slidingWindow.ContainsKey(channelKey))
-                {
-                    slidingWindow[channelKey] = new List<float>();
-                }
-
-                // Add new data to the channel's list
-                slidingWindow[channelKey].Add(Convert.ToSingle(entry.Value));
+                slidingWindow[channelKey] = new List<float>();
             }
 
-            bool sendMessage = true;
+            // Add new data to the channel's list
+            slidingWindow[channelKey].Add(Convert.ToSingle(entry.Value));
+
+        }
+
+        bool sendMessage = true;
+
+        List<string> keys = new List<string>(slidingWindow.Keys);
+
+        foreach (var channelKey in keys)
+        {
+            if(slidingWindow[channelKey].Count > windowSize)
+            {
+                Debug.Log("Error in channel " + channelKey + ": " + slidingWindow[channelKey].Count + "values");
+                slidingWindow[channelKey].RemoveRange(windowSize, slidingWindow[channelKey].Count - windowSize);
+            }
+
+            if (slidingWindow[channelKey].Count < windowSize)
+            {
+                sendMessage = false;
+                break;
+            }
+        }
+
+        // If the sliding window has reached the window size, send data and slide
+        if (sendMessage)
+        {
+            string message = FlattenWindow(slidingWindow);
+            ws.Send(message);
+
+            // Slide window: Remove overlap number of elements from each channel's list
             foreach (var channelKey in slidingWindow.Keys)
             {
-                if(slidingWindow[channelKey].Count > windowSize)
-                {
-                    Debug.Log("Error in channel " + channelKey + ": " + slidingWindow[channelKey].Count + "values");
-                    slidingWindow[channelKey].RemoveRange(windowSize, slidingWindow[channelKey].Count - windowSize);
-                }
-
-                if (slidingWindow[channelKey].Count < windowSize)
-                {
-                    sendMessage = false;
-                    break;
-                }
-            }
-
-            // If the sliding window has reached the window size, send data and slide
-            if (sendMessage)
-            {
-                string message = FlattenWindow(slidingWindow);
-                ws.Send(message);
-
-                // Slide window: Remove overlap number of elements from each channel's list
-                foreach (var channelKey in slidingWindow.Keys)
-                {
-                    slidingWindow[channelKey].RemoveRange(0, overlap);
-                }
+                slidingWindow[channelKey].RemoveRange(0, overlap);
             }
         }
     }

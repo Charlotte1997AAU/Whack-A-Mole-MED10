@@ -54,7 +54,6 @@ public class MyoLogger : MonoBehaviour
 
         loggingManager.Log("Med10", emgData);
         ws.GetEmgData(emgData);
-
     }
 
     public void StopLog() {

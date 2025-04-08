@@ -6,18 +6,16 @@ import numpy as np
 import pandas as pd
 
 WINDOW_SIZE = 40
-NUM_CHANNELS = 8
-columns = ["EMG1", "EMG2", "EMG3", "EMG4", "EMG5", "EMG6", "EMG7", "EMG8"]
+NUM_CHANNELS = 11
 
 # Dummy prediction logic
 def modelPredict(emg_window):
     # emg_window shape: (NUM_CHANNELS, WINDOW_SIZE)
-    emg_array = np.array(emg_window)
-    emg_array = pd.DataFrame({'EMG1': emg_array[:, 0], 'EMG2': emg_array[:, 1], 'EMG3': emg_array[:, 2], 'EMG4': emg_array[:, 3],
-                              'EMG5': emg_array[:, 4], 'EMG6': emg_array[:, 5], 'EMG7': emg_array[:, 6], 'EMG8': emg_array[:, 7]})
-    print(emg_array.head())
-
-    return emg_array
+    emg_array_transposed = emg_window.T
+    df = pd.DataFrame(emg_array_transposed, columns=[
+    'trackerX', 'trackerY', 'trackerZ', 'EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
+    print(df)
+    return df
 
 async def handler(websocket):
     print("Unity client connected.")
@@ -25,7 +23,6 @@ async def handler(websocket):
         try:
             # Convert flat string → float list
             values = list(map(float, message.strip().split(',')))
-
             expected_values = WINDOW_SIZE * NUM_CHANNELS
             if len(values) != expected_values:
                 await websocket.send("error: invalid window size")
@@ -39,7 +36,7 @@ async def handler(websocket):
             await websocket.send(prediction)
         except Exception as e:
             error_msg = f"error: {str(e)}"
-            print("oh noo", error_msg)
+            print(error_msg)
             await websocket.send(error_msg)
 
 async def main():
