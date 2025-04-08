@@ -265,6 +265,7 @@ gesture_files = [
     "Data_CleanUp_C/merged_file_supination_C_cleaned.csv"
 ]
 
+"""
 finalFiles = []
 for file in gesture_files:
     cleanData = createDataFrameWithCalculations(windowSize, stepSize, file)
@@ -277,3 +278,4 @@ finalDataset = finalDataset.apply(pd.to_numeric)
 print(finalDataset.dtypes)
 finalDataset.to_csv("test Data set/testData_C.csv", index=False)
 print("overall dataset created")
+"""

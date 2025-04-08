@@ -5,9 +5,6 @@ import dataPreProcessing
 import pandas as pd
 import joblib
 from sklearn.model_selection import learning_curve
-import matplotlib
-matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
 
 # Load the dataset
 df = pd.read_csv("test Data set/testData_L.csv")
@@ -22,7 +19,7 @@ dfTrain, dfTest = train_test_split(dfNormalized, test_size=0.2, random_state=42,
 dfTest.to_csv("test Data set/testSet_L.csv", index=False)
 dfNormalized = dfTrain
 
-X = dfNormalized.drop(columns=['GoalGesture'])  # Features
+X = dfNormalized.drop(columns=excludeColumns)  # Features
 y = dfNormalized['GoalGesture']  # Target
 
 # Split the dataset into training and testing (with stratification for balanced classes)
@@ -47,6 +44,7 @@ print(cm)
 print("Classification Report for Best Model:")
 print(classification_report(y_test, y_pred_best))
 
+"""
 train_sizes, train_scores, val_scores = learning_curve(
     model, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
 )
@@ -57,6 +55,7 @@ plt.xlabel("Training set size")
 plt.ylabel("Validation Accuracy")
 #plt.savefig(f"Images/learning_curve_SGD.png", dpi=300, bbox_inches="tight")
 plt.show()
+"""
 
 joblib.dump(model, "SGD_model_L.pkl")
 print("Saved model to tha pickle jar")
