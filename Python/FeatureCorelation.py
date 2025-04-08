@@ -6,7 +6,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import re
 
-bogstav = "C"
+bogstav = "L"
 
 
 def featureCorrelation(filePath: str, saveImage: bool):
@@ -18,6 +18,8 @@ def featureCorrelation(filePath: str, saveImage: bool):
 
     """
     data = pd.read_csv(filePath, sep=',', header=0, skipinitialspace=True)
+    data = data.drop(columns=["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
+                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY"])
 
     corr = data.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
@@ -30,4 +32,4 @@ def featureCorrelation(filePath: str, saveImage: bool):
     plt.show()
 
 
-featureCorrelation(f"test Data set/testData_{bogstav}.csv", True)
+featureCorrelation(f"test Data set/testData_{bogstav}.csv", False)
