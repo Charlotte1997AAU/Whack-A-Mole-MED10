@@ -66,6 +66,12 @@ public class webSocketTest : MonoBehaviour
             bool sendMessage = true;
             foreach (var channelKey in slidingWindow.Keys)
             {
+                if(slidingWindow[channelKey].Count > windowSize)
+                {
+                    Debug.Log("Error in channel " + channelKey + ": " + slidingWindow[channelKey].Count + "values");
+                    slidingWindow[channelKey].RemoveRange(windowSize, slidingWindow[channelKey].Count - windowSize);
+                }
+
                 if (slidingWindow[channelKey].Count < windowSize)
                 {
                     sendMessage = false;
