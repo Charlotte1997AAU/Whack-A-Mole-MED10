@@ -7,19 +7,25 @@ import numpy as np
 import pandas as pd
 import dataPreProcessing
 import featureSelection
+from sklearn.preprocessing import StandardScaler
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
 loaded_model = joblib.load('SGD_model_L.pkl')
+scaler = StandardScaler()
+testSet = pd.read_csv("test Data set/testData_L.csv")
+excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
+                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 
-# Dummy prediction logic
+X = testSet.drop(columns=excludeColumns)
+scaler.fit(X)  # Fit the scaler directly on the DataFrame
+
 def modelPredict(emg_window):
-    # emg_window shape: (NUM_CHANNELS, WINDOW_SIZE)
     emg_array_transposed = emg_window.T
-    df = pd.DataFrame(emg_array_transposed, columns=[
-    'TrackerX', 'TrackerY', 'TrackerZ', 'EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
-    df = featureSelection.createDataFrameWithCalculationsTest(df)
-    dfNormalized = dataPreProcessing.standardizeDataframe(df)
+    df = pd.DataFrame(emg_array_transposed, columns=['TrackerX', 'TrackerY', 'TrackerZ', 'EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
+    dfCalculated = featureSelection.createDataFrameWithCalculationsTest(df)
+    dfNormalized = scaler.transform(dfCalculated)
+    dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
     predictions = loaded_model.predict(dfNormalized)
     return predictions
 

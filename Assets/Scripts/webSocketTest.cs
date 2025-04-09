@@ -16,6 +16,15 @@ public class webSocketTest : MonoBehaviour
     private Vector3 trackerPos; // Position of tracker
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
+    private Dictionary<int, string> gestureNames = new Dictionary<int, string>()
+    {
+        { 0, "Extension" },
+        { 1, "Fist" },
+        { 2, "Flexion" },
+        { 3, "Pinch" },
+        { 4, "Pronation" },
+        { 5, "Supination" }
+    };
 
     void Start()
     {
@@ -29,9 +38,26 @@ public class webSocketTest : MonoBehaviour
 
         ws.OnMessage += (sender, e) =>
         {
-            Debug.Log("Prediction: " + e.Data);
-
-            // TODO: Handle prediction actions here
+            // Try to parse the e.Data as an integer (which is the key)
+            if (int.TryParse(e.Data, out int gestureKey))
+            {
+                // Check if the key exists in the dictionary
+                if (gestureNames.ContainsKey(gestureKey))
+                {
+                    // Log the corresponding gesture name
+                    Debug.Log("Gesture: " + gestureNames[gestureKey]);
+                }
+                else
+                {
+                    // Handle case where the key doesn't exist in the dictionary
+                    Debug.LogWarning("Invalid gesture key received: " + gestureKey);
+                }
+            }
+            else
+            {
+                // Handle case where e.Data is not a valid integer
+                Debug.LogWarning("Invalid prediction data: " + e.Data);
+            }
         };
 
         ws.OnError += (sender, e) =>
@@ -78,7 +104,6 @@ public class webSocketTest : MonoBehaviour
         {
             if(slidingWindow[channelKey].Count > windowSize)
             {
-                Debug.Log("Error in channel " + channelKey + ": " + slidingWindow[channelKey].Count + "values");
                 slidingWindow[channelKey].RemoveRange(windowSize, slidingWindow[channelKey].Count - windowSize);
             }
 
