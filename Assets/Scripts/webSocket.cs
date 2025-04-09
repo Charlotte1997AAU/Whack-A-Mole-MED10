@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 
-public class webSocketTest : MonoBehaviour
+public class webSocket : MonoBehaviour
 {
     private WebSocket ws;
 

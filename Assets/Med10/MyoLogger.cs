@@ -12,7 +12,8 @@ public class MyoLogger : MonoBehaviour
     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
     Stopwatch writeStopwatch = new Stopwatch();
     private LoggingManager loggingManager;
-    private webSocketTest ws;
+    private webSocket ws;
+    public bool logData;
 
     //  public GameObject thalmicMyo;
     //   private ThalmicMyo myo;
@@ -21,7 +22,8 @@ public class MyoLogger : MonoBehaviour
 
     void Start ()
     {
-        ws = FindObjectOfType<webSocketTest>();
+        logData = true;
+        ws = FindObjectOfType<webSocket>();
         // Subscribe to the EmgData event from ThalmicMyo
         thalmicMyo._myo.EmgData += onReceiveData;
         StartLog();
@@ -51,9 +53,14 @@ public class MyoLogger : MonoBehaviour
                             {"EMG7", data.Emg[6]},
                             {"EMG8", data.Emg[7]},
                         };
-
-        loggingManager.Log("Med10", emgData);
-        ws.GetEmgData(emgData);
+        if(logData)
+        {
+            loggingManager.Log("Med10", emgData);
+        }
+        else
+        {
+            ws.GetEmgData(emgData);
+        }
     }
 
     public void StopLog() {
