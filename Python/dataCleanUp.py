@@ -2,20 +2,9 @@ import pandas as pd
 import os
 
 output_folder = "Data_CleanUp_C"
-gesture_files = [
-    "Data_CleanUp_C/merged_file_extension_C.csv",
-    "Data_CleanUp_C/merged_file_fist_C.csv",
-    "Data_CleanUp_C/merged_file_flexion_C.csv",
-    "Data_CleanUp_C/merged_file_pinch_C.csv",
-    "Data_CleanUp_C/merged_file_pronation_C.csv",
-    "Data_CleanUp_C/merged_file_supination_C.csv"
-]
 
-# Iterate over the files, load them, strip spaces, and save with a new name
-for file in gesture_files:
-    # Load the data with the correct delimiter ';'
-    df = pd.read_csv(file, delimiter=";", skipinitialspace=True)
 
+def cleanMergedData(df):
     # Step 1: Find the index of the first row where 'State' is 'MVC'
     mvc_index = df[df['State'] == 'MVC'].index[0]
 
@@ -38,12 +27,14 @@ for file in gesture_files:
     # Strip spaces from all string columns, except for 'ID' column
     df = df.apply(lambda col: col.str.strip() if col.dtype == 'object' and col.name != 'ID' else col)
 
+    """ commented out logic for saving file to .csv
     # Save the cleaned DataFrame with a new name in the Data_CleanUp_L folder
     output_filename = file.split('/')[-1].replace('.csv', '_cleaned.csv')
     output_path = os.path.join(output_folder, output_filename)
 
     # Save using the correct delimiter, don't drop the ID column
     df.to_csv(output_path, index=False, sep=';')  # index=False to avoid extra index column
+    """
 
-    print(f"Processed and saved: {output_path}")
-    print(df.head())  # Print the first few rows to check the result
+    print(f"Processed gesture: {df['GoalGesture'].iloc[0]}")
+    return df

@@ -19,10 +19,10 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     :param filePath: Reference to file
     :return:
     """
-    data = pd.read_csv(filePath, sep=";")
+    data = filePath
 
     cubeDataFrames = []
-    for cube in range(25):
+    for cube in range(9):
         cubeName = f"Cube {cube}"
         activeCube = data[data['ActivatedCube'] == cubeName]
         cubeDataFrames.append(activeCube)
@@ -109,6 +109,7 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         processedData.append(featuredDataSet)
 
     combinedProcessedData = pd.concat(processedData, ignore_index=True)
+    print(f"Calculated features for gesture: {data['GoalGesture'].iloc[0]}")
     return combinedProcessedData
 
 

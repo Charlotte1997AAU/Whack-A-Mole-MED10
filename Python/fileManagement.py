@@ -1,7 +1,10 @@
+import os
+
 import pandas as pd
 import glob
 
 letter = "C"
+
 
 def get_id_from_csv(file_path, id_label):
     """Extracts the ID string from a CSV file using pandas."""
@@ -10,32 +13,44 @@ def get_id_from_csv(file_path, id_label):
     return df[id_label].iloc[0]
 
 
+def processAllFiles(folder):
+    testData = os.listdir(folder)
+    mergedFiles = []
+
+    unityFiles = [f for f in testData if 'Unity' in f]
+    EMGFiles = [f for f in testData if 'EMG' in f]
+
+    for uFile in unityFiles:
+        for eFile in EMGFiles:
+            unityPath = os.path.join(folder, uFile)
+            EMGPath = os.path.join(folder, eFile)
+            merged = compareIDs(unityPath, EMGPath)
+            if merged is not None:
+                mergedFiles.append(merged)
+
+    return mergedFiles
+
+
 def compareIDs(unityFile, EMGFile):
     unityID = get_id_from_csv(unityFile, 'ID')
     EMGID = get_id_from_csv(EMGFile, 'SessionID')
+    mergedFiles = []
 
     if unityID == EMGID:
         print(f"Found ID match for {unityFile} and {EMGFile}, merging...")
-        mergeEMGandUnityData(unityFile, EMGFile)
-        print("Merging complete!")
-    else:
-        print("No match in ID's!")
+        unityDf = pd.read_csv(unityFile, sep=';', header=0, skipinitialspace=True)
+        emgDf = pd.read_csv(EMGFile, sep=';', header=0, skipinitialspace=True)
 
+        unityDf['Timestamp'] = pd.to_datetime(unityDf['Timestamp'])
+        emgDf['Timestamp'] = pd.to_datetime(emgDf['Timestamp'])
 
-def mergeEMGandUnityData(unityFile, emgFile):
-    unityDf = pd.read_csv(unityFile, sep=';', header=0, skipinitialspace=True)
-    emgDf = pd.read_csv(emgFile, sep=';', header=0, skipinitialspace=True)
+        gesture = unityDf['GoalGesture'].iloc[0]
+        print(f"Successfully merged file for gesture: {gesture}")
 
-    unityDf['Timestamp'] = pd.to_datetime(unityDf['Timestamp'])
-    emgDf['Timestamp'] = pd.to_datetime(emgDf['Timestamp'])
-
-
-    gesture = unityDf['GoalGesture'].iloc[0]
-    print(f"current gesture: {gesture}")
-
-    mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp', direction='nearest')
-    mergedDfs = mergedDfs.drop(columns=['SessionID'])
-    mergedDfs.to_csv(f'Data_CleanUp_C/merged_file_{gesture}_L.csv', index=False, sep=";")
+        mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp',
+                                  direction='nearest')
+        mergedDfs = mergedDfs.drop(columns=['SessionID'])
+        return mergedDfs
 
 
 def createTrainingSet(folder):
@@ -67,8 +82,8 @@ def cleanTrainingSet(fileToClean):
 
 file_path = f"Data_CleanUp_{letter}"
 
-createTrainingSet(file_path)
-cleanTrainingSet(f"testDataWithPositions_{letter}.csv")
+#createTrainingSet(file_path)
+#cleanTrainingSet(f"testDataWithPositions_{letter}.csv")
 
 
 # Example usage:

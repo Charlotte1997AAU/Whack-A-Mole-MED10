@@ -1,31 +1,47 @@
-import pandas as pd
-from sklearn.metrics import classification_report, confusion_matrix
-
+from sklearn.preprocessing import LabelEncoder
 import dataPreProcessing
-import joblib
+import featureSelection
+import fileManagement
+import pandas as pd
+import dataCleanUp
+import MLTraining
 
-loaded_model = joblib.load('SGD_model_L.pkl')
+# Path to the data the training set should be created from
+trainingDataPath = "Final Pre Test"
 
-data = pd.read_csv("test Data set/testSet_L.csv")
+# Merge Unity data with EMG data to create full raw dataset
+mergedFiles = fileManagement.processAllFiles(trainingDataPath)
+
+# Clean merged files
+cleanedFiles = []
+for file in mergedFiles:
+    cleanedFiles.append(dataCleanUp.cleanMergedData(file))
+
+# Calculate features for EMG channels
+finalFiles = []
+for file in cleanedFiles:
+    cleanData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, file)
+    finalFiles.append(cleanData)
+
+# Merge calculated feature dataframes for each gesture to final dataframe
+finalDataset = pd.concat(finalFiles, ignore_index=True)
+le = LabelEncoder()
+finalDataset["GoalGesture"] = le.fit_transform(finalDataset["GoalGesture"])
+finalDataset = finalDataset.apply(pd.to_numeric)
+print("Training dataset created")
+
+# Remove unnessecary columns
+"""Fjern det her i fremtiden, bare lad vær med at lave de columns i stedet for at regne dem og fjerne lige efter"""
 excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
-                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY"]
-data.drop(columns=excludeColumns, inplace=True)
+                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
+dfNormalized = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
 
-# Preprocess the data (standardization)
-excludeColumns = ["activeCube","activeCubeX","activeCubeY","trackerX","trackerY","trackerZ","GoalGesture"]
-dfNormalized = dataPreProcessing.standardizeDataframe(data, excludeColumns)
-print(dfNormalized)
+# Train model on dataframe
+MLTraining.trainModel(dfNormalized)
 
-# Select features and target
-X = dfNormalized.drop(columns=['GoalGesture'])  # Features
-y = dfNormalized['GoalGesture']  # Target
 
-predictions = loaded_model.predict(X)
-print(classification_report(y, predictions))
-print("Confusion Matrix:")
-print(confusion_matrix(y, predictions))
 
-print(f"predictions: {predictions}")
+
 
 
 
