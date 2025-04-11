@@ -44,10 +44,9 @@ public class triggerBox : MonoBehaviour
         sliderFill = FindObjectOfType<SliderFill>();
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
+        webSocket = FindObjectOfType<webSocket>();
         currentAnim = logger.goalGesture.ToString();
         predictedGesture = webSocket.gestureNames;
-        
-
     }
 
     private void OnTriggerEnter(Collider other)
@@ -64,12 +63,6 @@ public class triggerBox : MonoBehaviour
                 gestureSignifierRenderer[renders].enabled = false;
             }
         }
-        if (stateManager.state == StateManager.State.Testing)
-        {
-            activeHandAnimation.SetTrigger(currentGestureString);
-        }
-
-
     }
 
     private void OnTriggerStay(Collider other)
@@ -82,7 +75,7 @@ public class triggerBox : MonoBehaviour
             {
                 cubeRenderer.material = hoverScript.GestureColor;
             }
-            
+
             if (!isInside)
             {
                 isInside = true;
@@ -94,11 +87,7 @@ public class triggerBox : MonoBehaviour
             timeInside += Time.deltaTime;
             sliderFill.FillSliderOverTime(requriedTime);
             Debug.Log("We have entered the box");
-            
-         
-           // timerText.gameObject.SetActive(true);
-           // timerText.text = $"{timeInside:F1} / {requriedTime}";
-            
+
             if (timeInside >= requriedTime)
             {
                 hoverScript.DeactivateCube();
@@ -107,8 +96,10 @@ public class triggerBox : MonoBehaviour
                 timeInside = 0f;
                 hoverScript.setGestureComplete(true);
                 sliderFill.resetTimer();
-           //     timerText.gameObject.SetActive(false);
-                //attempts = 1;
+            }
+            if (stateManager.state == StateManager.State.Testing)
+            {
+                activeHandAnimation.SetTrigger(currentGestureString);
             }
         }
     }
@@ -117,25 +108,28 @@ public class triggerBox : MonoBehaviour
     {
         if (other.CompareTag("GameController"))
         {
-
-            if (hoverScript.activeCube != null)
+            if (stateManager.state == StateManager.State.Training) //state 0 is "Training"
             {
-                Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
-                if (cubeRenderer != null)
+                if (hoverScript.activeCube != null)
                 {
-                    cubeRenderer.material = hoverScript.HighLightColor;
+                    Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
+                    if (cubeRenderer != null)
+                    {
+                        cubeRenderer.material = hoverScript.HighLightColor;
+                    }
                 }
-            }
-            sliderFill.resetTimer();
-            isInside = false;
-            timeInside = 0f;
 
-            if (!hoverScript.getGestureComplete())
-            {
-                hoverScript.setAttempts();
-                hoverScript.setCurrentState(4);
-                hoverScript.setCurrentEvent(1);
-                hoverScript.setCurrentEvent(0);
+                sliderFill.resetTimer();
+                isInside = false;
+                timeInside = 0f;
+
+                if (!hoverScript.getGestureComplete())
+                {
+                    hoverScript.setAttempts();
+                    hoverScript.setCurrentState(4);
+                    hoverScript.setCurrentEvent(1);
+                    hoverScript.setCurrentEvent(0);
+                }
             }
         }
     }
@@ -155,6 +149,5 @@ public class triggerBox : MonoBehaviour
     {
         currentGestureKey = webSocket.currentGestureKey;
         currentGestureString = predictedGesture[currentGestureKey];
-
     }
 }

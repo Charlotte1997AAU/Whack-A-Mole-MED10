@@ -19,10 +19,10 @@ public class webSocket : MonoBehaviour
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
     {
-        { 0, "Extension" },
-        { 1, "Fist" },
-        { 2, "Flexion" },
-        { 3, "Pinch" }
+        { 0, "extension" },
+        { 1, "fist" },
+        { 2, "flexion" },
+        { 3, "pinch" }
     };
 
     void Start()
@@ -54,11 +54,7 @@ public class webSocket : MonoBehaviour
                     if (confidenceProb > 0.8f)
                     {
                         // Log the corresponding gesture name
-                        Debug.Log("Gesture: " + gestureNames[predictedClass] + " | prob: " + confidenceProb);
-                    }
-                    else
-                    {
-                        Debug.Log("Hmmmmm... not sure | probability: " + confidenceProb);
+                        Debug.Log("Gesture: " + gestureNames[predictedClass]); //+ " | prob: " + confidenceProb);
                     }
                 }
                 else
