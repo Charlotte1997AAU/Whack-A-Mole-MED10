@@ -14,16 +14,15 @@ public class webSocket : MonoBehaviour
     private const int numChannels = 11; // Number of EMG channels
     private GameObject tracker;
     private Vector3 trackerPos; // Position of tracker
+    public int currentGestureKey;
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
-    private Dictionary<int, string> gestureNames = new Dictionary<int, string>()
+    public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
     {
         { 0, "Extension" },
         { 1, "Fist" },
         { 2, "Flexion" },
-        { 3, "Pinch" },
-        { 4, "Pronation" },
-        { 5, "Supination" }
+        { 3, "Pinch" }
     };
 
     void Start()
@@ -38,25 +37,40 @@ public class webSocket : MonoBehaviour
 
         ws.OnMessage += (sender, e) =>
         {
+
             // Try to parse the e.Data as an integer (which is the key)
-            if (int.TryParse(e.Data, out int gestureKey))
+            if (!string.IsNullOrEmpty(e.Data)) // Check if the string is not null or empty
             {
+                string gestureString = e.Data;
+                string[] stringParts = gestureString.Split(",");
+
+                int predictedClass = int.Parse(stringParts[0]);
+                float confidenceProb = float.Parse(stringParts[1]);
+
+                currentGestureKey = predictedClass;
                 // Check if the key exists in the dictionary
-                if (gestureNames.ContainsKey(gestureKey))
+                if (gestureNames.ContainsKey(predictedClass))
                 {
-                    // Log the corresponding gesture name
-                    Debug.Log("Gesture: " + gestureNames[gestureKey]);
+                    if (confidenceProb > 0.8f)
+                    {
+                        // Log the corresponding gesture name
+                        Debug.Log("Gesture: " + gestureNames[predictedClass] + " | prob: " + confidenceProb);
+                    }
+                    else
+                    {
+                        Debug.Log("Hmmmmm... not sure | probability: " + confidenceProb);
+                    }
                 }
                 else
                 {
                     // Handle case where the key doesn't exist in the dictionary
-                    Debug.LogWarning("Invalid gesture key received: " + gestureKey);
+                    Debug.LogWarning("Invalid gesture key received: " + predictedClass);
                 }
             }
             else
             {
                 // Handle case where e.Data is not a valid integer
-                Debug.LogWarning("Invalid prediction data: " + e.Data);
+                Debug.Log("Invalid prediction data: " + e.Data);
             }
         };
 

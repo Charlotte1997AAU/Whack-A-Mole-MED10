@@ -16,6 +16,8 @@ public class triggerBox : MonoBehaviour
     private Animator activeHandAnimation;
     private Animator gestureAnim;
     public GameObject gestureSignifier;
+    [SerializeField] private StateManager stateManager;
+    private webSocket webSocket;
 
     private bool isInside = false;
     public float requriedTime = 5.0f;
@@ -24,6 +26,9 @@ public class triggerBox : MonoBehaviour
     private string currentAnim;
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
+    public Dictionary<int, string> predictedGesture;
+    private int currentGestureKey;
+    private string currentGestureString;
 
     private Transform startPosition;
     private Transform endPosition;
@@ -40,18 +45,28 @@ public class triggerBox : MonoBehaviour
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
+        predictedGesture = webSocket.gestureNames;
+        
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Entered Once");
-        activeHandAnimation.SetTrigger(currentAnim);
-        gestureAnim.ResetTrigger(currentAnim);
-        gestureAnim.ResetTrigger("rest");  
-        Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
-        for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+        if (stateManager.state == StateManager.State.Training) //state 0 is "Training"
+        { 
+            Debug.Log("Entered Once");
+            activeHandAnimation.SetTrigger(currentAnim);
+            gestureAnim.ResetTrigger(currentAnim);
+            gestureAnim.ResetTrigger("rest");  
+            Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
+            for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+            {
+                gestureSignifierRenderer[renders].enabled = false;
+            }
+        }
+        if (stateManager.state == StateManager.State.Testing)
         {
-            gestureSignifierRenderer[renders].enabled = false;
+            activeHandAnimation.SetTrigger(currentGestureString);
         }
 
 
@@ -102,6 +117,7 @@ public class triggerBox : MonoBehaviour
     {
         if (other.CompareTag("GameController"))
         {
+
             if (hoverScript.activeCube != null)
             {
                 Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
@@ -133,5 +149,12 @@ public class triggerBox : MonoBehaviour
         Vector3 trackerPosition = new Vector3(trackerX, trackerY, trackerZ);
 
         return trackerPosition;
+    }
+
+    public void Update()
+    {
+        currentGestureKey = webSocket.currentGestureKey;
+        currentGestureString = predictedGesture[currentGestureKey];
+
     }
 }

@@ -8,6 +8,7 @@ import pandas as pd
 import dataPreProcessing
 import featureSelection
 from sklearn.preprocessing import StandardScaler
+from scipy.special import softmax
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
@@ -27,11 +28,12 @@ def modelPredict(emg_window):
     dfNormalized = scaler.transform(dfCalculated)
     dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
     predictions = loaded_model.predict(dfNormalized)
-    confidence_scores = loaded_model.decision(dfNormalized)
+    confidence_scores = loaded_model.decision_function(dfNormalized)
+    probability = softmax(confidence_scores[0])
 
     predicted_class = predictions[0]
     class_index = list(loaded_model.classes_).index(predicted_class)
-    confidence = confidence_scores[0][class_index]
+    confidence = round(probability[class_index], 3)
 
     return predictions, confidence
 
@@ -51,7 +53,8 @@ async def handler(websocket):
             emg_window = np.array(values).reshape((NUM_CHANNELS, WINDOW_SIZE))
 
             prediction, confidence = modelPredict(emg_window)
-            await websocket.send(f"{prediction},{confidence:.4f}")
+            await websocket.send(f"{prediction[0]},{confidence}")
+            print(f"{prediction[0]},{confidence}")
 
         except Exception as e:
             error_msg = f"error: {str(e)}"
