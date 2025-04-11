@@ -28,6 +28,7 @@ finalDataset = pd.concat(finalFiles, ignore_index=True)
 le = LabelEncoder()
 finalDataset["GoalGesture"] = le.fit_transform(finalDataset["GoalGesture"])
 finalDataset = finalDataset.apply(pd.to_numeric)
+finalDataset.to_csv("TrainingSet_L.csv", index=False)
 print("Training dataset created")
 
 # Remove unnessecary columns

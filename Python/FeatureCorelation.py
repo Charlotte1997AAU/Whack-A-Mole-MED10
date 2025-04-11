@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-import re
+import itertools
 
 bogstav = "L"
 
@@ -32,4 +32,56 @@ def featureCorrelation(filePath: str, saveImage: bool):
     plt.show()
 
 
-featureCorrelation(f"test Data set/testData_{bogstav}.csv", False)
+#featureCorrelation(f"test Data set/testData_{bogstav}.csv", False)
+
+
+def GestureCorrelation(data, savefig: bool):
+    df = pd.read_csv(data)
+    excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope",
+                      "EMG6Slope","EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX",
+                      "activeCubeY", "trackerX", "trackerY", "trackerZ", "GoalGesture"]
+
+    # Split the DataFrame into groups by 'GoalGesture'
+    grouped_dfs = {gesture: df[df['GoalGesture'] == gesture].drop(columns=excludeColumns)
+                   for gesture in df['GoalGesture'].unique()}
+
+    # Generate all unique pairs of gestures
+    gesture_pairs = list(itertools.combinations(grouped_dfs.keys(), 2))
+
+    # Loop through each pair and calculate cross-correlation
+    for g1, g2 in gesture_pairs:
+        df1 = grouped_dfs[g1].reset_index(drop=True)
+        df2 = grouped_dfs[g2].reset_index(drop=True)
+
+        # Ensure equal lengths
+        min_len = min(len(df1), len(df2))
+        df1 = df1.iloc[:min_len]
+        df2 = df2.iloc[:min_len]
+
+        # Full cross-correlation matrix
+        corr_matrix = pd.DataFrame(
+            {
+                col1: [df1[col1].corr(df2[col2]) for col2 in df2.columns]
+                for col1 in df1.columns
+            },
+            index=df2.columns
+        )
+
+        gestureNames = {
+            0: 'Extension',
+            1: 'Fist',
+            2: 'Flexion',
+            3: 'Pinch'
+        }
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(corr_matrix.astype(float), annot=False, fmt=".2f", cmap="coolwarm", vmin=-1,
+                    vmax=1, xticklabels=corr_matrix.columns, yticklabels=corr_matrix.index)
+        plt.title(f'Correlation Heatmap: {gestureNames[g1]} vs {gestureNames[g2]}')
+        plt.tight_layout()
+        if savefig:
+            plt.savefig(f"Images/CorrelationHeatmap{gestureNames[g1]}{gestureNames[g2]}.png", dpi=300, bbox_inches="tight")
+        plt.show()
+
+
+GestureCorrelation("TrainingSet_L.csv", True)
