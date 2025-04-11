@@ -27,7 +27,13 @@ def modelPredict(emg_window):
     dfNormalized = scaler.transform(dfCalculated)
     dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
     predictions = loaded_model.predict(dfNormalized)
-    return predictions
+    confidence_scores = loaded_model.decision(dfNormalized)
+
+    predicted_class = predictions[0]
+    class_index = list(loaded_model.classes_).index(predicted_class)
+    confidence = confidence_scores[0][class_index]
+
+    return predictions, confidence
 
 async def handler(websocket):
     print("Unity client connected.")
@@ -44,8 +50,9 @@ async def handler(websocket):
             # Reshape to 2D list: (NUM_CHANNELS, WINDOW_SIZE)
             emg_window = np.array(values).reshape((NUM_CHANNELS, WINDOW_SIZE))
 
-            prediction = modelPredict(emg_window)
-            await websocket.send(str(prediction[0]))
+            prediction, confidence = modelPredict(emg_window)
+            await websocket.send(f"{prediction},{confidence:.4f}")
+
         except Exception as e:
             error_msg = f"error: {str(e)}"
             print(error_msg)
