@@ -50,6 +50,7 @@ def compareIDs(unityFile, EMGFile):
         mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp',
                                   direction='nearest')
         mergedDfs = mergedDfs.drop(columns=['SessionID'])
+        mergedDfs.to_csv(f"Final Pre Test/merged_{gesture}.csv", index=False)
         return mergedDfs
 
 
@@ -70,6 +71,7 @@ def createTrainingSet(folder):
     df_filtered.to_csv(f"testDataWithPositions_{letter}.csv", index=False)
     print(f"Created test data set from folder {folder} ")
 
+createTrainingSet("Final Pre Test/Merged")
 
 def cleanTrainingSet(fileToClean):
     data = pd.read_csv(fileToClean)
@@ -90,6 +92,22 @@ file_path = f"Data_CleanUp_{letter}"
 unityData = "Pre-Pilot test C/Unity_supination_C.csv"
 EMGdata = "Pre-Pilot test C/EMG_supination_C.csv"
 
-#compareIDs(unityData, EMGdata)
+dataframesEMG = [
+    "Final Pre Test/EMG_ExtensIon_L.csv",
+    "Final Pre Test/EMG_Fist_L.csv",
+    "Final Pre Test/EMG_Flexion_L.csv",
+    "Final Pre Test/EMG_Pinch_L.csv"
+]
 
+dataframesUnity = [
+    "Final Pre Test/Unity_Extension_L.csv",
+    "Final Pre Test/Unity_Fist_L.csv",
+    "Final Pre Test/Unity_Flexion_L.csv",
+    "Final Pre Test/Unity_Pinch_L.csv"
+]
+"""
+for dataEMG in dataframesEMG:
+    for dataUnity in dataframesUnity:
+        compareIDs(dataUnity, dataEMG)
+"""
 

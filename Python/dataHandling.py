@@ -4,6 +4,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
 import featureSelection
+import seaborn as sns
 
 
 def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
@@ -155,42 +156,63 @@ def plot_all_emg_trends(df):
     plt.show()
 
 
-def visualizeMAV():
-    data = pd.read_csv("Data_CleanUp_L/merged_file_fist_L_cleaned.csv", sep=";")
-    mavList = []
-    meanMav = []
-    for start in range(0, len(data)-200+1, 100):
-        currentWindow = data[start:start+200]
-        mav = featureSelection.calcMAV(currentWindow, columns=["EMG1", "EMG2", "EMG3", "EMG4", "EMG5", "EMG6", "EMG7", "EMG8"])
-        mavList.append(mav)
-        mean = float(np.mean(mav))
-        meanMav.append(mean)
 
-    print(meanMav)
+def calculateRawEMGToVisualize():
+    data = pd.read_csv("Final Pre Test/Merged/merged_fist_cleanedNew.csv", sep=";")
+    cubeDataFrames = []
+    windowSize = 40
+    stepSize = 20
+    emgColumns = [f'EMG{i}' for i in range(1, 9)]
+    emgMeans = []
 
-    x = np.arange(len(meanMav))
-    meanMav = np.array(meanMav)
+    for cube in range(9):
+        cubeName = f"Cube {cube}"
+        activeCube = data[data['ActivatedCube'] == cubeName]
+        cubeDataFrames.append(activeCube)
 
-    plt.plot(x, meanMav)
-    plt.xlabel("X-axis")
-    plt.ylabel("Y-axis")
-    plt.title("MeanMav")
-    plt.legend()  # Show legend
-    plt.grid(True)  # Add grid for better visibility
+    for dfs in cubeDataFrames:
+        for start in range(0, len(dfs) - windowSize + 1, stepSize):
+            currentWindow = dfs[start:start + windowSize]
+            rawEMGMean = currentWindow[emgColumns].values.mean()  # This safely flattens the data
+            emgMeans.append(float(rawEMGMean))
+    return emgMeans
 
-    # Show the plot
-    plt.show()
 
-    x = np.arange(len(mavList))  # [0, 1, 2, 3, 4] (length of data)
+def visualizeAllFeatures():
+    data = pd.read_csv("Final Pre Test/Merged/Merged_fist_cleanedNew.csv", sep=";")
 
-    # Convert list of arrays into a NumPy array for easy indexing
-    mavList = np.array(mavList)
+    processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)
+    emgData = calculateRawEMGToVisualize()
+    mav = processedData[["EMG1MAV", "EMG2MAV", "EMG3MAV", "EMG4MAV", "EMG5MAV", "EMG6MAV", "EMG7MAV", "EMG8MAV"]]
+    zc = processedData[["EMG1ZC", "EMG2ZC", "EMG3ZC", "EMG4ZC", "EMG5ZC", "EMG6ZC", "EMG7ZC", "EMG8ZC"]]
+    slope = processedData[["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",  "EMG7Slope", "EMG8Slope"]]
+    ssc = processedData[["EMG1SSC",  "EMG2SSC", "EMG3SSC", "EMG4SSC", "EMG5SSC", "EMG6SSC", "EMG7SSC", "EMG8SSC"]]
+    wfl = processedData[["EMG1WFL", "EMG2WFL", "EMG3WFL", "EMG4WFL", "EMG5WFL", "EMG6WFL", "EMG7WFL", "EMG8WFL"]]
 
-    fig, axes = plt.subplots(8, 1, figsize=(10, 12), sharex=True)  # 8 rows, 1 column
+    mavMean = mav.mean(axis=1)
+    zcMean = zc.mean(axis=1)
+    slopeMean = slope.mean(axis=1)
+    sscMean = ssc.mean(axis=1)
+    wflMean = wfl.mean(axis=1)
 
-    for i in range(8):  # Loop through the 8 EMG channels
-        axes[i].plot(x, mavList[:, i], label=f"Channel {i + 1}", color=f"C{i}")
-        axes[i].set_ylabel(f"Ch {i + 1}")  # Label Y-axis for each channel
+    minRows = mavMean.shape[0]
+    emgData = emgData[:minRows]
+    print(len(emgData))
+
+    meanFeatures = [
+        ("RAWEMG", emgData),
+        ("MAV", mavMean),
+        ("ZeroCrossings", zcMean),
+        ("Slope", slopeMean),
+        ("SSC", sscMean),
+        ("WFL", wflMean)
+    ]
+
+    fig, axes = plt.subplots(len(meanFeatures), 1, figsize=(10, 12), sharex=True)
+    x = np.arange(mavMean.shape[0])
+    for i, (featureName, featureData) in enumerate(meanFeatures):
+        axes[i].plot(x, featureData, label=f"{featureName}", color=f"C{i}")
+        axes[i].set_ylabel(featureName)  # Label Y-axis for each channel
         axes[i].legend(loc="upper right")
         axes[i].grid(True)
 
@@ -198,15 +220,17 @@ def visualizeMAV():
     axes[-1].set_xlabel("Time (samples)")
 
     # Set a common title
-    fig.suptitle("EMG Channel Signals", fontsize=14)
+    fig.suptitle("EMG Signals", fontsize=14)
 
     # Adjust layout for better spacing
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
+    # Save plot
+    plt.savefig(f"Images/ProcessedEMGSignals.png", dpi=300, bbox_inches="tight")
     # Show plot
     plt.show()
 
-visualizeMAV()
+visualizeAllFeatures()
 
 gesture_files_All = [
     "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
@@ -227,4 +251,5 @@ gesture_files_All = [
 #for file in gesture_files_All:
     #df = pd.read_csv(file, delimiter=";")  # Change file if needed
     #plot_all_emg_trends(df)  # Call function to visualize best-fit trends
+
 

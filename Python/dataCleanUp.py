@@ -4,7 +4,7 @@ import os
 output_folder = "Data_CleanUp_C"
 
 
-def cleanMergedData(df):
+def cleanMergedData(df, file):
     # Step 1: Find the index of the first row where 'State' is 'MVC'
     mvc_index = df[df['State'] == 'MVC'].index[0]
 
@@ -27,14 +27,24 @@ def cleanMergedData(df):
     # Strip spaces from all string columns, except for 'ID' column
     df = df.apply(lambda col: col.str.strip() if col.dtype == 'object' and col.name != 'ID' else col)
 
-    """ commented out logic for saving file to .csv
+    """ commented out logic for saving file to .csv"""
+
     # Save the cleaned DataFrame with a new name in the Data_CleanUp_L folder
-    output_filename = file.split('/')[-1].replace('.csv', '_cleaned.csv')
+    output_filename = file.split('/')[-1].replace('.csv', '_cleanedNew.csv')
     output_path = os.path.join(output_folder, output_filename)
 
     # Save using the correct delimiter, don't drop the ID column
     df.to_csv(output_path, index=False, sep=';')  # index=False to avoid extra index column
-    """
 
     print(f"Processed gesture: {df['GoalGesture'].iloc[0]}")
     return df
+
+dataframes = [
+    "Final Pre Test/merged_extension.csv",
+    "Final Pre Test/merged_fist.csv",
+    "Final Pre Test/merged_flexion.csv",
+    "Final Pre Test/merged_pinch.csv"
+]
+for file in dataframes:
+    data = pd.read_csv(file)
+    cleanMergedData(data, file)
