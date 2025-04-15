@@ -37,8 +37,8 @@ excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 dfNormalized = dataPreProcessing.normalizeDataframe(finalDataset, excludeColumns)
 
 # Train model on dataframe
-#MLTraining.trainModel(dfNormalized)
-NNTraining.trainNN(dfNormalized)
+MLTraining.trainModel(dfNormalized)
+#NNTraining.trainNN(dfNormalized)
 
 
 

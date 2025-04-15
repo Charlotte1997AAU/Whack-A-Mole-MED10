@@ -28,31 +28,40 @@ def trainModel(data):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     # Initialize the GridSearchCV object
-  #  model = SGDClassifier(random_state=42, alpha=0.0001, eta0=0.001, learning_rate='optimal',
-  #                        loss='hinge', max_iter=1000, penalty='l2', tol=0.0001, n_jobs=-1)
+    SGDC = SGDClassifier(random_state=42, alpha=0.0001, eta0=0.001, learning_rate='optimal',
+                          loss='hinge', max_iter=1000, penalty='l2', tol=0.0001, n_jobs=-1)
 
     random_forest = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1, max_depth=10, min_samples_split=2)
 
     random_forest.fit(X_train, y_train)
-    # Fit the model with GridSearchCV
-    #model.fit(X_train, y_train)
-
+    SGDC.fit(X_train, y_train)
 
     # Evaluate the best model on the test set
-    y_pred_best = random_forest.predict(X_test)
+    y_pred_best_random = random_forest.predict(X_test)
+    y_pred_best_SGDC = SGDC.predict(X_test)
 
     # Calculate accuracy and print confusion matrix for the best model
-    accuracy_best = accuracy_score(y_test, y_pred_best)
-    cm = confusion_matrix(y_test, y_pred_best)
-    print(f"Best Model Accuracy: {accuracy_best:.2f}")
+    random_forest_accuracy_best = accuracy_score(y_test, y_pred_best_random)
+    random_forest_cm = confusion_matrix(y_test, y_pred_best_random)
+    print(f"RandomForest: {random_forest_accuracy_best:.2f}")
     print("Confusion Matrix for Best Model:")
-    print(cm)
+    print(random_forest_cm)
     print("Classification Report for Best Model:")
-    print(classification_report(y_test, y_pred_best))
+    print(classification_report(y_test, y_pred_best_random))
 
-    joblib.dump(random_forest, "SGD_model_L.pkl")
+    SGDC_accuracy_best = accuracy_score(y_test, y_pred_best_SGDC)
+    SGDC_cm = confusion_matrix(y_test, y_pred_best_SGDC)
+    print(f"SGDC: {SGDC_accuracy_best:.2f}")
+    print("Confusion Matrix for Best Model:")
+    print(SGDC_cm)
+    print("Classification Report for Best Model:")
+    print(classification_report(y_test, y_pred_best_SGDC))
+
+    joblib.dump(SGDC, "SGD_model_L.pkl")
+    joblib.dump(random_forest, "random_forest_L.pkl")
     print("Trained and saved model")
 
+    """
     train_sizes, train_scores, val_scores = learning_curve(
         random_forest, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
     )
@@ -68,4 +77,4 @@ def trainModel(data):
     plt.legend(loc='best')
 
     plt.show()
-
+    """
