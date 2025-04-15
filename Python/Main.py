@@ -5,6 +5,7 @@ import fileManagement
 import pandas as pd
 import dataCleanUp
 import MLTraining
+import NNTraining
 
 # Path to the data the training set should be created from
 trainingDataPath = "Final Pre Test"
@@ -32,16 +33,12 @@ finalDataset.to_csv("TrainingSet_L.csv", index=False)
 print("Training dataset created")
 
 # Remove unnessecary columns
-"""Fjern det her i fremtiden, bare lad vær med at lave de columns i stedet for at regne dem og fjerne lige efter"""
-excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
-                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
-dfNormalized = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
+excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
+dfNormalized = dataPreProcessing.normalizeDataframe(finalDataset, excludeColumns)
 
 # Train model on dataframe
-MLTraining.trainModel(dfNormalized)
-
-
-
+#MLTraining.trainModel(dfNormalized)
+NNTraining.trainNN(dfNormalized)
 
 
 
