@@ -1,24 +1,18 @@
-import tensorflow as tf
 from keras import Input
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import joblib
 import dataPreProcessing
-import pandas as pd
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
-def trainNN(data):
-    df = data
 
+def trainNN(data, plotData=None):
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
-    dfNormalized = dataPreProcessing.normalizeDataframe(df, excludeColumns)
-
-    dfTrain, dfTest = train_test_split(dfNormalized, test_size=0.2, random_state=42, stratify=dfNormalized["GoalGesture"])
-    dfTest.to_csv("Final Pre Test/testSet_L.csv", index=False)
-    dfNormalized = dfTrain
+    dfNormalized = dataPreProcessing.standardizeDataframe(data, excludeColumns)
 
     X = dfNormalized.drop(columns=excludeColumns)
     Y = dfNormalized['GoalGesture']
@@ -45,26 +39,27 @@ def trainNN(data):
 
     history = model.fit(X_train, Y_train, validation_split=0.2, epochs=50, batch_size=32, verbose=1)
 
-    # Plot the learning curve (accuracy)
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    plt.plot(history.history['accuracy'], label='Training Accuracy')
-    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-    plt.title('Accuracy over Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
+    if plotData:
+        # Plot the learning curve (accuracy)
+        plt.figure(figsize=(12, 6))
+        plt.subplot(1, 2, 1)
+        plt.plot(history.history['accuracy'], label='Training Accuracy')
+        plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+        plt.title('Accuracy over Epochs')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
 
-    # Plot the learning curve (loss)
-    plt.subplot(1, 2, 2)
-    plt.plot(history.history['loss'], label='Training Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Loss over Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
+        # Plot the learning curve (loss)
+        plt.subplot(1, 2, 2)
+        plt.plot(history.history['loss'], label='Training Loss')
+        plt.plot(history.history['val_loss'], label='Validation Loss')
+        plt.title('Loss over Epochs')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
 
-    plt.show()
+        plt.show()
 
     yPredProbs = model.predict(X_test)
     yPred = yPredProbs.argmax(axis=1)
@@ -75,8 +70,6 @@ def trainNN(data):
     print(confusion_matrix(yTrue, yPred))
     print("Classification Report:")
     print(classification_report(yTrue, yPred))
-
-
 
     model.save("NeuralNetworkModel.h5")
     print("trained and saved neural network model")

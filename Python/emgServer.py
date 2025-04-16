@@ -14,7 +14,7 @@ WINDOW_SIZE = 40
 NUM_CHANNELS = 11
 loaded_model = joblib.load('SGD_model_L.pkl')
 scaler = StandardScaler()
-testSet = pd.read_csv("test Data set/testData_L.csv")
+testSet = pd.read_csv("test Data set/TrainingSet_L.csv")
 excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
                   "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 
