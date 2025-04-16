@@ -27,15 +27,8 @@ public class triggerBox : MonoBehaviour
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
     public Dictionary<int, string> predictedGesture;
-    private int currentGestureKey;
-    private string currentGestureString;
 
-    private Transform startPosition;
-    private Transform endPosition;
-    private float offsetX = -0.13f;
-    private float offsetY = 0.13f;
-    private float offsetZ = -0.5f;
-    private float timeElapsed = 0f;
+
 
 
     private void Start()
@@ -97,10 +90,19 @@ public class triggerBox : MonoBehaviour
                 hoverScript.setGestureComplete(true);
                 sliderFill.resetTimer();
             }
+            /*
             if (stateManager.state == StateManager.State.Testing)
             {
-                activeHandAnimation.SetTrigger(currentGestureString);
+                string currentGestureString = hoverScript.runAnimations();
+                Debug.Log("Current gesture string: " + currentGestureString);
+                if (currentGestureString != hoverScript.lastTriggeredGesture && !string.IsNullOrEmpty(currentGestureString))
+                {
+                    activeHandAnimation.SetTrigger(currentGestureString);
+                    hoverScript.lastTriggeredGesture = currentGestureString;
+                    Debug.Log("last triggered gesture: " + hoverScript.lastTriggeredGesture);
+                }
             }
+            */
         }
     }
 
@@ -147,7 +149,6 @@ public class triggerBox : MonoBehaviour
 
     public void Update()
     {
-        currentGestureKey = webSocket.currentGestureKey;
-        currentGestureString = predictedGesture[currentGestureKey];
+        
     }
 }

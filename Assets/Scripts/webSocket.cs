@@ -15,14 +15,16 @@ public class webSocket : MonoBehaviour
     private GameObject tracker;
     private Vector3 trackerPos; // Position of tracker
     public int currentGestureKey;
+    public float minimumProbability;
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
     {
-        { 0, "extension" },
-        { 1, "fist" },
-        { 2, "flexion" },
-        { 3, "pinch" }
+        { 0, "pinch" },
+        { 1, "extension" },
+        { 2, "fist" },
+        { 3, "flexion" },
+        { 4, "rest" }
     };
 
     void Start()
@@ -47,19 +49,14 @@ public class webSocket : MonoBehaviour
                 int predictedClass = int.Parse(stringParts[0]);
                 float confidenceProb = float.Parse(stringParts[1]);
 
-                currentGestureKey = predictedClass;
-                // Check if the key exists in the dictionary
-                if (gestureNames.ContainsKey(predictedClass))
+                if (confidenceProb > minimumProbability)
                 {
-                    if (confidenceProb > 0.8f)
-                    {
-                        // Log the corresponding gesture name
-                        Debug.Log("Gesture: " + gestureNames[predictedClass]); //+ " | prob: " + confidenceProb);
-                    }
+                    currentGestureKey = predictedClass;
                 }
-                else
+
+                // Check if the key exists in the dictionary
+                if (!gestureNames.ContainsKey(predictedClass))
                 {
-                    // Handle case where the key doesn't exist in the dictionary
                     Debug.LogWarning("Invalid gesture key received: " + predictedClass);
                 }
             }
@@ -72,7 +69,7 @@ public class webSocket : MonoBehaviour
 
         ws.OnError += (sender, e) =>
         {
-            Debug.LogError("WebSocket Error: " + e.Message);
+            Debug.Log("WebSocket Error: " + e.Message);
         };
 
         ws.OnClose += (sender, e) =>

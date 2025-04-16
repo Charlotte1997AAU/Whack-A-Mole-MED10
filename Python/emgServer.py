@@ -12,30 +12,55 @@ from scipy.special import softmax
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
-loaded_model = joblib.load('SGD_model_L.pkl')
+loaded_model = joblib.load('RandomForestClassifier_L.pkl')
+model_name = type(loaded_model).__name__
 scaler = StandardScaler()
-testSet = pd.read_csv("test Data set/TrainingSet_L.csv")
-excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",
-                  "EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
+testSet = pd.read_csv("test Data set\TrainingSet_L.csv")
+excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 
 X = testSet.drop(columns=excludeColumns)
 scaler.fit(X)  # Fit the scaler directly on the DataFrame
 
 def modelPredict(emg_window):
+    # Transpose the window data to fit the expected format
     emg_array_transposed = emg_window.T
+
+    # Convert the array into a DataFrame with proper column names
     df = pd.DataFrame(emg_array_transposed, columns=['TrackerX', 'TrackerY', 'TrackerZ', 'EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
+
+    # Call the feature extraction function on the current window of data
     dfCalculated = featureSelection.createDataFrameWithCalculationsTest(df)
+
+    # Normalize the features using the pre-trained scaler
     dfNormalized = scaler.transform(dfCalculated)
     dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
-    predictions = loaded_model.predict(dfNormalized)
-    confidence_scores = loaded_model.decision_function(dfNormalized)
-    probability = softmax(confidence_scores[0])
 
-    predicted_class = predictions[0]
-    class_index = list(loaded_model.classes_).index(predicted_class)
-    confidence = round(probability[class_index], 3)
+    # Make predictions using the pre-trained model
+    predictions = loaded_model.predict(dfNormalized)
+    
+    if model_name == "SGDClassifier":
+        # Get confidence scores and compute probability using softmax
+        confidence_scores = loaded_model.decision_function(dfNormalized)
+        probability = softmax(confidence_scores[0])
+        predicted_class = predictions[0]
+        class_index = list(loaded_model.classes_).index(predicted_class)
+        confidence = round(probability[class_index], 3)
+
+    if model_name == "RandomForestClassifier":
+        # Get the probabilities for each class
+        probabilities = loaded_model.predict_proba(dfNormalized)
+        
+        # Get the predicted class
+        predicted_class = predictions[0]
+        
+        # Find the index of the predicted class in the model's class list
+        class_index = list(loaded_model.classes_).index(predicted_class)
+        
+        # Get the confidence score (probability of the predicted class)
+        confidence = round(probabilities[0][class_index], 3)
 
     return predictions, confidence
+
 
 async def handler(websocket):
     print("Unity client connected.")

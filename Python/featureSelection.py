@@ -20,12 +20,15 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     :return:
     """
     data = filePath
-
     cubeDataFrames = []
-    for cube in range(9):
-        cubeName = f"Cube {cube}"
-        activeCube = data[data['ActivatedCube'] == cubeName]
-        cubeDataFrames.append(activeCube)
+    if data['GoalGesture'].iloc[0] != "Resting":
+        for cube in range(9):
+            cubeName = f"Cube {cube}"
+            activeCube = data[data['ActivatedCube'] == cubeName]
+            cubeDataFrames.append(activeCube)
+    else:
+        cubeDataFrames.append(data)
+
 
     processedData = []
 
@@ -94,11 +97,15 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         wflDF = wflDF[:minRows]
         trackerPos = trackerPos[:minRows]
         cubeDF = pd.DataFrame([activeCube] * minRows, columns=columnsForCubePos)
-        activatedCubeString = cubeDF["ActivatedCube"]
-        activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
-        activatedCubeString = activatedCubeString.astype(int)
-        cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-        cubeDF.insert(0, "ActivatedCube", activatedCubeString)
+        if data['GoalGesture'].iloc[0] != "Resting":
+            activatedCubeString = cubeDF["ActivatedCube"]
+            activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
+            activatedCubeString = activatedCubeString.astype(int)
+            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+            cubeDF.insert(0, "ActivatedCube", activatedCubeString)
+        else:
+            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+            cubeDF.insert(0, "ActivatedCube", -1) 
         gestureDF = pd.DataFrame([currentGesture] * minRows)
 
         allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos, gestureDF])
@@ -113,13 +120,7 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     return combinedProcessedData
 
 
-def createDataFrameWithCalculationsTest(dataframe):
-    """
-    Calculate features on a given dataframe
-
-    :param dataframe: Dataframe to run calculations on
-    :return dataframe: Dataframe with new values calculated
-    """
+def createDataFrameWithCalculationsTest(dataframe, windowSize=5, stepSize=1):
     data = dataframe
 
     mavList = []
@@ -128,49 +129,52 @@ def createDataFrameWithCalculationsTest(dataframe):
     wflList = []
     trackerPosList = []
 
-    # Calculate the features (each returns a list of arrays, one array per feature)
-    mav = calcMAV(data, columns)  # Returns a list of arrays for each feature
-    mavList.append(mav)
+    for start in range(0, len(data) - windowSize + 1, stepSize):
+        currentWindow = data[start:start + windowSize]
 
-    zeroCrossings = calcZeroCrossings(data, columns)  # List of arrays for each feature
-    zeroCrossingsList.append(zeroCrossings)
-
-    ssc = calcSSC(data, columns)  # List of arrays for each feature
-    sscList.append(ssc)
-
-    wfl = calcWFL(data, columns)  # List of arrays for each feature
-    wflList.append(wfl)
-
-    trackerMeanPos = calcAvgTracker(data, columnsForTracker)
-    trackerPosList.append(trackerMeanPos)
+        mavList.append(calcMAV(currentWindow, columns))
+        zeroCrossingsList.append(calcZeroCrossings(currentWindow, columns))
+        sscList.append(calcSSC(currentWindow, columns))
+        wflList.append(calcWFL(currentWindow, columns))
+        trackerPosList.append(calcAvgTracker(currentWindow, columnsForTracker))
 
     mavMatrix = np.vstack(mavList)
-    mavDF = pd.DataFrame(mavMatrix)
-
     zeroCrossingsMatrix = np.vstack(zeroCrossingsList)
-    zeroCrossDF = pd.DataFrame(zeroCrossingsMatrix)
-
     sscMatrix = np.vstack(sscList)
-    sscDF = pd.DataFrame(sscMatrix)
-
     wflMatrix = np.vstack(wflList)
-    wflDF = pd.DataFrame(wflMatrix)
-
     trackerPosMatrix = np.vstack(trackerPosList)
+
+    mavSlope = calcMAVslope(mavMatrix)
+
+    # Convert all to DataFrames
+    mavDF = pd.DataFrame(mavMatrix)
+    mavSlopeDF = pd.DataFrame(mavSlope).round(3)
+    zeroCrossDF = pd.DataFrame(zeroCrossingsMatrix)
+    sscDF = pd.DataFrame(sscMatrix)
+    wflDF = pd.DataFrame(wflMatrix)
     trackerPos = pd.DataFrame(trackerPosMatrix)
 
+    # Clip all to match the length of mavSlopeDF
+    minRows = mavSlopeDF.shape[0]
+    mavDF = mavDF[:minRows]
+    zeroCrossDF = zeroCrossDF[:minRows]
+    sscDF = sscDF[:minRows]
+    wflDF = wflDF[:minRows]
+    trackerPos = trackerPos[:minRows]
+
+    # Columns
     mavColumns = [f"EMG{i}MAV" for i in range(1, 9)]
+    mavSlopeColumns = [f"EMG{i}Slope" for i in range(1, 9)]
     ZCColumns = [f"EMG{i}ZC" for i in range(1, 9)]
     sscDFColumns = [f"EMG{i}SSC" for i in range(1, 9)]
     wflDFColumns = [f"EMG{i}WFL" for i in range(1, 9)]
     trackerColumns = ["trackerX", "trackerY", "trackerZ"]
 
-    allFeatures = np.hstack([mavDF, zeroCrossDF, sscDF, wflDF, trackerPos])
-    allColumns = mavColumns + ZCColumns + sscDFColumns + wflDFColumns + trackerColumns
+    allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, trackerPos])
+    allColumns = mavColumns + mavSlopeColumns + ZCColumns + sscDFColumns + wflDFColumns + trackerColumns
 
-    calculatedDataSet = pd.DataFrame(allFeatures, columns=allColumns)
+    return pd.DataFrame(allFeatures, columns=allColumns)
 
-    return calculatedDataSet
 
 def calcMAV(data, columns):
     """

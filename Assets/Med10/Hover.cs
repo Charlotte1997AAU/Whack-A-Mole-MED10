@@ -18,6 +18,14 @@ public class Hover : MonoBehaviour
     public int iterations = 1;
     public GameObject hannesHand;
     private string currentAnim;
+    [SerializeField] private StateManager stateManager;
+    public webSocket ws;
+    public Dictionary<int, string> predictedGesture;
+    private int currentGestureKey;
+    public string currentGestureString;
+    public string lastTriggeredGesture = "";
+    private Queue<string> gestureHistory = new Queue<string>();
+    public int gestureSampleSize = 5;
 
     private int gesturesCount = 0;
     public bool cubeActivated = false;
@@ -46,6 +54,7 @@ public class Hover : MonoBehaviour
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
         if (cubes.Length == 0) return;
+        predictedGesture = ws.gestureNames;
         //ActivateCube();
         //logger.StartLogging();
     }
@@ -76,7 +85,44 @@ private void Update()
         {
             setCurrentEvent(0);
         }
+    }
 
+
+    public string runAnimations()
+    {
+        currentGestureKey = ws.currentGestureKey;
+        string newGesture = predictedGesture[currentGestureKey];
+
+        gestureHistory.Enqueue(newGesture);
+
+        // Keep only the last X gestures
+        if (gestureHistory.Count > gestureSampleSize)
+        {
+            gestureHistory.Dequeue();
+        }
+
+        // Check if all gestures in history are the same
+        if (gestureHistory.Count == gestureSampleSize)
+        {
+            string firstGesture = gestureHistory.Peek();
+            bool allSame = true;
+
+            foreach (var gesture in gestureHistory)
+            {
+                if (gesture != firstGesture)
+                {
+                    allSame = false;
+                    break;
+                }
+            }
+
+            currentGestureString = allSame ? firstGesture : "rest";
+        }
+        else
+        {
+            currentGestureString = "rest"; // Still filling up history
+        }
+        return currentGestureString;
     }
 
     public List<int> ShuffleList(List<int> list)
@@ -135,7 +181,7 @@ private void Update()
     {
         if(boxes.Count == 0)
         {
-            textField.text = "Done :D";
+            textField.text = "Done";
             Debug.Log("No boxes :(");
             return activeCube;
         }
@@ -173,8 +219,17 @@ private void Update()
 
     public void DeactivateCube()
     {
-        activeHandAnimation.SetTrigger("rest");
-        activeHandAnimation.ResetTrigger(currentAnim);
+        if (stateManager.state == StateManager.State.Testing)
+        {
+            activeHandAnimation.ResetTrigger(currentGestureString);
+
+            // Return to the rest/neutral animation
+            activeHandAnimation.SetTrigger("rest");
+
+            // Optionally reset the gesture trigger tracking
+            lastTriggeredGesture = "";
+        }
+
         if (activeCube == null) return; 
 
         Renderer cubeRenderer = activeCube.GetComponent<Renderer>();

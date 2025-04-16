@@ -7,7 +7,7 @@ import fileManagement
 import pandas as pd
 import dataCleanUp
 import MLTraining
-import NNTraining
+#import NNTraining
 
 # Path to the data the training set should be created from
 trainingDataPath = "Final Pre Test"
@@ -19,6 +19,10 @@ mergedFiles = fileManagement.processAllFiles(trainingDataPath)
 cleanedFiles = []
 for file in mergedFiles:
     cleanedFiles.append(dataCleanUp.cleanMergedData(file))
+
+restData = cleanedFiles[0][cleanedFiles[0]['State'] == "Resting"].copy()
+restData.replace({'GoalGesture': "extension"}, "Resting", inplace=True)
+cleanedFiles.append(restData)
 
 # Calculate features for EMG channels
 finalFiles = []
@@ -42,7 +46,7 @@ models = {
                                             n_jobs=-1, max_depth=10, min_samples_split=2)
 }
 
-trainingModel = models["SGD"]
+trainingModel = models["random_forest"]
 
 if trainingModel == models["SGD"]:
     # Remove unnecessary columns
@@ -51,9 +55,5 @@ if trainingModel == models["SGD"]:
 
 
 # Train model on dataframe
-#MLTraining.trainModel(finalDataset, trainingModel)
-NNTraining.trainNN(finalDataset)
-
-
-
-
+MLTraining.trainModel(finalDataset, trainingModel)
+#NNTraining.trainNN(finalDataset)
