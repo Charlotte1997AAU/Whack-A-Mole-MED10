@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+pd.set_option('future.no_silent_downcasting', True)
 
 windowSize = 40
 stepSize = 20
@@ -118,6 +119,66 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     combinedProcessedData = pd.concat(processedData, ignore_index=True)
     print(f"Calculated features for gesture: {data['GoalGesture'].iloc[0]}")
     return combinedProcessedData
+
+
+def calculateDeltaFeatures(data):
+    mav_columns = [f"EMG{i}MAV" for i in range(1, 9)]
+    slope_columns = [f"EMG{i}Slope" for i in range(1, 9)]
+    zc_columns = [f"EMG{i}ZC" for i in range(1, 9)]
+    ssc_columns = [f"EMG{i}SSC" for i in range(1, 9)]
+    wfl_columns = [f"EMG{i}WFL" for i in range(1, 9)]
+
+    mavDelta = round(data[mav_columns].diff(), 3)
+    slopeDelta = round(data[slope_columns].diff(), 3)
+    zcDelta = round(data[zc_columns].diff(), 3)
+    wflDelta = round(data[wfl_columns].diff(), 3)
+    sscDelta = round(data[ssc_columns].diff(), 3)
+
+    mavDelta.columns = [col.replace("MAV", "DELTAMAV") for col in mavDelta.columns]
+    slopeDelta.columns = [col.replace("Slope", "DELTASlope") for col in slopeDelta.columns]
+    zcDelta.columns = [col.replace("ZC", "DELTAZC") for col in zcDelta.columns]
+    wflDelta.columns = [col.replace("WFL", "DELTAWFL") for col in wflDelta.columns]
+    sscDelta.columns = [col.replace("SSC", "DELTASSC") for col in sscDelta.columns]
+
+    mavDelta = mavDelta.dropna().reset_index(drop=True)
+    slopeDelta = slopeDelta.dropna().reset_index(drop=True)
+    zcDelta = zcDelta.dropna().reset_index(drop=True)
+    wflDelta = wflDelta.dropna().reset_index(drop=True)
+    sscDelta = sscDelta.dropna().reset_index(drop=True)
+
+    deltaList = [mavDelta, slopeDelta, zcDelta, wflDelta, sscDelta]
+    deltaDf = pd.concat(deltaList, axis=1)
+
+    # Compute max absolute delta per feature group
+    deltaDf["mav_max"] = deltaDf[mavDelta.columns].abs().max(axis=1)
+    deltaDf["slope_max"] = deltaDf[slopeDelta.columns].abs().max(axis=1)
+    deltaDf["zc_max"] = deltaDf[zcDelta.columns].abs().max(axis=1)
+    deltaDf["wfl_max"] = deltaDf[wflDelta.columns].abs().max(axis=1)
+    deltaDf["ssc_max"] = deltaDf[sscDelta.columns].abs().max(axis=1)
+
+    mavThresh = deltaDf["mav_max"].quantile(0.95)
+    slopeThresh = deltaDf["slope_max"].quantile(0.95)
+    zcThresh = deltaDf["zc_max"].quantile(0.95)
+    wflThresh = deltaDf["wfl_max"].quantile(0.95)
+    sscThresh = deltaDf["ssc_max"].quantile(0.95)
+
+    deltaDf["onsetFlag"] = (
+            (deltaDf["mav_max"] > mavThresh) |
+            (deltaDf["slope_max"] > slopeThresh) |
+            (deltaDf["zc_max"] > zcThresh) |
+            (deltaDf["wfl_max"] > wflThresh) |
+            (deltaDf["ssc_max"] > sscThresh)
+    )
+
+    deltaDf.drop(["mav_max", "slope_max", "zc_max", "wfl_max", "ssc_max"], axis=1, inplace=True)
+    newDataFrame = [data, deltaDf]
+    data = pd.concat(newDataFrame, axis=1)
+
+    data["gestureStart"] = data["onsetFlag"] & ~data["onsetFlag"].shift(1).fillna(False)
+    trainingWindows = data[data["gestureStart"] == True]
+    trainingWindows.drop(["onsetFlag", "gestureStart"], axis=1, inplace=True)
+    print("Calculated delta features")
+    return trainingWindows
 
 
 def createDataFrameWithCalculationsTest(dataframe, windowSize=5, stepSize=1):

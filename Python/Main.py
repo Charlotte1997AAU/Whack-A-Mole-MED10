@@ -31,11 +31,14 @@ for file in cleanedFiles:
     finalFiles.append(cleanData)
 
 # Merge calculated feature dataframes for each gesture to final dataframe
-finalDataset = pd.concat(finalFiles, ignore_index=True)
+featureDataset = pd.concat(finalFiles, ignore_index=True)
 le = LabelEncoder()
-finalDataset["GoalGesture"] = le.fit_transform(finalDataset["GoalGesture"])
-finalDataset = finalDataset.apply(pd.to_numeric)
-finalDataset.to_csv("test Data set/TrainingSet_L.csv", index=False)
+featureDataset["GoalGesture"] = le.fit_transform(featureDataset["GoalGesture"])
+featureDataset = featureDataset.apply(pd.to_numeric)
+featureDataset[["activeCubeX", "activeCubeY"]] = featureDataset[["activeCubeX", "activeCubeY"]].round(3)
+finalDataset = featureSelection.calculateDeltaFeatures(featureDataset)
+
+finalDataset.to_csv("test Data set/TrainingSetWdeltas_L.csv", index=False)
 print("Training dataset created")
 
 models = {

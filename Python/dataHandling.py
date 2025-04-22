@@ -179,15 +179,16 @@ def calculateRawEMGToVisualize():
 
 
 def visualizeAllFeatures():
-    data = pd.read_csv("Final Pre Test/Merged/Merged_fist_cleanedNew.csv", sep=";")
+    data = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    processedData = data[data['GoalGesture'] == 0]
 
-    processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)
+    #processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)
     emgData = calculateRawEMGToVisualize()
-    mav = processedData[["EMG1MAV", "EMG2MAV", "EMG3MAV", "EMG4MAV", "EMG5MAV", "EMG6MAV", "EMG7MAV", "EMG8MAV"]]
-    zc = processedData[["EMG1ZC", "EMG2ZC", "EMG3ZC", "EMG4ZC", "EMG5ZC", "EMG6ZC", "EMG7ZC", "EMG8ZC"]]
-    slope = processedData[["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope", "EMG6Slope",  "EMG7Slope", "EMG8Slope"]]
-    ssc = processedData[["EMG1SSC",  "EMG2SSC", "EMG3SSC", "EMG4SSC", "EMG5SSC", "EMG6SSC", "EMG7SSC", "EMG8SSC"]]
-    wfl = processedData[["EMG1WFL", "EMG2WFL", "EMG3WFL", "EMG4WFL", "EMG5WFL", "EMG6WFL", "EMG7WFL", "EMG8WFL"]]
+    mav = processedData[["EMG1DELTAMAV", "EMG2DELTAMAV", "EMG3DELTAMAV", "EMG4DELTAMAV", "EMG5DELTAMAV", "EMG6DELTAMAV", "EMG7DELTAMAV", "EMG8DELTAMAV"]]
+    zc = processedData[["EMG1DELTAZC", "EMG2DELTAZC", "EMG3DELTAZC", "EMG4DELTAZC", "EMG5DELTAZC", "EMG6DELTAZC", "EMG7DELTAZC", "EMG8DELTAZC"]]
+    slope = processedData[["EMG1DELTASlope", "EMG2DELTASlope", "EMG3DELTASlope", "EMG4DELTASlope", "EMG5DELTASlope", "EMG6DELTASlope",  "EMG7DELTASlope", "EMG8DELTASlope"]]
+    ssc = processedData[["EMG1DELTASSC",  "EMG2DELTASSC", "EMG3DELTASSC", "EMG4DELTASSC", "EMG5DELTASSC", "EMG6DELTASSC", "EMG7DELTASSC", "EMG8DELTASSC"]]
+    wfl = processedData[["EMG1DELTAWFL", "EMG2DELTAWFL", "EMG3DELTAWFL", "EMG4DELTAWFL", "EMG5DELTAWFL", "EMG6DELTAWFL", "EMG7DELTAWFL", "EMG8DELTAWFL"]]
 
     mavMean = mav.mean(axis=1)
     zcMean = zc.mean(axis=1)
@@ -197,15 +198,14 @@ def visualizeAllFeatures():
 
     minRows = mavMean.shape[0]
     emgData = emgData[:minRows]
-    print(len(emgData))
 
     meanFeatures = [
         ("RAWEMG", emgData),
-        ("MAV", mavMean),
-        ("ZeroCrossings", zcMean),
-        ("Slope", slopeMean),
-        ("SSC", sscMean),
-        ("WFL", wflMean)
+        ("DeltaMAV", mavMean),
+        ("DeltaZC", zcMean),
+        ("DeltaSlope", slopeMean),
+        ("DeltaSSC", sscMean),
+        ("DeltaWFL", wflMean)
     ]
 
     fig, axes = plt.subplots(len(meanFeatures), 1, figsize=(10, 12), sharex=True)
@@ -226,7 +226,7 @@ def visualizeAllFeatures():
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
     # Save plot
-    plt.savefig(f"Images/ProcessedEMGSignals.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"Images/ProcessedEMGSignalsForDeltaPinch.png", dpi=300, bbox_inches="tight")
     # Show plot
     plt.show()
 
