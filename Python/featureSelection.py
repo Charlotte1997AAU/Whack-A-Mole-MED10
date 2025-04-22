@@ -108,7 +108,7 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
             cubeDF.insert(0, "ActivatedCube", activatedCubeString)
         else:
             cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-            cubeDF.insert(0, "ActivatedCube", -1) 
+            cubeDF.insert(0, "ActivatedCube", -1)
         gestureDF = pd.DataFrame([currentGesture] * minRows)
 
         allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos, gestureDF])
@@ -158,30 +158,11 @@ def calculateDeltaFeatures(data):
     deltaDf["wfl_max"] = deltaDf[wflDelta.columns].abs().max(axis=1)
     deltaDf["ssc_max"] = deltaDf[sscDelta.columns].abs().max(axis=1)
 
-    mavThresh = deltaDf["mavTresh"] = (
-        deltaDf["mav_max"].rolling(window=10, min_periods=1).mean() +
-        sensitivityFactor * deltaDf["mav_max"].rolling(window=10, min_periods=1).std()
-    )
-    slopeThresh = deltaDf["slopeTresh"] = (
-        deltaDf["slope_max"].rolling(window=10, min_periods=1).mean() +
-        sensitivityFactor * deltaDf["slope_max"].rolling(window=10, min_periods=1).std()
-    )
-
-    zcThresh = deltaDf["zcTresh"] = (
-            deltaDf["zc_max"].rolling(window=10, min_periods=1).mean() +
-            sensitivityFactor * deltaDf["zc_max"].rolling(window=10, min_periods=1).std()
-    )
-
-    wflThresh = deltaDf["wflTresh"] = (
-            deltaDf["wfl_max"].rolling(window=10, min_periods=1).mean() +
-            sensitivityFactor * deltaDf["wfl_max"].rolling(window=10, min_periods=1).std()
-    )
-
-    sscThresh = deltaDf["sscTresh"] = (
-        deltaDf["ssc_max"].rolling(window=10, min_periods=1).mean() +
-        sensitivityFactor * deltaDf["ssc_max"].rolling(window=10, min_periods=1).std()
-    )
-
+    mavThresh = deltaDf["mav_max"].quantile(0.95)
+    slopeThresh = deltaDf["slope_max"].quantile(0.95)
+    zcThresh = deltaDf["zc_max"].quantile(0.95)
+    wflThresh = deltaDf["wfl_max"].quantile(0.95)
+    sscThresh = deltaDf["ssc_max"].quantile(0.95)
 
 
     deltaDf["onsetFlag"] = (
