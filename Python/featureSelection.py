@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 pd.set_option('future.no_silent_downcasting', True)
+pd.options.mode.copy_on_write = True
 
 windowSize = 40
 stepSize = 20
+sensitivityFactor = 1.5
 columns = ["EMG1", "EMG2", "EMG3", "EMG4", "EMG5", "EMG6", "EMG7", "EMG8"]
 columnsForTracker = ["TrackerX", "TrackerY", "TrackerZ"]
 columnsForCubePos = ["ActivatedCube", "ActiveCubeX", "ActiveCubeY"]
@@ -156,11 +158,31 @@ def calculateDeltaFeatures(data):
     deltaDf["wfl_max"] = deltaDf[wflDelta.columns].abs().max(axis=1)
     deltaDf["ssc_max"] = deltaDf[sscDelta.columns].abs().max(axis=1)
 
-    mavThresh = deltaDf["mav_max"].quantile(0.95)
-    slopeThresh = deltaDf["slope_max"].quantile(0.95)
-    zcThresh = deltaDf["zc_max"].quantile(0.95)
-    wflThresh = deltaDf["wfl_max"].quantile(0.95)
-    sscThresh = deltaDf["ssc_max"].quantile(0.95)
+    mavThresh = deltaDf["mavTresh"] = (
+        deltaDf["mav_max"].rolling(window=10, min_periods=1).mean() +
+        sensitivityFactor * deltaDf["mav_max"].rolling(window=10, min_periods=1).std()
+    )
+    slopeThresh = deltaDf["slopeTresh"] = (
+        deltaDf["slope_max"].rolling(window=10, min_periods=1).mean() +
+        sensitivityFactor * deltaDf["slope_max"].rolling(window=10, min_periods=1).std()
+    )
+
+    zcThresh = deltaDf["zcTresh"] = (
+            deltaDf["zc_max"].rolling(window=10, min_periods=1).mean() +
+            sensitivityFactor * deltaDf["zc_max"].rolling(window=10, min_periods=1).std()
+    )
+
+    wflThresh = deltaDf["wflTresh"] = (
+            deltaDf["wfl_max"].rolling(window=10, min_periods=1).mean() +
+            sensitivityFactor * deltaDf["wfl_max"].rolling(window=10, min_periods=1).std()
+    )
+
+    sscThresh = deltaDf["sscTresh"] = (
+        deltaDf["ssc_max"].rolling(window=10, min_periods=1).mean() +
+        sensitivityFactor * deltaDf["ssc_max"].rolling(window=10, min_periods=1).std()
+    )
+
+
 
     deltaDf["onsetFlag"] = (
             (deltaDf["mav_max"] > mavThresh) |
@@ -177,7 +199,6 @@ def calculateDeltaFeatures(data):
     data["gestureStart"] = data["onsetFlag"] & ~data["onsetFlag"].shift(1).fillna(False)
     trainingWindows = data[data["gestureStart"] == True]
     trainingWindows.drop(["onsetFlag", "gestureStart"], axis=1, inplace=True)
-    print("Calculated delta features")
     return trainingWindows
 
 
