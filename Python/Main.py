@@ -30,6 +30,8 @@ for file in cleanedFiles:
     cleanData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, file)
     finalFiles.append(cleanData)
 
+print(finalFiles)
+
 # Merge calculated feature dataframes for each gesture to final dataframe
 featureDataset = pd.concat(finalFiles, ignore_index=True)
 le = LabelEncoder()

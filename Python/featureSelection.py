@@ -24,13 +24,13 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     """
     data = filePath
     cubeDataFrames = []
-    if data['GoalGesture'].iloc[0] != "Resting":
-        for cube in range(9):
-            cubeName = f"Cube {cube}"
-            activeCube = data[data['ActivatedCube'] == cubeName]
-            cubeDataFrames.append(activeCube)
-    else:
-        cubeDataFrames.append(data)
+    #if data['GoalGesture'].iloc[0] != "Resting":
+    for cube in range(9):
+        cubeName = f"Cube {cube}"
+        activeCube = data[data['ActivatedCube'] == cubeName]
+        cubeDataFrames.append(activeCube)
+    #else:
+        #cubeDataFrames.append(data)
 
 
     processedData = []
@@ -66,6 +66,8 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
 
             activeCube = currentWindow.iloc[0]
 
+        if len(mavList) == 0:
+            break
         mavMatrix = np.vstack(mavList)
         mavDF = pd.DataFrame(mavMatrix)
 
@@ -100,15 +102,15 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         wflDF = wflDF[:minRows]
         trackerPos = trackerPos[:minRows]
         cubeDF = pd.DataFrame([activeCube] * minRows, columns=columnsForCubePos)
-        if data['GoalGesture'].iloc[0] != "Resting":
-            activatedCubeString = cubeDF["ActivatedCube"]
-            activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
-            activatedCubeString = activatedCubeString.astype(int)
-            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-            cubeDF.insert(0, "ActivatedCube", activatedCubeString)
-        else:
-            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-            cubeDF.insert(0, "ActivatedCube", -1)
+        #if data['GoalGesture'].iloc[0] != "Resting":
+        activatedCubeString = cubeDF["ActivatedCube"]
+        activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
+        activatedCubeString = activatedCubeString.astype(int)
+        cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+        cubeDF.insert(0, "ActivatedCube", activatedCubeString)
+        #else:
+            #cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+            #cubeDF.insert(0, "ActivatedCube", -1)
         gestureDF = pd.DataFrame([currentGesture] * minRows)
 
         allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos, gestureDF])
@@ -158,11 +160,11 @@ def calculateDeltaFeatures(data):
     deltaDf["wfl_max"] = deltaDf[wflDelta.columns].abs().max(axis=1)
     deltaDf["ssc_max"] = deltaDf[sscDelta.columns].abs().max(axis=1)
 
-    mavThresh = deltaDf["mav_max"].quantile(0.95)
-    slopeThresh = deltaDf["slope_max"].quantile(0.95)
-    zcThresh = deltaDf["zc_max"].quantile(0.95)
-    wflThresh = deltaDf["wfl_max"].quantile(0.95)
-    sscThresh = deltaDf["ssc_max"].quantile(0.95)
+    mavThresh = deltaDf["mav_max"].quantile(0.9)
+    slopeThresh = deltaDf["slope_max"].quantile(0.9)
+    zcThresh = deltaDf["zc_max"].quantile(0.9)
+    wflThresh = deltaDf["wfl_max"].quantile(0.9)
+    sscThresh = deltaDf["ssc_max"].quantile(0.9)
 
 
     deltaDf["onsetFlag"] = (
