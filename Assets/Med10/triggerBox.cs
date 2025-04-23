@@ -17,7 +17,6 @@ public class triggerBox : MonoBehaviour
     private Animator gestureAnim;
     public GameObject gestureSignifier;
     [SerializeField] private StateManager stateManager;
-    private webSocket webSocket;
 
     private bool isInside = false;
     public float requriedTime = 5.0f;
@@ -37,25 +36,20 @@ public class triggerBox : MonoBehaviour
         sliderFill = FindObjectOfType<SliderFill>();
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
-        webSocket = FindObjectOfType<webSocket>();
         currentAnim = logger.goalGesture.ToString();
-        predictedGesture = webSocket.gestureNames;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (stateManager.state == StateManager.State.Training) //state 0 is "Training"
-        { 
-            Debug.Log("Entered Once");
-            activeHandAnimation.SetTrigger(currentAnim);
-            gestureAnim.ResetTrigger(currentAnim);
-            gestureAnim.ResetTrigger("rest");  
-            Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
-            for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
-            {
-                gestureSignifierRenderer[renders].enabled = false;
-            }
-        }
+        Debug.Log("Entered Once");
+        activeHandAnimation.SetTrigger(currentAnim);
+        gestureAnim.ResetTrigger(currentAnim);
+        gestureAnim.ResetTrigger("rest");  
+        Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
+        for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+        {
+            gestureSignifierRenderer[renders].enabled = false;
+        }   
     }
 
     private void OnTriggerStay(Collider other)

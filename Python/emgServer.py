@@ -34,13 +34,14 @@ def modelPredict(emg_window):
     # Normalize the features using the pre-trained scaler
     dfNormalized = scaler.transform(dfCalculated)
     dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
+    dfWithDeltas = featureSelection.calculateDeltaFeatures(dfNormalized)
 
     # Make predictions using the pre-trained model
-    predictions = loaded_model.predict(dfNormalized)
+    predictions = loaded_model.predict(dfWithDeltas)
     
     if model_name == "SGDClassifier":
         # Get confidence scores and compute probability using softmax
-        confidence_scores = loaded_model.decision_function(dfNormalized)
+        confidence_scores = loaded_model.decision_function(dfWithDeltas)
         probability = softmax(confidence_scores[0])
         predicted_class = predictions[0]
         class_index = list(loaded_model.classes_).index(predicted_class)
@@ -48,7 +49,7 @@ def modelPredict(emg_window):
 
     if model_name == "RandomForestClassifier":
         # Get the probabilities for each class
-        probabilities = loaded_model.predict_proba(dfNormalized)
+        probabilities = loaded_model.predict_proba(dfWithDeltas)
         
         # Get the predicted class
         predicted_class = predictions[0]

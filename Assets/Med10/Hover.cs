@@ -4,7 +4,7 @@ using TMPro;
 
 public class Hover : MonoBehaviour
 {
-    public LayerMask cubeLayer; 
+    public LayerMask cubeLayer;
     public Logger logger;
     public Material HighLightColor;
     public Material gridColor;
@@ -18,14 +18,6 @@ public class Hover : MonoBehaviour
     public int iterations = 1;
     public GameObject hannesHand;
     private string currentAnim;
-    [SerializeField] private StateManager stateManager;
-    public webSocket ws;
-    public Dictionary<int, string> predictedGesture;
-    private int currentGestureKey;
-    public string currentGestureString;
-    public string lastTriggeredGesture = "";
-    private Queue<string> gestureHistory = new Queue<string>();
-    public int gestureSampleSize = 5;
 
     private int gesturesCount = 0;
     public bool cubeActivated = false;
@@ -54,12 +46,11 @@ public class Hover : MonoBehaviour
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
         if (cubes.Length == 0) return;
-        predictedGesture = ws.gestureNames;
         //ActivateCube();
         //logger.StartLogging();
     }
 
-private void Update()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -81,48 +72,12 @@ private void Update()
             Debug.Log("Gesture completed ");
             setCurrentEvent(1);
             setGestureComplete(false);
-        } else
-        {
-            setCurrentEvent(0);
-        }
-    }
-
-
-    public string runAnimations()
-    {
-        currentGestureKey = ws.currentGestureKey;
-        string newGesture = predictedGesture[currentGestureKey];
-
-        gestureHistory.Enqueue(newGesture);
-
-        // Keep only the last X gestures
-        if (gestureHistory.Count > gestureSampleSize)
-        {
-            gestureHistory.Dequeue();
-        }
-
-        // Check if all gestures in history are the same
-        if (gestureHistory.Count == gestureSampleSize)
-        {
-            string firstGesture = gestureHistory.Peek();
-            bool allSame = true;
-
-            foreach (var gesture in gestureHistory)
-            {
-                if (gesture != firstGesture)
-                {
-                    allSame = false;
-                    break;
-                }
-            }
-
-            currentGestureString = allSame ? firstGesture : "rest";
         }
         else
         {
-            currentGestureString = "rest"; // Still filling up history
+            setCurrentEvent(0);
         }
-        return currentGestureString;
+
     }
 
     public List<int> ShuffleList(List<int> list)
@@ -160,28 +115,28 @@ private void Update()
         }
         int amountOfBoxes = cubeSpawner.cubesAlongX * cubeSpawner.cubesAlongY;
 
-        List<int> tempBoxes = new List<int>();    
+        List<int> tempBoxes = new List<int>();
         // Step 1: Populate the initial list with values 0 to 8    
-        for (int i = 0; i < amountOfBoxes; i++)    
-        {        
-            tempBoxes.Add(i);    
-        }    
+        for (int i = 0; i < amountOfBoxes; i++)
+        {
+            tempBoxes.Add(i);
+        }
         // Step 2: Duplicate the list 'size' times    
-        List<int> originalList = new List<int>(tempBoxes);    
-        for (int i = 0; i < size; i++)    
-        {        
-            tempBoxes.AddRange(originalList);    
-        }    
+        List<int> originalList = new List<int>(tempBoxes);
+        for (int i = 0; i < size; i++)
+        {
+            tempBoxes.AddRange(originalList);
+        }
         return tempBoxes;
     }
 
 
 
-        public GameObject ActivateCube()
+    public GameObject ActivateCube()
     {
-        if(boxes.Count == 0)
+        if (boxes.Count == 0)
         {
-            textField.text = "Done";
+            textField.text = "Done :D";
             Debug.Log("No boxes :(");
             return activeCube;
         }
@@ -214,28 +169,19 @@ private void Update()
             }
         }
 
-        return activeCube; 
+        return activeCube;
     }
 
     public void DeactivateCube()
     {
-        if (stateManager.state == StateManager.State.Testing)
-        {
-            activeHandAnimation.ResetTrigger(currentGestureString);
-
-            // Return to the rest/neutral animation
-            activeHandAnimation.SetTrigger("rest");
-
-            // Optionally reset the gesture trigger tracking
-            lastTriggeredGesture = "";
-        }
-
-        if (activeCube == null) return; 
+        activeHandAnimation.SetTrigger("rest");
+        activeHandAnimation.ResetTrigger(currentAnim);
+        if (activeCube == null) return;
 
         Renderer cubeRenderer = activeCube.GetComponent<Renderer>();
         if (cubeRenderer != null)
         {
-            cubeRenderer.material = gridColor; 
+            cubeRenderer.material = gridColor;
             cubeActivated = false;
             logger.LogDeactivatedCube();
             Debug.Log("Deactivated Cube: " + activeCube.name);

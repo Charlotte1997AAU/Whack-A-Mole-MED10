@@ -10,7 +10,7 @@ import MLTraining
 #import NNTraining
 
 # Path to the data the training set should be created from
-trainingDataPath = "Final Pre Test"
+trainingDataPath = "Data_CleanUp_C/leEpictest"
 
 # Merge Unity data with EMG data to create full raw dataset
 mergedFiles = fileManagement.processAllFiles(trainingDataPath)
@@ -20,9 +20,9 @@ cleanedFiles = []
 for file in mergedFiles:
     cleanedFiles.append(dataCleanUp.cleanMergedData(file))
 
-restData = cleanedFiles[0][cleanedFiles[0]['State'] == "Resting"].copy()
-restData.replace({'GoalGesture': "extension"}, "Resting", inplace=True)
-cleanedFiles.append(restData)
+#restData = cleanedFiles[0][cleanedFiles[0]['State'] == "Resting"].copy()
+#restData.replace({'GoalGesture': "extension"}, "Resting", inplace=True)
+#cleanedFiles.append(restData)
 
 # Calculate features for EMG channels
 finalFiles = []

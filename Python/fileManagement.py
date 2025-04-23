@@ -105,9 +105,8 @@ dataframesUnity = [
     "Final Pre Test/Unity_Flexion_L.csv",
     "Final Pre Test/Unity_Pinch_L.csv"
 ]
-"""
-for dataEMG in dataframesEMG:
-    for dataUnity in dataframesUnity:
-        compareIDs(dataUnity, dataEMG)
-"""
+
+
+#compareIDs("Data_CleanUp_C/leEpictest/Unity_log_2025_04_23_13_56_17_Med10.csv", "Data_CleanUp_C/leEpictest/EMG_log_2025_04_23_13_56_17_Med10.csv")
+
 

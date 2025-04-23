@@ -22,7 +22,7 @@ def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include
     """
 
     # Load the appropriate CSV file based on the gesture_name
-    file_path = f"Data_CleanUp_C/merged_file_{gesture_name}_C_cleaned.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
+    file_path = f"Data_CleanUp_L/merged_fist_cleanedNew.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
     df = pd.read_csv(file_path, delimiter=";")
 
     # Convert Timestamp column to datetime format
@@ -104,6 +104,8 @@ emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 # Example usage:
 gesture_name = "supination"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
 #plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
+
+plot_emg_with_states("fist", states_to_include, emg_signals_to_include)
 
 #--------------------Best fitting line from here on---------------------------------
 def plot_all_emg_trends(df):
@@ -230,7 +232,7 @@ def visualizeAllFeatures():
     # Show plot
     plt.show()
 
-visualizeAllFeatures()
+#visualizeAllFeatures()
 
 gesture_files_All = [
     "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",

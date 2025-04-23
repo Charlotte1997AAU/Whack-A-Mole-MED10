@@ -24,13 +24,13 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     """
     data = filePath
     cubeDataFrames = []
-    if data['GoalGesture'].iloc[0] != "Resting":
-        for cube in range(9):
-            cubeName = f"Cube {cube}"
-            activeCube = data[data['ActivatedCube'] == cubeName]
-            cubeDataFrames.append(activeCube)
-    else:
-        cubeDataFrames.append(data)
+    #if data['GoalGesture'].iloc[0] != "Resting":
+    for cube in range(9):
+        cubeName = f"Cube {cube}"
+        activeCube = data[data['ActivatedCube'] == cubeName]
+        cubeDataFrames.append(activeCube)
+    #else:
+        #cubeDataFrames.append(data)
 
 
     processedData = []
@@ -100,15 +100,15 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         wflDF = wflDF[:minRows]
         trackerPos = trackerPos[:minRows]
         cubeDF = pd.DataFrame([activeCube] * minRows, columns=columnsForCubePos)
-        if data['GoalGesture'].iloc[0] != "Resting":
-            activatedCubeString = cubeDF["ActivatedCube"]
-            activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
-            activatedCubeString = activatedCubeString.astype(int)
-            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-            cubeDF.insert(0, "ActivatedCube", activatedCubeString)
-        else:
-            cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
-            cubeDF.insert(0, "ActivatedCube", -1) 
+        #if data['GoalGesture'].iloc[0] != "Resting":
+        activatedCubeString = cubeDF["ActivatedCube"]
+        activatedCubeString = activatedCubeString.str.replace("Cube ", "", regex=True)
+        activatedCubeString = activatedCubeString.astype(int)
+        cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+        cubeDF.insert(0, "ActivatedCube", activatedCubeString)
+        #else:
+            #cubeDF.drop(["ActivatedCube"], axis=1, inplace=True)
+            #cubeDF.insert(0, "ActivatedCube", -1) 
         gestureDF = pd.DataFrame([currentGesture] * minRows)
 
         allFeatures = np.hstack([mavDF, mavSlopeDF, zeroCrossDF, sscDF, wflDF, cubeDF, trackerPos, gestureDF])

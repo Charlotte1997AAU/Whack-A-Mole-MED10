@@ -189,6 +189,46 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   broadcastDeviceChanges: 1
+--- !u!21 &312241688
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Sprites/Default
+  m_Shader: {fileID: 10753, guid: 0000000000000000f000000000000000, type: 0}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AlphaTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - PixelSnap: 0
+    - _EnableExternalAlpha: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Flip: {r: 1, g: 1, b: 1, a: 1}
+    - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
 --- !u!114 &349949931 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3624573305851510795, guid: 6487ac6b05118154da0defa17e629db1,
@@ -232,46 +272,6 @@ Transform:
   m_Father: {fileID: 2109220435}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!21 &419554717
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Sprites/Default
-  m_Shader: {fileID: 10753, guid: 0000000000000000f000000000000000, type: 0}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _AlphaTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - PixelSnap: 0
-    - _EnableExternalAlpha: 0
-    m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Flip: {r: 1, g: 1, b: 1, a: 1}
-    - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-  m_BuildTextureStacks: []
 --- !u!1001 &461539427
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -331,11 +331,11 @@ PrefabInstance:
     - target: {fileID: 2348914, guid: 4d293c8e162f3874b982baadd71153d2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 419554717}
+      objectReference: {fileID: 312241688}
     - target: {fileID: 3380982, guid: 4d293c8e162f3874b982baadd71153d2, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 2019897173}
+      objectReference: {fileID: 2076538247}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -1108,6 +1108,11 @@ PrefabInstance:
       objectReference: {fileID: 297054241}
     - target: {fileID: 6878760952044443007, guid: e4f2ee99769f6f3489aa50520976cbc7,
         type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6878760952044443007, guid: e4f2ee99769f6f3489aa50520976cbc7,
+        type: 3}
       propertyPath: controllerPos
       value: 
       objectReference: {fileID: 783154143}
@@ -1352,7 +1357,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 640e3b327720cb141b2f02a2d2c8a29b, type: 2}
     m_RemovedComponents:
-    - {fileID: 6878760952044443007, guid: e4f2ee99769f6f3489aa50520976cbc7, type: 3}
     - {fileID: 6878760952680800577, guid: e4f2ee99769f6f3489aa50520976cbc7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1578,7 +1582,7 @@ MonoBehaviour:
   startColor: {fileID: 2100000, guid: f84e60741f48c694dba439f8cfedfbbb, type: 2}
   handAnchor: {fileID: 541948070}
   textField: {fileID: 1926541557}
-  requiredTime: 5
+  requiredTime: 1
   SetRestPosition: 0
   getMVC: 0
 --- !u!1 &912384864
@@ -1982,13 +1986,8 @@ MonoBehaviour:
   activeCube: {fileID: 0}
   activeCubeCollider: {fileID: 0}
   gestureSignifier: {fileID: 573181854}
-  iterations: 1
+  iterations: 2
   hannesHand: {fileID: 541948070}
-  stateManager: {fileID: 3624573306050400226}
-  ws: {fileID: 1366948147}
-  currentGestureString: 
-  lastTriggeredGesture: 
-  gestureSampleSize: 5
   cubeActivated: 0
   cubeSpawner: {fileID: 1488151176}
   stopLogging: {fileID: 2133030900}
@@ -2357,18 +2356,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3240737791427849203}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1728355818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1728355816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb348311cad9c574eb454db41cfc50c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1739957251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2731,14 +2718,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1980980824}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba4d4810d5cd7df45a237c486b81cd4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ws: {fileID: 1366948147}
   queueSize: 5
---- !u!43 &2019897173
+--- !u!43 &2076538247
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3176,6 +3163,11 @@ PrefabInstance:
       objectReference: {fileID: 860816039}
     - target: {fileID: 3240737789800166941, guid: c04b6fcd5a91d6f4c99a8824186b57eb,
         type: 3}
+      propertyPath: requriedTime
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3240737789800166941, guid: c04b6fcd5a91d6f4c99a8824186b57eb,
+        type: 3}
       propertyPath: stateManager
       value: 
       objectReference: {fileID: 3624573306050400226}
@@ -3192,11 +3184,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3240737789800166939, guid: c04b6fcd5a91d6f4c99a8824186b57eb,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1728355818}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c04b6fcd5a91d6f4c99a8824186b57eb, type: 3}
 --- !u!1001 &3624573306050400224
 PrefabInstance:
@@ -3274,7 +3262,7 @@ PrefabInstance:
     - target: {fileID: 3624573305851510795, guid: 6487ac6b05118154da0defa17e629db1,
         type: 3}
       propertyPath: goalGesture
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3624573306718355377, guid: 6487ac6b05118154da0defa17e629db1,
         type: 3}
@@ -3316,4 +3304,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e00bad50dbbaab449845321893233b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 1
+  state: 0

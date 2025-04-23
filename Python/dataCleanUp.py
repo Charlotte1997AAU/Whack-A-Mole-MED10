@@ -1,10 +1,17 @@
 import pandas as pd
 import os
 
-output_folder = "Data_CleanUp_C"
+output_folder = "Data_CleanUp_L"
 
 
 def cleanMergedData(df, file=None):
+
+    if isinstance(df, str):
+        file = df
+        df = pd.read_csv(file, sep=',')
+    elif df is None and file is not None:
+        df = pd.read_csv(file, sep=',')
+
     # Step 1: Find the index of the first row where 'State' is 'MVC'
     mvc_index = df[df['State'] == 'MVC'].index[0]
 
@@ -18,7 +25,7 @@ def cleanMergedData(df, file=None):
     df = df[['Index'] + [col for col in df.columns if col != 'Index']]
 
     # Step 2: Remove rows after the first occurrence where 'GesturesAtempted' == 25 and 'Event' == 'Successful Gesture'
-    success_row_index = df[(df['GesturesAttempted'] == 25) & (df['Event'] == 'Successful Gesture')].index
+    success_row_index = df[(df['GesturesAttempted'] == 18) & (df['Event'] == 'Successful Gesture')].index
 
     if not success_row_index.empty:
         # Find the first row index where the condition is met and remove that row and all rows after it
@@ -27,15 +34,14 @@ def cleanMergedData(df, file=None):
     # Strip spaces from all string columns, except for 'ID' column
     df = df.apply(lambda col: col.str.strip() if col.dtype == 'object' and col.name != 'ID' else col)
 
-    """ commented out logic for saving file to .csv
-
+    """
     # Save the cleaned DataFrame with a new name in the Data_CleanUp_L folder
     output_filename = file.split('/')[-1].replace('.csv', '_cleanedNew.csv')
     output_path = os.path.join(output_folder, output_filename)
 
     # Save using the correct delimiter, don't drop the ID column
     df.to_csv(output_path, index=False, sep=';')  # index=False to avoid extra index column
-
-    print(f"Processed gesture: {df['GoalGesture'].iloc[0]}") """
+    """
+    print(f"Processed gesture: {df['GoalGesture'].iloc[0]}") 
 
     return df
