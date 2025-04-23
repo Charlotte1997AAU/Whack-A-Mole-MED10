@@ -41,7 +41,6 @@ print("calculated delta values")
 
 finalDataset.to_csv("test Data set/TrainingSetWdeltas_L.csv", index=False)
 print("Training dataset created")
-print(finalDataset['GoalGesture'].value_counts())
 
 models = {
     "SGD": SGDClassifier(random_state=42, alpha=0.0001, eta0=0.001, learning_rate='optimal',
@@ -62,3 +61,4 @@ if trainingModel == models["SGD"]:
 # Train model on dataframe
 MLTraining.trainModel(finalDataset, trainingModel)
 #NNTraining.trainNN(finalDataset)
+

@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import featureSelection
 import seaborn as sns
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
 
 
 def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
@@ -253,5 +257,3 @@ gesture_files_All = [
 #for file in gesture_files_All:
     #df = pd.read_csv(file, delimiter=";")  # Change file if needed
     #plot_all_emg_trends(df)  # Call function to visualize best-fit trends
-
-
