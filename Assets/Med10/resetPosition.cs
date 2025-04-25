@@ -8,6 +8,7 @@ public class resetPosition : MonoBehaviour
 
     public Hover hoverScript;
     public Logger logger;
+    public goalZoneSlider goalZoneSlider;
     private Collider sphereCollider;
     public Material startColor;
     public GameObject handAnchor;
@@ -30,6 +31,7 @@ public class resetPosition : MonoBehaviour
         sliderFill = FindObjectOfType<SliderFill>();
         sphereCollider = GetComponent<Collider>();
         sphereRenderer = GetComponent<Renderer>();
+        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
     }
 
     private void Update()
@@ -87,6 +89,7 @@ public class resetPosition : MonoBehaviour
             sphereCollider.enabled = false;
             sphereRenderer.material = startColor;
             hoverScript.ActivateCube();
+            goalZoneSlider.OnCubeActivated();
             timeInside = 0f;
             hoverScript.setCurrentState(1);
             sliderFill.resetTimer();

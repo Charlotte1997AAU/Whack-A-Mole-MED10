@@ -9,6 +9,7 @@ public class triggerBox : MonoBehaviour
 {
     public Hover hoverScript;
     public Logger logger;
+    public goalZoneSlider goalZoneSlider;
     public resetPosition resetScript;
     //private TextMeshPro timerText;
     private SliderFill sliderFill;
@@ -37,6 +38,7 @@ public class triggerBox : MonoBehaviour
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
+        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -78,6 +80,7 @@ public class triggerBox : MonoBehaviour
             if (timeInside >= requriedTime)
             {
                 hoverScript.DeactivateCube();
+                goalZoneSlider.OnCubeDeactivated();
                 hoverScript.activeCubeCollider.enabled = false;
                 resetScript.resetPosReady();
                 timeInside = 0f;
