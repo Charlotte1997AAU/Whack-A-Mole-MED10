@@ -20,10 +20,10 @@ public class webSocket : MonoBehaviour
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
     {
-        { 0, "pinch" },
-        { 1, "extension" },
-        { 2, "fist" },
-        { 3, "flexion" },
+        { 0, "extension" },
+        { 1, "fist" },
+        { 2, "flexion" },
+        { 3, "pinch" },
         { 4, "rest" }
     };
 

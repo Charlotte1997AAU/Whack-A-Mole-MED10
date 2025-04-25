@@ -10,7 +10,7 @@ import MLTraining
 #import NNTraining
 
 # Path to the data the training set should be created from
-trainingDataPath = "Final Pre Test/"
+trainingDataPath = "leEpictest"
 
 # Merge Unity data with EMG data to create full raw dataset
 mergedFiles = fileManagement.processAllFiles(trainingDataPath)
@@ -30,12 +30,11 @@ for file in cleanedFiles:
     cleanData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, file)
     finalFiles.append(cleanData)
 
-print(finalFiles)
-
 # Merge calculated feature dataframes for each gesture to final dataframe
 featureDataset = pd.concat(finalFiles, ignore_index=True)
 le = LabelEncoder()
 featureDataset["GoalGesture"] = le.fit_transform(featureDataset["GoalGesture"])
+print(le.classes_)
 featureDataset = featureDataset.apply(pd.to_numeric)
 featureDataset[["activeCubeX", "activeCubeY"]] = featureDataset[["activeCubeX", "activeCubeY"]].round(3)
 finalDataset = featureSelection.calculateDeltaFeatures(featureDataset)
