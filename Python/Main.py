@@ -10,7 +10,7 @@ import MLTraining
 #import NNTraining
 
 # Path to the data the training set should be created from
-trainingDataPath = "Data_CleanUp_C/leEpictest"
+trainingDataPath = "Final Pre Test/"
 
 # Merge Unity data with EMG data to create full raw dataset
 mergedFiles = fileManagement.processAllFiles(trainingDataPath)
