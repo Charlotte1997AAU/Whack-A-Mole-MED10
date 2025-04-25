@@ -2,7 +2,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.model_selection import train_test_split
 import dataPreProcessing
 import joblib
-
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def trainModel(data, model):
     # Load the dataset
@@ -20,6 +22,8 @@ def trainModel(data, model):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     model.fit(X_train, y_train)
+    #Feature importance:
+    #featureImportance(model, X_train)
 
     # Evaluate the best model on the test set
     y_pred_best_model = model.predict(X_test)
@@ -82,3 +86,29 @@ def trainPCA(data, model):
 
     joblib.dump(model, f"{model_name}PCA_L.pkl")
     print(f"Trained and saved {model_name}")
+
+
+def featureImportance(model, X):
+    importances = model.feature_importances_
+
+    feature_names = X.columns  # or a list of your feature names
+    importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': importances
+    })
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+    top_20_features = importance_df.head(20)
+
+    plt.figure(figsize=(10, 6))
+
+    # Create a bar plot using seaborn
+    sns.barplot(x='Importance', y='Feature', data=top_20_features, palette='viridis')
+
+    # Add titles and labels
+    plt.title('Feature Importance')
+    plt.xlabel('Importance')
+    plt.ylabel('Feature')
+
+    # Show the plot
+    plt.savefig('feature_importance_plot.png', bbox_inches='tight')
+    plt.show()
