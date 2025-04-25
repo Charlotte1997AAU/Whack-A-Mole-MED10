@@ -180,10 +180,24 @@ def calculateDeltaFeatures(data):
     data = pd.concat(newDataFrame, axis=1)
 
     data["gestureStart"] = data["onsetFlag"] & ~data["onsetFlag"].shift(1).fillna(False)
+    data["gestureEnd"] = data["onsetFlag"] & ~data["onsetFlag"].shift(-1).fillna(False)
+
+    starts = data.index[data["gestureStart"] == True].tolist()
+    ends = data.index[data["gestureEnd"] == True].tolist()
+    gestureWindows = []
+    for start in starts:
+        end = next((e for e in ends if e > start), None)  #find first gesture end, that comes after this start
+        if end:
+            segment = data.loc[start:end].copy()
+            segment.drop(["onsetFlag", "gestureStart", "gestureEnd"], axis=1, inplace=True)
+            gestureWindows.append(segment)
+
     trainingWindows = data[data["gestureStart"] == True]
     trainingWindows.drop(["onsetFlag", "gestureStart"], axis=1, inplace=True)
-    return trainingWindows
 
+    mergedGestureWindows = pd.concat(gestureWindows, ignore_index=True)
+
+    return mergedGestureWindows
 
 def createDataFrameWithCalculationsTest(dataframe, windowSize=5, stepSize=1):
     data = dataframe
