@@ -8,7 +8,6 @@ public class resetPosition : MonoBehaviour
 
     public Hover hoverScript;
     public Logger logger;
-    public goalZoneSlider goalZoneSlider;
     private Collider sphereCollider;
     public Material startColor;
     public GameObject handAnchor;
@@ -19,6 +18,7 @@ public class resetPosition : MonoBehaviour
 
     private bool isInside = false;
     public float requiredTime = 3.0f;
+    public float MVCRequiredTime = 5.0f;
     private float timeInside = 0.0f;
     private float MVCtime = 0f;
     public bool SetRestPosition = false;
@@ -31,7 +31,6 @@ public class resetPosition : MonoBehaviour
         sliderFill = FindObjectOfType<SliderFill>();
         sphereCollider = GetComponent<Collider>();
         sphereRenderer = GetComponent<Renderer>();
-        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
     }
 
     private void Update()
@@ -41,8 +40,8 @@ public class resetPosition : MonoBehaviour
             textField.text = "100% POWER!";
             hoverScript.setCurrentState(5);
             MVCtime += Time.deltaTime;
-            sliderFill.FillSliderOverTime(requiredTime);
-            if (MVCtime > requiredTime)
+            sliderFill.FillSliderOverTime(MVCRequiredTime);
+            if (MVCtime > MVCRequiredTime)
             {  
                 hoverScript.setCurrentState(0);
                 sphereCollider.enabled = true;
@@ -89,7 +88,6 @@ public class resetPosition : MonoBehaviour
             sphereCollider.enabled = false;
             sphereRenderer.material = startColor;
             hoverScript.ActivateCube();
-            goalZoneSlider.OnCubeActivated();
             timeInside = 0f;
             hoverScript.setCurrentState(1);
             sliderFill.resetTimer();

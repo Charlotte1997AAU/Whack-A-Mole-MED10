@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // <- You need this!
+using UnityEngine.UI;
 
-public class goalZoneSlider : MonoBehaviour
+public class goalZoneSliderOLD : MonoBehaviour
 {
     public Slider slider;
-    public RectTransform goalArea; // <- Corrected (capital R)
+    public RectTransform goalArea;
 
     public Vector2 firstGoalRange = new Vector2(0.25f, 0.35f);
     public Vector2 secondGoalRange = new Vector2(0.55f, 0.65f);
@@ -20,14 +20,15 @@ public class goalZoneSlider : MonoBehaviour
 
     public void UpdateGoalArea(float start, float end)
     {
-        RectTransform sliderRect = slider.GetComponent<RectTransform>(); // <- Corrected (capital R)
+        RectTransform sliderRect = slider.GetComponent<RectTransform>();
 
-        float sliderWidth = sliderRect.rect.width;
-        float goalWidth = (end - start) * sliderWidth;
-        float goalPosX = start * sliderWidth;
+        float sliderHeight = sliderRect.rect.height;  // Use height for vertical slider
+        float goalHeight = (end - start) * sliderHeight;
+        float goalPosY = start * sliderHeight;
 
-        goalArea.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, goalWidth);
-        goalArea.anchoredPosition = new Vector2(goalPosX, goalArea.anchoredPosition.y);
+        goalArea.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, goalHeight);
+
+        goalArea.anchoredPosition = new Vector2(goalArea.anchoredPosition.x, goalPosY);
     }
 
     public void OnCubeActivated()
@@ -52,11 +53,20 @@ public class goalZoneSlider : MonoBehaviour
 
     private void showSlider()
     {
-        slider.gameObject.SetActive(true);
+        SetSliderVisible(true);
     }
 
     private void hideSlider()
     {
-        slider.gameObject.SetActive(false);
+        SetSliderVisible(false);
+    }
+
+    private void SetSliderVisible(bool visible)
+    {
+        CanvasRenderer[] renderers = slider.GetComponentsInChildren<CanvasRenderer>();
+        foreach (var renderer in renderers)
+        {
+            renderer.SetAlpha(visible ? 1f : 0f);
+        }
     }
 }

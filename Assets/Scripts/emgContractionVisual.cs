@@ -42,6 +42,7 @@ public class emgContractionVisual : MonoBehaviour
             else
             {
                 temporaryValues.Add(data.Emg[i]);
+
                 RectifyData(temporaryValues);
                 temporaryValues.Clear();
             }

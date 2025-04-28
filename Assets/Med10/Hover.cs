@@ -18,6 +18,8 @@ public class Hover : MonoBehaviour
     public int iterations = 1;
     public GameObject hannesHand;
     private string currentAnim;
+    public goalZoneSlider goalZoneSlider;
+
 
     private int gesturesCount = 0;
     public bool cubeActivated = false;
@@ -45,6 +47,7 @@ public class Hover : MonoBehaviour
         cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
+        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
         if (cubes.Length == 0) return;
         //ActivateCube();
         //logger.StartLogging();
@@ -165,6 +168,8 @@ public class Hover : MonoBehaviour
                 Debug.Log("Activated Cube: " + randomCube.name + " | Boxes left: " + boxes.Count);
                 textField.text = "";
                 setCurrentState(1);
+                goalZoneSlider.changePosition(activeCube.transform.position);
+                goalZoneSlider.OnCubeActivated();
                 logger.LogActivatedCube(activeCube.name, activeCube.transform.position);
             }
         }

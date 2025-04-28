@@ -7,6 +7,8 @@ using System.Collections;
 
 public class calcEMGaverage : MonoBehaviour
 {
+    public goalZoneSlider goalZoneSlider;
+
     [Header("UI Elements")]
     public TextMeshProUGUI percentageText;
     public Slider powerSlider;
@@ -15,7 +17,6 @@ public class calcEMGaverage : MonoBehaviour
     public bool useEMA = true; // <-- Skift mellem EMA og Moving Average
     public float smoothingFactor = 0.1f; // For EMA
     public int smoothingWindow = 6;      // For Moving Average
-    public float mvcRecordDuration = 5f;
 
     [Header("Debug/State")]
     public bool isCalibrated = false;
@@ -29,12 +30,18 @@ public class calcEMGaverage : MonoBehaviour
     public ThalmicMyo thalmicMyo;
     private List<float> temporaryValues = new List<float>();
     private float rawEMG;
+    public resetPosition MVC;
+
 
     private float smoothedValue = 0f; // EMA værdi
 
     void Start()
     {
         thalmicMyo._myo.EmgData += onReceiveData;
+        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
+        MVC = FindObjectOfType<resetPosition>();
+
+
     }
 
     void Update()
@@ -67,6 +74,7 @@ public class calcEMGaverage : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && !isRecordingMVC && !isCalibrated)
         {
+            MVC.getMVC = true;
             StartCoroutine(RecordMVC());
         }
 
@@ -74,14 +82,8 @@ public class calcEMGaverage : MonoBehaviour
         {
             float percentage = (smoothedValue / maxBaselineValue) * 100f;
             percentage = Mathf.Clamp(percentage, 0f, 100f);
-
-            percentageText.text = percentage.ToString("F0") + "%";
-            if (powerSlider != null)
-                powerSlider.value = percentage / 100f;
-        }
-        else
-        {
-            percentageText.text = "Calibrating...";
+            if (goalZoneSlider.slider != null)
+                goalZoneSlider.slider.value = percentage;
         }
 
         // BONUS: Skift mellem EMA/Moving Average med en tast (ekstra feature)
@@ -95,12 +97,12 @@ public class calcEMGaverage : MonoBehaviour
 
     IEnumerator RecordMVC()
     {
-        Debug.Log("Starting MVC recording for " + mvcRecordDuration + " seconds...");
+        Debug.Log("Starting MVC recording for " + MVC.MVCRequiredTime + " seconds...");
         isRecordingMVC = true;
         mvcRecordingBuffer.Clear();
 
         float startTime = Time.time;
-        while (Time.time - startTime < mvcRecordDuration)
+        while (Time.time - startTime < MVC.MVCRequiredTime)
         {
             mvcRecordingBuffer.Add(smoothedValue);
             yield return null;
