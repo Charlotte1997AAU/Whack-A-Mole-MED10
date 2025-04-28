@@ -19,6 +19,9 @@ mergedFiles = fileManagement.processAllFiles(trainingDataPath)
 cleanedFiles = []
 for file in mergedFiles:
     cleanedFiles.append(dataCleanUp.cleanMergedData(file))
+    if file['GoalGesture'].iloc[0] == "fist":
+        file.to_csv("fistData.csv")
+        print("saved fist data")
 
 #restData = cleanedFiles[0][cleanedFiles[0]['State'] == "Resting"].copy()
 #restData.replace({'GoalGesture': "extension"}, "Resting", inplace=True)

@@ -25,11 +25,12 @@ def cleanMergedData(df, file=None):
     df = df[['Index'] + [col for col in df.columns if col != 'Index']]
 
     # Step 2: Remove rows after the first occurrence where 'GesturesAtempted' == 25 and 'Event' == 'Successful Gesture'
-    success_row_index = df[(df['GesturesAttempted'] == 18) & (df['Event'] == 'Successful Gesture')].index
-
+    success_row_index = df[(df['GesturesAttempted'] == 27) & (df['Event'] == 'Successful Gesture')].index
     if not success_row_index.empty:
+
         # Find the first row index where the condition is met and remove that row and all rows after it
         df = df.iloc[:success_row_index[0]]
+
 
     # Strip spaces from all string columns, except for 'ID' column
     df = df.apply(lambda col: col.str.strip() if col.dtype == 'object' and col.name != 'ID' else col)

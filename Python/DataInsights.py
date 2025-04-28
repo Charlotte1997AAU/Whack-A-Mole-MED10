@@ -24,5 +24,15 @@ emgTest = [
     "Pre-Pilot test L/EMG_supination_L.csv"
 
 ]
-for files in emgTest:
-    emgInsight(files)
+
+tempfiles = [
+    "tempFiles/extension.csv",
+    "tempFiles/fist.csv",
+    "tempFiles/flexion.csv",
+    "tempFiles/pinch.csv",
+    "tempFiles/rest.csv"
+]
+for files in tempfiles:
+    data = pd.read_csv(files)
+    print(f"Value counts for gesture {data['GoalGesture'].iloc[0]}: \n{data['Event'].value_counts()}")
+    #emgInsight(files)

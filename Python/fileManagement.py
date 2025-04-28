@@ -34,7 +34,6 @@ def processAllFiles(folder):
 def compareIDs(unityFile, EMGFile):
     unityID = get_id_from_csv(unityFile, 'ID')
     EMGID = get_id_from_csv(EMGFile, 'SessionID')
-    mergedFiles = []
 
     if unityID == EMGID:
         print(f"Found ID match for {unityFile} and {EMGFile}, merging...")
@@ -50,7 +49,6 @@ def compareIDs(unityFile, EMGFile):
         mergedDfs = pd.merge_asof(emgDf.sort_values('Timestamp'), unityDf.sort_values('Timestamp'), on='Timestamp',
                                   direction='nearest')
         mergedDfs = mergedDfs.drop(columns=['SessionID'])
-        mergedDfs.to_csv(f"Final Pre Test/merged_{gesture}.csv", index=False)
         return mergedDfs
 
 

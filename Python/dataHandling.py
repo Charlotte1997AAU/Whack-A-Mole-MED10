@@ -26,8 +26,8 @@ def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include
     """
 
     # Load the appropriate CSV file based on the gesture_name
-    file_path = f"Data_CleanUp_L/merged_fist_cleanedNew.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
-    df = pd.read_csv(file_path, delimiter=";")
+    file_path = f"fistData.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
+    df = pd.read_csv(file_path, delimiter=",")
 
     # Convert Timestamp column to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"])
