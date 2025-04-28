@@ -197,7 +197,7 @@ def calculateDeltaFeatures(data):
 
     mergedGestureWindows = pd.concat(gestureWindows, ignore_index=True)
 
-    return mergedGestureWindows
+    return trainingWindows
 
 def createDataFrameWithCalculationsTest(dataframe, windowSize=5, stepSize=1):
     data = dataframe
