@@ -21,7 +21,6 @@ public class resetPosition : MonoBehaviour
     public float MVCRequiredTime = 5.0f;
     private float timeInside = 0.0f;
     private float MVCtime = 0f;
-    public bool SetRestPosition = false;
     public bool getMVC = false;
 
     private void Start()
@@ -52,10 +51,9 @@ public class resetPosition : MonoBehaviour
             }
         }
 
-        if (SetRestPosition)
+        if (Input.GetKeyDown(KeyCode.R))
         {
             transform.position = handTransform.transform.position;
-            SetRestPosition = false;
         }
     }
 

@@ -17,6 +17,7 @@ model_name = type(loaded_model).__name__
 scaler = StandardScaler()
 testSet = pd.read_csv("test Data set\TrainingSet_L.csv")
 excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
+results_list = []
 
 X = testSet.drop(columns=excludeColumns)
 scaler.fit(X)  # Fit the scaler directly on the DataFrame
@@ -81,11 +82,24 @@ async def handler(websocket):
             prediction, confidence = modelPredict(emg_window)
             await websocket.send(f"{prediction[0]},{confidence}")
             print(f"{prediction[0]},{confidence}")
+            results_list.append({
+            'prediction': prediction[0],
+            'confidence': confidence
+            })
 
         except Exception as e:
             error_msg = f"error: {str(e)}"
             print(error_msg)
             await websocket.send(error_msg)
+
+        finally:
+            # Client disconnected - save the results to a CSV
+            if results_list:
+                df_results = pd.DataFrame(results_list)
+                df_results.to_csv("prediction_results.csv", index=False)
+                print("Saved predictions to prediction_results.csv")
+            else:
+                print("No results to save.")
 
 async def main():
     async with websockets.serve(handler, "localhost", 8765):

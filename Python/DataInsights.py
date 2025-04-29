@@ -32,7 +32,20 @@ tempfiles = [
     "tempFiles/pinch.csv",
     "tempFiles/rest.csv"
 ]
-for files in tempfiles:
-    data = pd.read_csv(files)
-    print(f"Value counts for gesture {data['GoalGesture'].iloc[0]}: \n{data['Event'].value_counts()}")
-    #emgInsight(files)
+
+
+def readPredictions():
+    gesturePredict = []
+    df = pd.read_csv("prediction_results.csv")
+    print(df['prediction'].value_counts())
+    for gesture in range(4):
+        guessedGesture = df[df['prediction'] == gesture]
+        gesturePredict.append(guessedGesture)
+
+    for gestures in gesturePredict:
+        conf = gestures.filter(items=['confidence'])
+        stats = conf.agg(['mean', 'median', 'min', 'max']).round(2)
+        gestureNum = gestures['prediction'].iloc[0]
+        print(f"stats for gesture {gestureNum}: \n{stats}\n")
+
+readPredictions()
