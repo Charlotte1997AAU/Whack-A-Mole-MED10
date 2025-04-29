@@ -92,14 +92,14 @@ async def handler(websocket):
             print(error_msg)
             await websocket.send(error_msg)
 
-        finally:
+        #finally:
             # Client disconnected - save the results to a CSV
-            if results_list:
-                df_results = pd.DataFrame(results_list)
-                df_results.to_csv("prediction_results.csv", index=False)
-                print("Saved predictions to prediction_results.csv")
-            else:
-                print("No results to save.")
+         #   if results_list:
+         #       df_results = pd.DataFrame(results_list)
+         #       df_results.to_csv("prediction_results.csv", index=False)
+         #       print("Saved predictions to prediction_results.csv")
+         #   else:
+         #       print("No results to save.")
 
 async def main():
     async with websockets.serve(handler, "localhost", 8765):

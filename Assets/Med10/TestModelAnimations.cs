@@ -12,7 +12,7 @@ public class TestModelAnimations : MonoBehaviour
     private string currentGestureString;
     private bool isAnimating = false;
     private Queue<int> keyQueue = new Queue<int>();
-    public int queueSize = 5;
+    public int queueSize;
 
     void Start()
     {

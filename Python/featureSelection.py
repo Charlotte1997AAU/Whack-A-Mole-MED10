@@ -24,8 +24,9 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
     """
     data = filePath
     cubeDataFrames = []
+    cubeCount = data['ActivatedCube'].nunique()
     #if data['GoalGesture'].iloc[0] != "Resting":
-    for cube in range(9):
+    for cube in range(cubeCount):
         cubeName = f"Cube {cube}"
         activeCube = data[data['ActivatedCube'] == cubeName]
         cubeDataFrames.append(activeCube)
