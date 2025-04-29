@@ -4,7 +4,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import dataPreProcessing
 import joblib
 
-loaded_model = joblib.load('SGDClassifier_L.pkl')
+loaded_model = joblib.load('NeuralNetworkModel.h5')
 model_name = type(loaded_model).__name__
 
 data = pd.read_csv("test Data set/TrainingSet_L.csv")

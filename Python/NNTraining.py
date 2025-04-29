@@ -1,3 +1,4 @@
+import joblib
 from keras import Input
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
@@ -71,5 +72,8 @@ def trainNN(data, plotData=None):
     print("Classification Report:")
     print(classification_report(yTrue, yPred))
 
-    model.save("NeuralNetworkModel.h5")
-    print("trained and saved neural network model")
+    joblib.dump(model, f"NeuralNetwork_L.pkl")
+    print(f"Trained and saved NN")
+
+    #model.save("NeuralNetworkModel.h5")
+    #print("trained and saved neural network model")

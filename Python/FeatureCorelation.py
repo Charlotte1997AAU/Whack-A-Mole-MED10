@@ -37,9 +37,7 @@ def featureCorrelation(filePath: str, saveImage: bool):
 
 def GestureCorrelation(data, savefig: bool):
     df = pd.read_csv(data)
-    excludeColumns = ["EMG1Slope", "EMG2Slope", "EMG3Slope", "EMG4Slope", "EMG5Slope",
-                      "EMG6Slope","EMG7Slope", "EMG8Slope", "activeCube", "activeCubeX",
-                      "activeCubeY", "trackerX", "trackerY", "trackerZ", "GoalGesture"]
+    excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "trackerX", "trackerY", "trackerZ", "GoalGesture"]
 
     # Split the DataFrame into groups by 'GoalGesture'
     grouped_dfs = {gesture: df[df['GoalGesture'] == gesture].drop(columns=excludeColumns)
@@ -68,10 +66,11 @@ def GestureCorrelation(data, savefig: bool):
         )
 
         gestureNames = {
-            0: 'Extension',
-            1: 'Fist',
-            2: 'Flexion',
-            3: 'Pinch'
+            1: 'Extension',
+            2: 'Fist',
+            3: 'Flexion',
+            4: 'Pinch',
+            0: 'Rest'
         }
 
         plt.figure(figsize=(10, 8))
@@ -84,4 +83,4 @@ def GestureCorrelation(data, savefig: bool):
         plt.show()
 
 
-GestureCorrelation("TrainingSet_L.csv", True)
+GestureCorrelation("test Data set\TrainingSetWdeltas_L.csv", True)

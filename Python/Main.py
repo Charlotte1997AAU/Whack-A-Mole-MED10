@@ -7,7 +7,7 @@ import fileManagement
 import pandas as pd
 import dataCleanUp
 import MLTraining
-#import NNTraining
+import NNTraining
 
 # Path to the data the training set should be created from
 trainingDataPath = "leEpictest"
@@ -58,8 +58,7 @@ if trainingModel == models["SGD"]:
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
     finalDataset = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
 
-
 # Train model on dataframe
-MLTraining.trainModel(finalDataset, trainingModel)
-#NNTraining.trainNN(finalDataset)
+#MLTraining.trainModel(finalDataset, trainingModel)
+NNTraining.trainNN(finalDataset)
 
