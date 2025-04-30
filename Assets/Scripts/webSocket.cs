@@ -18,7 +18,9 @@ public class webSocket : MonoBehaviour
     private Vector3 trackerPos; // Position of tracker
     public int currentGestureKey;
     public bool thresholdsCalculated = false;
+    public bool isCalibrating = false;
     private bool handAnimEnabled = true;
+    private CalibrationGhostHand calibrationGhostHand;
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
@@ -37,6 +39,8 @@ public class webSocket : MonoBehaviour
     {
         hannesHand = GameObject.Find("Hannes_Hand");
         tracker = GameObject.Find("Tracker");
+        calibrationGhostHand = FindObjectOfType<CalibrationGhostHand>();
+
         ws = new WebSocket("ws://localhost:8765");
 
         ws.OnOpen += (sender, e) =>
@@ -131,6 +135,7 @@ public class webSocket : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.C))
         {
+            StartCoroutine(calibrationGhostHand.PlayAnimations());
             predictions.Clear();
             Debug.Log("Cleared predictions list, ready to collect ");
         }
