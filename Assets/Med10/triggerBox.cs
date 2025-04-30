@@ -8,6 +8,7 @@ using TMPro;
 public class triggerBox : MonoBehaviour
 {
     public Hover hoverScript;
+    public MovingTarget movingTarget;
     public Logger logger;
     public goalZoneSlider goalZoneSlider;
     public resetPosition resetScript;
@@ -35,6 +36,7 @@ public class triggerBox : MonoBehaviour
     {
        // timerText = GameObject.Find("TimerText").GetComponent<TextMeshPro>();
         sliderFill = FindObjectOfType<SliderFill>();
+        movingTarget = FindObjectOfType<MovingTarget>();
         activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
@@ -100,6 +102,14 @@ public class triggerBox : MonoBehaviour
                 }
             }
             */
+            if(movingTarget.movingCubePhase)
+            {
+                movingTarget.MoveCube();
+                if(movingTarget.isMoving == false)
+                {
+                    resetScript.resetPosReady();
+                }
+            } 
         }
     }
 

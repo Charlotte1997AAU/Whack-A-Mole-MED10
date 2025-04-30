@@ -15,6 +15,8 @@ public class resetPosition : MonoBehaviour
     private SliderFill sliderFill;
     public TextMeshProUGUI textField;
     private Renderer sphereRenderer;
+    private MovingTarget movingTarget;
+
 
     private bool isInside = false;
     public float requiredTime = 3.0f;
@@ -30,6 +32,8 @@ public class resetPosition : MonoBehaviour
         sliderFill = FindObjectOfType<SliderFill>();
         sphereCollider = GetComponent<Collider>();
         sphereRenderer = GetComponent<Renderer>();
+        movingTarget = FindObjectOfType<MovingTarget>();
+
     }
 
     private void Update()
@@ -80,16 +84,37 @@ public class resetPosition : MonoBehaviour
         timeInside += Time.deltaTime;
         sliderFill.FillSliderOverTime(requiredTime);
 
-        if (timeInside >= requiredTime)
+        if(movingTarget.movingCubePhase == false)
         {
-            sphereCollider = this.GetComponent<Collider>();
-            sphereCollider.enabled = false;
-            sphereRenderer.material = startColor;
-            hoverScript.ActivateCube();
-            timeInside = 0f;
-            hoverScript.setCurrentState(1);
-            sliderFill.resetTimer();
-            Debug.Log("Current State: " + hoverScript.getCurrentState());
+            if (timeInside >= requiredTime)
+            {
+                sphereCollider = this.GetComponent<Collider>();
+                sphereCollider.enabled = false;
+                sphereRenderer.material = startColor;
+                hoverScript.ActivateCube();
+                timeInside = 0f;
+                hoverScript.setCurrentState(1);
+                sliderFill.resetTimer();
+                Debug.Log("Current State: " + hoverScript.getCurrentState());
+
+            }
+        }
+
+        
+        if(movingTarget.movingCubePhase)
+        {
+            if (timeInside >= requiredTime)
+            {
+                sphereCollider = this.GetComponent<Collider>();
+                sphereCollider.enabled = false;
+                sphereRenderer.material = startColor;
+                movingTarget.ActivateCube();
+                timeInside = 0f;
+                hoverScript.setCurrentState(1);
+                sliderFill.resetTimer();
+                Debug.Log("Current State: " + hoverScript.getCurrentState());
+
+            }
         }
     }
 
