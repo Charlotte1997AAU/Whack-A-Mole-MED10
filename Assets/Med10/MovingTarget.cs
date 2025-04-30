@@ -9,7 +9,6 @@ public class MovingTarget : MonoBehaviour
     public Material HighLightColor;
     public Material gridColor;
     public Material GestureColor;
-    public GameObject[] cubes;
     public Collider activeCubeCollider;
 
 
