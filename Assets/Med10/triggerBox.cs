@@ -19,6 +19,8 @@ public class triggerBox : MonoBehaviour
     private Animator gestureAnim;
     public GameObject gestureSignifier;
     [SerializeField] private StateManager stateManager;
+    private testLogger testLogger;
+    private MovingTarget movingCube;
 
     private bool isInside = false;
     public float requriedTime = 5.0f;
@@ -41,75 +43,100 @@ public class triggerBox : MonoBehaviour
         gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
         currentAnim = logger.goalGesture.ToString();
         goalZoneSlider = FindObjectOfType<goalZoneSlider>();
+        testLogger = FindObjectOfType<testLogger>();
+        movingCube = FindObjectOfType<MovingTarget>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Entered Once");
-        activeHandAnimation.SetTrigger(currentAnim);
-        gestureAnim.ResetTrigger(currentAnim);
-        gestureAnim.ResetTrigger("rest");  
-        Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
-        for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+        if (stateManager.state == StateManager.State.Training)
         {
-            gestureSignifierRenderer[renders].enabled = false;
-        }   
+            Debug.Log("Entered Once");
+            activeHandAnimation.SetTrigger(currentAnim);
+            gestureAnim.ResetTrigger(currentAnim);
+            gestureAnim.ResetTrigger("rest");  
+            Renderer[] gestureSignifierRenderer = gestureSignifier.GetComponentsInChildren<Renderer>();
+            for (int renders = 0; renders < gestureSignifierRenderer.Length; renders++)
+            {
+                gestureSignifierRenderer[renders].enabled = false;
+            }   
+        }
     }
 
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("GameController"))
         {
-            trackerPositions.Add(trackerPos());
-            Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
-            if (cubeRenderer != null)
+            if (stateManager.state == StateManager.State.Training) //state 0 is "Training"
             {
-                cubeRenderer.material = hoverScript.GestureColor;
+                trackerPositions.Add(trackerPos());
+                Renderer cubeRenderer = hoverScript.activeCube.GetComponent<Renderer>();
+                if (cubeRenderer != null)
+                {
+                    cubeRenderer.material = hoverScript.GestureColor;
+                }
+
+                if (!isInside)
+                {
+                    isInside = true;
+                    sliderFill.isFilling = true;
+                    timeInside = 0f;
+                    hoverScript.setCurrentState(2);
+                }
+
+                timeInside += Time.deltaTime;
+                sliderFill.FillSliderOverTime(requriedTime);
+                Debug.Log("We have entered the box");
+
+                if (timeInside >= requriedTime)
+                {
+                    hoverScript.DeactivateCube();
+                    goalZoneSlider.OnCubeDeactivated();
+                    hoverScript.activeCubeCollider.enabled = false;
+                    resetScript.resetPosReady();
+                    timeInside = 0f;
+                    hoverScript.setGestureComplete(true);
+                    sliderFill.resetTimer();
+                }
             }
 
-            if (!isInside)
-            {
-                isInside = true;
-                sliderFill.isFilling = true;
-                timeInside = 0f;
-                hoverScript.setCurrentState(2);
-            }
-
-            timeInside += Time.deltaTime;
-            sliderFill.FillSliderOverTime(requriedTime);
-            Debug.Log("We have entered the box");
-
-            if (timeInside >= requriedTime)
-            {
-                hoverScript.DeactivateCube();
-                goalZoneSlider.OnCubeDeactivated();
-                hoverScript.activeCubeCollider.enabled = false;
-                resetScript.resetPosReady();
-                timeInside = 0f;
-                hoverScript.setGestureComplete(true);
-                sliderFill.resetTimer();
-            }
-            /*
             if (stateManager.state == StateManager.State.Testing)
             {
-                string currentGestureString = hoverScript.runAnimations();
-                Debug.Log("Current gesture string: " + currentGestureString);
-                if (currentGestureString != hoverScript.lastTriggeredGesture && !string.IsNullOrEmpty(currentGestureString))
-                {
-                    activeHandAnimation.SetTrigger(currentGestureString);
-                    hoverScript.lastTriggeredGesture = currentGestureString;
-                    Debug.Log("last triggered gesture: " + hoverScript.lastTriggeredGesture);
+                    Renderer cubeRenderer = testLogger.activeCube.GetComponent<Renderer>();
+                    if (cubeRenderer != null)
+                    {
+                        cubeRenderer.material = testLogger.GestureColor;
+                    }
+
+                    if (!isInside)
+                    {
+                        isInside = true;
+                        sliderFill.isFilling = true;
+                        timeInside = 0f;
+                    }
+
+                    timeInside += Time.deltaTime;
+                    sliderFill.FillSliderOverTime(requriedTime);
+
+                    if (timeInside >= requriedTime)
+                    {
+                        testLogger.DeactivateCube();
+                        testLogger.activeCubeCollider.enabled = false;
+                        timeInside = 0f;
+                        resetScript.resetPosReady();
+                        sliderFill.resetTimer();
+                    }
+
+                    if (movingCube.movingCubePhase)
+                    {
+                        movingCube.MoveCube();
+                        if (movingCube.isMoving == false)
+                        {
+                            resetScript.resetPosReady();
+                        }
+                    }
                 }
-            }
-            */
-            if(movingTarget.movingCubePhase)
-            {
-                movingTarget.MoveCube();
-                if(movingTarget.isMoving == false)
-                {
-                    resetScript.resetPosReady();
-                }
-            } 
+            
         }
     }
 
@@ -139,6 +166,12 @@ public class triggerBox : MonoBehaviour
                     hoverScript.setCurrentEvent(1);
                     hoverScript.setCurrentEvent(0);
                 }
+            }
+            else
+            {
+                sliderFill.resetTimer();
+                isInside = false;
+                timeInside = 0f;
             }
         }
     }

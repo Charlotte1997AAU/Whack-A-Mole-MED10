@@ -16,7 +16,8 @@ public class resetPosition : MonoBehaviour
     public TextMeshProUGUI textField;
     private Renderer sphereRenderer;
     private MovingTarget movingTarget;
-
+    private testLogger testLogger;
+    [SerializeField] private StateManager stateManager;
 
     private bool isInside = false;
     public float requiredTime = 3.0f;
@@ -33,7 +34,7 @@ public class resetPosition : MonoBehaviour
         sphereCollider = GetComponent<Collider>();
         sphereRenderer = GetComponent<Renderer>();
         movingTarget = FindObjectOfType<MovingTarget>();
-
+        testLogger = FindObjectOfType<testLogger>();
     }
 
     private void Update()
@@ -47,8 +48,6 @@ public class resetPosition : MonoBehaviour
             if (MVCtime > MVCRequiredTime)
             {  
                 hoverScript.setCurrentState(0);
-                sphereCollider.enabled = true;
-                sphereRenderer.enabled = true;
                 sliderFill.resetTimer();
                 textField.text = "Rest";
                 getMVC = false;
@@ -57,6 +56,8 @@ public class resetPosition : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R))
         {
+            sphereCollider.enabled = true;
+            sphereRenderer.enabled = true;
             transform.position = handTransform.transform.position;
         }
     }
@@ -84,7 +85,7 @@ public class resetPosition : MonoBehaviour
         timeInside += Time.deltaTime;
         sliderFill.FillSliderOverTime(requiredTime);
 
-        if(movingTarget.movingCubePhase == false)
+        if(!testLogger.testing)
         {
             if (timeInside >= requiredTime)
             {
@@ -100,45 +101,82 @@ public class resetPosition : MonoBehaviour
             }
         }
 
-        
-        if(movingTarget.movingCubePhase)
+        if (testLogger.testing)
         {
-            if (timeInside >= requiredTime)
+            if(testLogger.testingBoxes)
             {
-                sphereCollider = this.GetComponent<Collider>();
-                sphereCollider.enabled = false;
-                sphereRenderer.material = startColor;
-                movingTarget.ActivateCube();
-                timeInside = 0f;
-                hoverScript.setCurrentState(1);
-                sliderFill.resetTimer();
-                Debug.Log("Current State: " + hoverScript.getCurrentState());
+                if (timeInside >= requiredTime)
+                {
+                    sphereCollider = this.GetComponent<Collider>();
+                    sphereCollider.enabled = false;
+                    sphereRenderer.material = startColor;
+                    testLogger.ActivateCube();
+                    timeInside = 0f;
+                    sliderFill.resetTimer();
+                }
+            }
 
+            if(movingTarget.movingCubePhase)
+            {
+                if (timeInside >= requiredTime)
+                {
+                    sphereCollider = this.GetComponent<Collider>();
+                    sphereCollider.enabled = false;
+                    sphereRenderer.material = startColor;
+                    movingTarget.ActivateCube();
+                    timeInside = 0f;
+                    sliderFill.resetTimer();
+                }
             }
         }
+
+        
     }
 
     private void OnTriggerExit(Collider other)
     {
         if(other.CompareTag("GameController"))
         {
-            Renderer sphereRenderer = this.GetComponent<Renderer>();
-            if(sphereRenderer != null)
+            if (stateManager.state == StateManager.State.Training)
             {
-            sphereRenderer.material = hoverScript.HighLightColor;
+                Renderer sphereRenderer = this.GetComponent<Renderer>();
+                if(sphereRenderer != null)
+                {
+                sphereRenderer.material = hoverScript.HighLightColor;
+                }
+                sliderFill.resetTimer();
+                isInside = false;
+                timeInside = 0f;
             }
-            sliderFill.resetTimer();
-            isInside = false;
-            timeInside = 0f;
+            else
+            {
+                Renderer sphereRenderer = this.GetComponent<Renderer>();
+                if (sphereRenderer != null)
+                {
+                    sphereRenderer.material = testLogger.HighLightColor;
+                }
+                sliderFill.resetTimer();
+                isInside = false;
+                timeInside = 0f;
+            }
+
         }
     }
 
 
     public void resetPosReady()
     {
-            sphereCollider = this.GetComponent<Collider>();
-            sphereCollider.enabled = true;
-            Renderer sphereRenderer = this.GetComponent<Renderer>();
+        sphereCollider = this.GetComponent<Collider>();
+        sphereCollider.enabled = true;
+        Renderer sphereRenderer = this.GetComponent<Renderer>();
+        if (!testLogger.testing)
+        { 
             sphereRenderer.material = hoverScript.HighLightColor;
+        }
+        else
+        {
+            sphereRenderer.material = testLogger.HighLightColor;
+        }
+
     }
 }

@@ -18,9 +18,12 @@ public class webSocket : MonoBehaviour
     private Vector3 trackerPos; // Position of tracker
     public int currentGestureKey;
     public bool thresholdsCalculated = false;
-    public bool isCalibrating = false;
     private bool handAnimEnabled = true;
+    public calcEMGaverage averageEMG;
+    public float restThreshold = 15f;
+    public testLogger logger;
     private CalibrationGhostHand calibrationGhostHand;
+    public GameObject ghostHand;
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
@@ -39,7 +42,6 @@ public class webSocket : MonoBehaviour
     {
         hannesHand = GameObject.Find("Hannes_Hand");
         tracker = GameObject.Find("Tracker");
-        calibrationGhostHand = FindObjectOfType<CalibrationGhostHand>();
 
         ws = new WebSocket("ws://localhost:8765");
 
@@ -90,9 +92,17 @@ public class webSocket : MonoBehaviour
                     {
                         if (classAverageConfidence.TryGetValue(predictedClass, out float minProb))
                         {
-                            if (confidenceProb > minProb)
+                            if (averageEMG.getEMGMean() < restThreshold)
                             {
-                                currentGestureKey = predictedClass;
+                                currentGestureKey = 4;
+                                Debug.Log("Now we're resting");
+                            }
+                            else
+                            {
+                                if (confidenceProb > minProb)
+                                {
+                                    currentGestureKey = predictedClass;
+                                }
                             }
                         }
                     }
@@ -135,8 +145,10 @@ public class webSocket : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.C))
         {
-            StartCoroutine(calibrationGhostHand.PlayAnimations());
+            ghostHand.SetActive(true);
+            calibrationGhostHand = FindObjectOfType<CalibrationGhostHand>();
             predictions.Clear();
+            StartCoroutine(calibrationGhostHand.PlayAnimations());
             Debug.Log("Cleared predictions list, ready to collect ");
         }
 
@@ -176,7 +188,7 @@ public class webSocket : MonoBehaviour
 
         foreach (var channelKey in keys)
         {
-            if(slidingWindow[channelKey].Count > windowSize)
+            if (slidingWindow[channelKey].Count > windowSize)
             {
                 slidingWindow[channelKey].RemoveRange(windowSize, slidingWindow[channelKey].Count - windowSize);
             }
@@ -216,26 +228,12 @@ public class webSocket : MonoBehaviour
             );
     }
 
-    public void CheckAndUpdateGestureKey(int predictedClass, float confidenceProb)
-    {
-        if (classAverageConfidence.TryGetValue(predictedClass, out float minProb))
-        {
-            if (confidenceProb > minProb)
-            {
-                currentGestureKey = predictedClass;
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"No threshold found for class {predictedClass}. Confidence: {confidenceProb:F3}");
-        }
-    }
 
     public void GetEmgData(Dictionary<string, object> emgData)
     {
         foreach (var entry in emgData)
         {
-            if(entry.Value == null)
+            if (entry.Value == null)
             {
                 Debug.Log("Empty value");
                 return;
@@ -245,6 +243,11 @@ public class webSocket : MonoBehaviour
                 emgDataForSocket[entry.Key] = entry.Value;
             }
         }
+    }
+
+    public int getGestureKey()
+    {
+        return currentGestureKey;
     }
 
     string FlattenWindow(Dictionary<string, List<float>> window)

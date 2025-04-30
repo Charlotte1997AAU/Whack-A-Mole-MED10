@@ -10,6 +10,8 @@ public class MovingTarget : MonoBehaviour
     public Material gridColor;
     public Material GestureColor;
     public Collider activeCubeCollider;
+    public resetPosition resetScript;
+    public Renderer movingBoxRender;
 
 
     public bool movingCubePhase = false;
@@ -22,6 +24,7 @@ public class MovingTarget : MonoBehaviour
 
     private void Start()
     {
+        movingBoxRender = GetComponent<Renderer>();
     }
 
     private void Update()
@@ -38,8 +41,32 @@ public class MovingTarget : MonoBehaviour
 
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("GameController"))
+        {
+            if (movingBoxRender != null)
+            {
+                movingBoxRender.material = GestureColor;
+            }
 
-    public void ActivateCube()
+            MoveCube();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("GameController"))
+        {
+            if (movingBoxRender != null)
+            {
+                movingBoxRender.material = HighLightColor;
+            }
+
+        }
+    }
+
+        public void ActivateCube()
     {
         if (gestureCount == 4)
         {
@@ -136,7 +163,9 @@ public class MovingTarget : MonoBehaviour
         {
             cubeRenderer.material = gridColor;
             cubeActivated = false;
+            activeCubeCollider.enabled = false;
             Debug.Log("Deactivated Cube: ");
+            resetScript.resetPosReady();
         }
     }
 }

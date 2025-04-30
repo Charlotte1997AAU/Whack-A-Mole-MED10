@@ -6,7 +6,6 @@ public class CalibrationGhostHand : MonoBehaviour
 {
 
     public Animator animator;
-    public bool isCalibrating;
 
     // Start is called before the first frame update
     void Start()
@@ -21,17 +20,18 @@ public class CalibrationGhostHand : MonoBehaviour
 
     public IEnumerator PlayAnimations()
     {
-        yield return TriggerAndWait("rest", 1f); //wait for one second so the participant has time..
+        yield return new WaitForSeconds(1f);
         yield return TriggerAndWait("fist", 3f);
-        yield return TriggerAndWait("rest", 0.2f);
+        yield return TriggerAndWait("rest", 0.5f);
         yield return TriggerAndWait("pinch", 3f);
-        yield return TriggerAndWait("rest", 0.2f);
+        yield return TriggerAndWait("rest", 0.5f);
         yield return TriggerAndWait("extension", 3f);
-        yield return TriggerAndWait("rest", 0.2f);
+        yield return TriggerAndWait("rest", 0.5f);
         yield return TriggerAndWait("flexion", 3f);
-        yield return TriggerAndWait("rest", 0.2f);
+        yield return TriggerAndWait("rest", 0.5f);
 
         Debug.Log("Done Calibrating");
+        gameObject.SetActive(false);
     }
 
     private IEnumerator TriggerAndWait(string triggerName, float waitTime)

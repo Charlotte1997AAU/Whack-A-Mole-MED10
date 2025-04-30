@@ -19,6 +19,7 @@ public class Hover : MonoBehaviour
     public GameObject hannesHand;
     private string currentAnim;
     public goalZoneSlider goalZoneSlider;
+    [SerializeField] private StateManager stateManager;
 
 
     private int gesturesCount = 0;
@@ -39,18 +40,21 @@ public class Hover : MonoBehaviour
 
     private void Start()
     {
-        gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
-        boxes = GenerateList(iterations);
-        boxes = ShuffleList(boxes);
-        cubeSpawner.SpawnCubes();
-        cubeSpawner.cubePrefab.SetActive(false);
-        cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
-        activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
-        currentAnim = logger.goalGesture.ToString();
-        goalZoneSlider = FindObjectOfType<goalZoneSlider>();
-        if (cubes.Length == 0) return;
-        //ActivateCube();
-        //logger.StartLogging();
+        if (stateManager.state == StateManager.State.Training)
+        {
+            gestureAnim = gestureSignifier.GetComponentInChildren<Animator>();
+            boxes = GenerateList(iterations);
+            boxes = ShuffleList(boxes);
+            cubeSpawner.SpawnCubes();
+            cubeSpawner.cubePrefab.SetActive(false);
+            cubes = GameObject.FindGameObjectsWithTag("cube"); // Ensure correct tag
+            activeHandAnimation = hannesHand.GetComponentInChildren<Animator>();
+            currentAnim = logger.goalGesture.ToString();
+            goalZoneSlider = FindObjectOfType<goalZoneSlider>();
+            if (cubes.Length == 0) return;
+            //ActivateCube();
+            //logger.StartLogging();
+        }
     }
 
     private void Update()

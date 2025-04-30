@@ -12,7 +12,7 @@ from scipy.special import softmax
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
-loaded_model = joblib.load('NeuralNetwork_L.pkl')
+loaded_model = joblib.load('RandomForestClassifier_L.pkl')
 model_name = type(loaded_model).__name__
 scaler = StandardScaler()
 testSet = pd.read_csv("test Data set\TrainingSet_L.csv")

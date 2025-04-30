@@ -142,4 +142,9 @@ public class calcEMGaverage : MonoBehaviour
         runningSum = 0f;
         smoothedValue = 0f;
     }
+
+    public float getEMGMean()
+    {
+        return rawEMG;
+    }
 }
