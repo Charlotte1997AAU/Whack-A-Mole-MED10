@@ -1,7 +1,7 @@
 import pandas as pd
 
 def emgInsight(filePath):
-    data = pd.read_csv(filePath, delimiter=";", header=0, skipinitialspace=True)
+    data = pd.read_csv(filePath, delimiter=",", header=0, skipinitialspace=True)
     emgData = data.filter(items=['EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
 
     stats = emgData.agg(['mean', 'median', 'min', 'max']).round(2)
@@ -33,6 +33,7 @@ tempfiles = [
     "tempFiles/rest.csv"
 ]
 
+emgInsight("pinchData.csv")
 
 def readPredictions():
     gesturePredict = []
@@ -48,4 +49,4 @@ def readPredictions():
         gestureNum = gestures['prediction'].iloc[0]
         print(f"stats for gesture {gestureNum}: \n{stats}\n")
 
-readPredictions()
+#readPredictions()

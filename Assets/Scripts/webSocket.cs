@@ -20,10 +20,13 @@ public class webSocket : MonoBehaviour
     public bool thresholdsCalculated = false;
     private bool handAnimEnabled = true;
     public calcEMGaverage averageEMG;
-    public float restThreshold = 15f;
+    public float restThreshold;
     public testLogger logger;
     private CalibrationGhostHand calibrationGhostHand;
     public GameObject ghostHand;
+    private Queue<int> keyQueue = new Queue<int>();
+    public int queueSize;
+    public bool allSame;
 
     private Dictionary<string, object> emgDataForSocket = new Dictionary<string, object>();
     public Dictionary<int, string> gestureNames = new Dictionary<int, string>()
@@ -95,13 +98,37 @@ public class webSocket : MonoBehaviour
                             if (averageEMG.getEMGMean() < restThreshold)
                             {
                                 currentGestureKey = 4;
-                                Debug.Log("Now we're resting");
                             }
                             else
                             {
                                 if (confidenceProb > minProb)
                                 {
-                                    currentGestureKey = predictedClass;
+                                    keyQueue.Enqueue(predictedClass);
+
+                                    if (keyQueue.Count > queueSize)
+                                    {
+                                        keyQueue.Dequeue();
+                                    }
+
+                                    if (keyQueue.Count == queueSize)
+                                    {
+                                        int firstKey = keyQueue.Peek();
+                                        foreach (int key in keyQueue)
+                                        {
+                                            Debug.Log(key);
+                                            if (key != firstKey)
+                                            {
+                                                allSame = false;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                allSame = true;
+                                                currentGestureKey = firstKey;
+                                                Debug.Log("gesture key: " + currentGestureKey);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -7,12 +7,11 @@ public class TestModelAnimations : MonoBehaviour
     private Animator handAnimation;
     public webSocket ws;
     private Dictionary<int, string> predictedGesture;
+    public calcEMGaverage averageEMG;
 
     private string lastGesture = "";
     private string currentGestureString;
     private bool isAnimating = false;
-    private Queue<int> keyQueue = new Queue<int>();
-    public int queueSize;
 
     void Start()
     {
@@ -22,50 +21,29 @@ public class TestModelAnimations : MonoBehaviour
 
     void Update()
     {
-        int currentGestureKey = ws.currentGestureKey;
-        keyQueue.Enqueue(currentGestureKey);
-
-        if(keyQueue.Count > queueSize)
+        if(ws.allSame)
         {
-            keyQueue.Dequeue();
-        }
 
-        if(keyQueue.Count == queueSize)
-        {
-            bool allSame = true;
-            int firstKey = keyQueue.Peek();
-            foreach(int key in keyQueue)
+            currentGestureString = predictedGesture[ws.getGestureKey()];
+            // Check if gesture has changed
+            if (currentGestureString != lastGesture && !isAnimating)
             {
-                if(key != firstKey)
-                {
-                    allSame = false;
-                    break;
-                }
+                Debug.Log("Playing new animation: " + currentGestureString);
+                handAnimation.ResetTrigger(lastGesture); // Optional cleanup
+                handAnimation.SetTrigger(currentGestureString);
+                lastGesture = currentGestureString;
+                isAnimating = true;
             }
-            if(allSame)
+
+            // Check if current animation is done
+            AnimatorStateInfo stateInfo = handAnimation.GetCurrentAnimatorStateInfo(0);
+
+            if (isAnimating && stateInfo.normalizedTime >= 1f && !stateInfo.IsTag("Idle"))
             {
-                currentGestureString = predictedGesture[firstKey];
-                // Check if gesture has changed
-                if (currentGestureString != lastGesture && !isAnimating)
-                {
-                    Debug.Log("Playing new animation: " + currentGestureString);
-                    handAnimation.ResetTrigger(lastGesture); // Optional cleanup
-                    handAnimation.SetTrigger(currentGestureString);
-                    lastGesture = currentGestureString;
-                    isAnimating = true;
-                }
-
-                // Check if current animation is done
-                AnimatorStateInfo stateInfo = handAnimation.GetCurrentAnimatorStateInfo(0);
-
-                if (isAnimating && stateInfo.normalizedTime >= 1f && !stateInfo.IsTag("Idle"))
-                {
-                    isAnimating = false;
-                }
+                isAnimating = false;
             }
         }
-
-
     }
 }
+
 

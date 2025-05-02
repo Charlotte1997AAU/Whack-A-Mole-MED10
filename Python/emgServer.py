@@ -12,10 +12,10 @@ from scipy.special import softmax
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
-loaded_model = joblib.load('RandomForestClassifier_L.pkl')
+loaded_model = joblib.load('TestData/Participant l/RandomForestClassifier.pkl')
 model_name = type(loaded_model).__name__
 scaler = StandardScaler()
-testSet = pd.read_csv("test Data set\TrainingSet_L.csv")
+testSet = pd.read_csv("TestData/participant l/TrainingSet_L.csv")
 excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 results_list = []
 

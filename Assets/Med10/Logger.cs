@@ -37,7 +37,7 @@ public class Logger : MonoBehaviour
         {1, "Successful Gesture" },
     };
 
-    public enum currentGesture { fist, pinch, pronation, supination, flexion, extension, rest }
+    public enum currentGesture { fist, pinch, flexion, extension}
     [SerializeField] public currentGesture goalGesture; // Which gesture is supposed to be trained in this run
 
 
@@ -106,7 +106,7 @@ public class Logger : MonoBehaviour
     private void OnApplicationQuit()
     {
         // Get the directory path
-        string directoryPath = Path.Combine(Application.dataPath, "MED10", "Logs");
+        string directoryPath = Path.Combine(Application.dataPath, "MED10", "Training Logs");
 
         // Ensure the directory exists
         Directory.CreateDirectory(directoryPath);

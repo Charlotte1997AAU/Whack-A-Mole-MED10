@@ -36,8 +36,11 @@ def trainModel(data, model):
     print(model_cm)
     print("Classification Report for Best Model:")
     print(classification_report(y_test, y_pred_best_model))
+    report_dict = classification_report(y_test, y_pred_best_model, output_dict=True)
+    report_df = pd.DataFrame(report_dict).transpose()
+    report_df.to_csv("TestData/Participant l/classification_report.csv", index=False)
 
-    joblib.dump(model, f"{model_name}_L.pkl")
+    joblib.dump(model, f"TestData/Participant l/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
     """

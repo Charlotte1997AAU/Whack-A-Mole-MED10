@@ -22,7 +22,7 @@ public class triggerBox : MonoBehaviour
     private testLogger testLogger;
     private MovingTarget movingCube;
 
-    private bool isInside = false;
+    public bool isInside = false;
     public float requriedTime = 5.0f;
     public float timeInside = 0f;
     public int attempts = 1;
@@ -30,9 +30,7 @@ public class triggerBox : MonoBehaviour
     public GameObject tracker;
     public static List<Vector3> trackerPositions = new List<Vector3>();
     public Dictionary<int, string> predictedGesture;
-
-
-
+    private TestModelAnimations modelAnimations;
 
     private void Start()
     {
@@ -45,6 +43,7 @@ public class triggerBox : MonoBehaviour
         goalZoneSlider = FindObjectOfType<goalZoneSlider>();
         testLogger = FindObjectOfType<testLogger>();
         movingCube = FindObjectOfType<MovingTarget>();
+        modelAnimations = FindObjectOfType<TestModelAnimations>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -108,6 +107,7 @@ public class triggerBox : MonoBehaviour
                         cubeRenderer.material = testLogger.GestureColor;
                     }
 
+
                     if (!isInside)
                     {
                         isInside = true;
@@ -167,7 +167,7 @@ public class triggerBox : MonoBehaviour
                     hoverScript.setCurrentEvent(0);
                 }
             }
-            else
+            if (stateManager.state == StateManager.State.Testing)
             {
                 sliderFill.resetTimer();
                 isInside = false;

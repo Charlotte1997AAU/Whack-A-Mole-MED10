@@ -40,7 +40,8 @@ featureDataset[["activeCubeX", "activeCubeY"]] = featureDataset[["activeCubeX", 
 finalDataset = featureSelection.calculateDeltaFeatures(featureDataset)
 print("calculated delta values")
 
-finalDataset.to_csv("test Data set/TrainingSetWdeltas_L.csv", index=False)
+featureDataset.to_csv("TestData/Participant l/TrainingSet_L.csv", index=False)
+#finalDataset.to_csv("TestData/Participant c/TrainingSetWdeltas_C.csv", index=False)
 print("Training dataset created")
 
 models = {

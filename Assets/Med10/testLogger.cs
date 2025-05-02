@@ -107,7 +107,6 @@ public class testLogger : MonoBehaviour
 
     public GameObject ActivateCube()
     {
-        Debug.Log(boxes.Count);
         if (boxes.Count == 0)
         {
             Debug.Log("No boxes :(");
@@ -116,6 +115,7 @@ public class testLogger : MonoBehaviour
             movingCube.movingBoxRender.enabled = true;
             movingCube.movingCubePhase = true;
             movingCube.ActivateCube();
+            wall.SetActive(false);
             return activeCube;
         }
 

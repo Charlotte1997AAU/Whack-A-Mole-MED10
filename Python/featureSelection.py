@@ -44,6 +44,16 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         trackerPosList = []
         currentGesture = data['GoalGesture'].iloc[0]
 
+        for column in columns:
+            if column not in dfs.columns:
+                print(f"Column {column} not found in DataFrame")
+                continue
+            
+            if dfs[column].isna().any() or (dfs[column] == '').any():
+                print(f"Empty value found in column {column}, cleaning")
+                dfs = dfs[dfs[column].notna() & (dfs[column] != '')]
+                dfs[column] = pd.to_numeric(dfs[column], errors='coerce').dropna()
+
         # Loop through the data using the window size and step size
         for start in range(0, len(dfs) - windowSize + 1, stepSize):
             # Extract the current window of data
