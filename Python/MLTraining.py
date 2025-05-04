@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def trainModel(data, model):
+def trainModel(data, model, filePath):
     # Load the dataset
     df = data
     model_name = type(model).__name__
@@ -38,9 +38,9 @@ def trainModel(data, model):
     print(classification_report(y_test, y_pred_best_model))
     report_dict = classification_report(y_test, y_pred_best_model, output_dict=True)
     report_df = pd.DataFrame(report_dict).transpose()
-    report_df.to_csv("TestData/Participant l/classification_report.csv", index=False)
+    report_df.to_csv(f"{filePath}/classification_report.csv", index=False)
 
-    joblib.dump(model, f"TestData/Participant l/{model_name}.pkl")
+    joblib.dump(model, f"{filePath}/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
     """

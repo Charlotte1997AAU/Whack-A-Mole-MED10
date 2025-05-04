@@ -10,7 +10,9 @@ import MLTraining
 #import NNTraining
 
 # Path to the data the training set should be created from
-trainingDataPath = "leEpictest"
+fileManagement.moveUnityData(file_extension=".csv")
+trainingDataPath = "tempTestData"
+
 
 # Merge Unity data with EMG data to create full raw dataset
 mergedFiles = fileManagement.processAllFiles(trainingDataPath)
@@ -19,10 +21,6 @@ mergedFiles = fileManagement.processAllFiles(trainingDataPath)
 cleanedFiles = []
 for file in mergedFiles:
     cleanedFiles.append(dataCleanUp.cleanMergedData(file))
-
-#restData = cleanedFiles[0][cleanedFiles[0]['State'] == "Resting"].copy()
-#restData.replace({'GoalGesture': "extension"}, "Resting", inplace=True)
-#cleanedFiles.append(restData)
 
 # Calculate features for EMG channels
 finalFiles = []
@@ -40,7 +38,9 @@ featureDataset[["activeCubeX", "activeCubeY"]] = featureDataset[["activeCubeX", 
 finalDataset = featureSelection.calculateDeltaFeatures(featureDataset)
 print("calculated delta values")
 
-featureDataset.to_csv("TestData/Participant l/TrainingSet_L.csv", index=False)
+filePath, participantNr = fileManagement.createParticipantFolder("TestData")
+
+featureDataset.to_csv(f"{filePath}/TrainingSet_{participantNr}.csv", index=False)
 #finalDataset.to_csv("TestData/Participant c/TrainingSetWdeltas_C.csv", index=False)
 print("Training dataset created")
 
@@ -60,6 +60,6 @@ if trainingModel == models["SGD"]:
     finalDataset = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
 
 # Train model on dataframe
-MLTraining.trainModel(finalDataset, trainingModel)
+MLTraining.trainModel(finalDataset, trainingModel, filePath)
 #NNTraining.trainNN(finalDataset)
 

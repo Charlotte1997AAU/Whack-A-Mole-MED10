@@ -164,7 +164,7 @@ def plot_all_emg_trends(df):
 
 
 def calculateRawEMGToVisualize():
-    data = pd.read_csv("Final Pre Test/Merged/merged_fist_cleanedNew.csv", sep=";")
+    data = pd.read_csv("Archive/Final Pre Test/Merged/merged_fist_cleanedNew.csv", sep=";")
     cubeDataFrames = []
     windowSize = 40
     stepSize = 20
@@ -185,7 +185,7 @@ def calculateRawEMGToVisualize():
 
 
 def visualizeAllFeatures():
-    data = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
     processedData = data[data['GoalGesture'] == 0]
 
     #processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)

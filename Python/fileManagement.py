@@ -1,7 +1,8 @@
 import os
-
 import pandas as pd
 import glob
+import shutil
+from pathlib import Path
 
 letter = "C"
 
@@ -69,7 +70,6 @@ def createTrainingSet(folder):
     df_filtered.to_csv(f"testDataWithPositions_{letter}.csv", index=False)
     print(f"Created test data set from folder {folder} ")
 
-createTrainingSet("Final Pre Test/Merged")
 
 def cleanTrainingSet(fileToClean):
     data = pd.read_csv(fileToClean)
@@ -85,6 +85,62 @@ file_path = f"Data_CleanUp_{letter}"
 #createTrainingSet(file_path)
 #cleanTrainingSet(f"testDataWithPositions_{letter}.csv")
 
+
+def createParticipantFolder(base_path):
+    # Ensure the base path exists
+    os.makedirs(base_path, exist_ok=True)
+
+    # List all folders in the base path that start with "Participant "
+    existing_folders = [f for f in os.listdir(base_path)
+                        if os.path.isdir(os.path.join(base_path, f)) and f.startswith("Participant ")]
+
+    # Extract the participant numbers and find the next one
+    numbers = []
+    for folder in existing_folders:
+        try:
+            num = int(folder.replace("Participant ", ""))
+            numbers.append(num)
+        except ValueError:
+            continue  # Skip folders with unexpected names
+
+    next_number = max(numbers, default=0) + 1
+    new_folder_name = f"Participant {next_number}"
+    new_folder_path = os.path.join(base_path, new_folder_name)
+
+    # Create the new folder
+    os.makedirs(new_folder_path)
+    print(f"Created folder for participant {next_number}")
+    return new_folder_path, next_number
+
+
+def moveUnityData(filename_contains=None, file_extension=None, expected_file_count=8):
+    # Get the root directory (Whack-A-Mole-MED10)
+    script_path = Path(__file__).resolve()
+    project_root = script_path.parents[1]  # 'Python' is one level deep inside root
+
+    # Define relative paths
+    source_dir = project_root / "Assets" / "Med10" / "Training Logs"
+    destination_dir = script_path.parent / "tempTestData"  # Or pass this as a param
+
+    destination_dir.mkdir(exist_ok=True)
+
+    # Move files
+    moved_files = []
+    for file_path in source_dir.rglob("*"):
+        if file_path.is_file():
+            if filename_contains and filename_contains not in file_path.name:
+                continue
+            if file_extension and not file_path.name.endswith(file_extension):
+                continue
+
+            target = destination_dir / file_path.name
+            shutil.move(str(file_path), str(target))
+            moved_files.append(target)
+
+    if len(moved_files) != expected_file_count:
+        print(f"ERROR: Expected {expected_file_count} files, but moved {len(moved_files)}.")
+    else:
+        print(f"Successfully moved {expected_file_count} files.")
 
 # Example usage:
 unityData = "Pre-Pilot test C/Unity_supination_C.csv"
@@ -105,6 +161,6 @@ dataframesUnity = [
 ]
 
 
-#compareIDs("Data_CleanUp_C/leEpictest/Unity_log_2025_04_23_13_56_17_Med10.csv", "Data_CleanUp_C/leEpictest/EMG_log_2025_04_23_13_56_17_Med10.csv")
+#compareIDs("Data_CleanUp_C/tempTestData/Unity_log_2025_04_23_13_56_17_Med10.csv", "Data_CleanUp_C/tempTestData/EMG_log_2025_04_23_13_56_17_Med10.csv")
 
 

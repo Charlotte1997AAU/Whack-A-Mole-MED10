@@ -14,7 +14,7 @@ import plotly.express as px
 import numpy as np
 
 def lda():
-    df = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    df = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
     df = df[df['activeCube'] != -1]
     X = df.drop("GoalGesture", axis=1)
     y = df["GoalGesture"]
@@ -38,7 +38,7 @@ def PCAVisual(X_pca, y):
 
 #MLTraining.trainPCA(data, RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1, max_depth=10, min_samples_split=2))
 def PCAcalc():
-    data = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
     data = data[data['activeCube'] != -1]
     pca = PCA(n_components=0.95)
     X = data.drop(columns=["GoalGesture"])
@@ -88,7 +88,7 @@ data = PCAcalc()
 
 
 def tsne_Visualization():
-    data = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
     data = data[data['activeCube'] != -1]
     X = data.drop(columns=["GoalGesture"])
     y = data["GoalGesture"]
@@ -120,7 +120,7 @@ def tsne_Visualization():
     plt.show()
 
 def umapVisualization():
-    data = pd.read_csv("test Data set/TrainingSetWdeltas_L.csv")
+    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
     data = data[data['activeCube'] != -1]
     X = data.drop(columns=["GoalGesture"])
     y = data["GoalGesture"]

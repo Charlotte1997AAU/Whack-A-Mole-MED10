@@ -7,7 +7,7 @@ import joblib
 loaded_model = joblib.load('NeuralNetworkModel.h5')
 model_name = type(loaded_model).__name__
 
-data = pd.read_csv("test Data set/TrainingSet_L.csv")
+data = pd.read_csv("Archive/test Data set/TrainingSet_L.csv")
 excludeColumns = ["activeCube", "activeCubeX", "activeCubeY"]
 data.drop(columns=excludeColumns, inplace=True)
 
