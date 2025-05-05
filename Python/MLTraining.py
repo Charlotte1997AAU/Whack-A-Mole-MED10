@@ -24,15 +24,6 @@ def trainModel(data, model, filePath):
 
     model.fit(X_train, y_train)
 
-    featureImportanceDF = featureImportance(model, X)
-    featureImportanceDF = featureImportanceDF[featureImportanceDF['Importance'] >= FIthreshold]
-    importantFeatureNames = featureImportanceDF['Feature'].tolist()
-
-    X_filtered = X[importantFeatureNames]
-    X_train, X_test, y_train, y_test = train_test_split(X_filtered, y, test_size=0.2, random_state=42, stratify=y)
-
-    model.fit(X_train, y_train)
-
     # Evaluate the best model on the test set
     y_pred_best_model = model.predict(X_test)
 
@@ -100,9 +91,15 @@ def trainPCA(data, model):
 
 
 def featureImportance(model, X):
-    importances = model.feature_importances_
+    # Check if the model has feature_importances_ attribute (for tree-based models)
+    if hasattr(model, 'feature_importances_'):
+        importances = model.feature_importances_
+    elif hasattr(model, 'coef_'):  # For linear models like SGDClassifier
+        importances = abs(model.coef_[0])  # Use absolute values of the coefficients
+    else:
+        raise AttributeError(f"Model {type(model).__name__} does not have feature_importances_ or coef_ attribute.")
 
-    feature_names = X.columns  # or a list of your feature names
+    feature_names = X.columns  # List of feature names
     importance_df = pd.DataFrame({
         'Feature': feature_names,
         'Importance': importances

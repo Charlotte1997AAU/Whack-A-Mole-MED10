@@ -1,3 +1,4 @@
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
@@ -52,14 +53,21 @@ models = {
                                             n_estimators=100,
                                             max_depth=6,
                                             min_samples_split=10,
-                                            min_samples_leaf=5)
+                                            min_samples_leaf=5),
+
+    "lda" : LinearDiscriminantAnalysis(
+        solver='lsqr',       # Use least squares solution, suitable for large datasets
+        shrinkage='auto',    # Apply automatic shrinkage, which helps with regularization
+        priors=None,         # Use uniform class priors (None means it will be inferred from data)
+        n_components=None,   # Use all components (None means it will be set to min(n_classes-1, n_features))
+        tol=0.0001           # Tolerance for singular matrix handling
+    )
 
 }
 
-trainingModel = models["random_forest"]
+trainingModel = models["lda"]
 
-if trainingModel == models["SGD"]:
-    # Remove unnecessary columns
+if trainingModel == models["SGD"] or trainingModel == models["lda"]:
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
     finalDataset = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
 
