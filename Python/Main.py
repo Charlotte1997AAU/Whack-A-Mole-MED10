@@ -48,8 +48,12 @@ models = {
     "SGD": SGDClassifier(random_state=42, alpha=0.0001, eta0=0.001, learning_rate='optimal',
                           loss='hinge', max_iter=1000, penalty='l2', tol=0.0001, n_jobs=-1),
 
-    "random_forest": RandomForestClassifier(n_estimators=100, random_state=42,
-                                            n_jobs=-1, max_depth=10, min_samples_split=2)
+    "random_forest": RandomForestClassifier(
+                                            n_estimators=100,
+                                            max_depth=6,
+                                            min_samples_split=10,
+                                            min_samples_leaf=5)
+
 }
 
 trainingModel = models["random_forest"]

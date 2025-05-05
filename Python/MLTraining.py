@@ -1,5 +1,5 @@
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, learning_curve
 import dataPreProcessing
 import joblib
 import pandas as pd
@@ -10,6 +10,7 @@ def trainModel(data, model, filePath):
     # Load the dataset
     df = data
     model_name = type(model).__name__
+    FIthreshold = 0.005
 
     # Preprocess the data (standardization)
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
@@ -22,8 +23,15 @@ def trainModel(data, model, filePath):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     model.fit(X_train, y_train)
-    #Feature importance:
-    #featureImportance(model, X_train)
+
+    featureImportanceDF = featureImportance(model, X)
+    featureImportanceDF = featureImportanceDF[featureImportanceDF['Importance'] >= FIthreshold]
+    importantFeatureNames = featureImportanceDF['Feature'].tolist()
+
+    X_filtered = X[importantFeatureNames]
+    X_train, X_test, y_train, y_test = train_test_split(X_filtered, y, test_size=0.2, random_state=42, stratify=y)
+
+    model.fit(X_train, y_train)
 
     # Evaluate the best model on the test set
     y_pred_best_model = model.predict(X_test)
@@ -43,9 +51,9 @@ def trainModel(data, model, filePath):
     joblib.dump(model, f"{filePath}/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
-    """
+    '''
     train_sizes, train_scores, val_scores = learning_curve(
-        random_forest, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
+       model, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
     )
 
     # Plotting the learning curve
@@ -59,7 +67,7 @@ def trainModel(data, model, filePath):
     plt.legend(loc='best')
 
     plt.show()
-    """
+    '''
 
 def trainPCA(data, model):
     # Load the dataset
@@ -100,18 +108,5 @@ def featureImportance(model, X):
         'Importance': importances
     })
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
-    top_20_features = importance_df.head(20)
 
-    plt.figure(figsize=(10, 6))
-
-    # Create a bar plot using seaborn
-    sns.barplot(x='Importance', y='Feature', data=top_20_features, palette='viridis')
-
-    # Add titles and labels
-    plt.title('Feature Importance')
-    plt.xlabel('Importance')
-    plt.ylabel('Feature')
-
-    # Show the plot
-    plt.savefig('feature_importance_plot.png', bbox_inches='tight')
-    plt.show()
+    return importance_df
