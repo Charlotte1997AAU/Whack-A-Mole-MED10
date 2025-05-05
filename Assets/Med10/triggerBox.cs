@@ -111,6 +111,7 @@ public class triggerBox : MonoBehaviour
 
                     if (!isInside)
                     {
+                        testLogger.isInsideLogger = true;
                         isInside = true;
                         sliderFill.isFilling = true;
                         timeInside = 0f;
@@ -122,6 +123,7 @@ public class triggerBox : MonoBehaviour
 
                     if (timeInside >= requriedTime)
                     {
+                        testLogger.isInsideLogger = false;
                         testLogger.DeactivateCube();
                         testLogger.activeCubeCollider.enabled = false;
                         timeInside = 0f;
@@ -171,6 +173,7 @@ public class triggerBox : MonoBehaviour
             }
             if (stateManager.state == StateManager.State.Testing)
             {
+                testLogger.isInsideLogger = false;
                 sliderFill.resetTimer();
                 isInside = false;
                 timeInside = 0f;

@@ -22,6 +22,7 @@ public class testLogger : MonoBehaviour
     public bool testing = false;
     public bool testingBoxes = true;
     public string gestureName;
+    public bool isInsideLogger = false;
 
     public enum goalGestureLatinSquare {goalGestures0, goalGesture1, goalGestures2, goalGestures3 };
     [SerializeField] public goalGestureLatinSquare goalSquare;
@@ -213,7 +214,6 @@ public class testLogger : MonoBehaviour
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"); // Timestamp in real time
             frameNumber = Time.frameCount;
             prediction = ws.getGestureKey();
-
             // If the cube is activated, continue logging it
             string logEntry =
                 $"{timestamp};" +
@@ -222,7 +222,7 @@ public class testLogger : MonoBehaviour
                 $"{(movingCube.isMoving ? "Moving box" : "None")};" +
                 $"{goalGesture};" +
                 $"{prediction};" +
-                $"{(trigger.isInside ? "InCube" : "None")}"
+                $"{(isInsideLogger? "InCube" : "None")}"
                 ;
 
             // Write the log entry to the file
