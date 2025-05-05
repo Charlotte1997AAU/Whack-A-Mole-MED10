@@ -9,10 +9,10 @@ public class goalZoneSlider : MonoBehaviour
     private float idealMin = 30f;
     private float idealMax = 40f;
 
-    private float firstGoalMin = 45;
-    private float firstGoalMax = 55;
-    private float secondGoalMin = 45;
-    private float secondGoalMax = 55;
+    private float firstGoalMin = 25;
+    private float firstGoalMax = 35;
+    private float secondGoalMin = 55;
+    private float secondGoalMax = 65;
     public float offsetY;
     public float offsetX;
 
