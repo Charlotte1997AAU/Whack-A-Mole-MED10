@@ -2,6 +2,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
+from sklearn.svm import SVC
+
 import dataPreProcessing
 import featureSelection
 import fileManagement
@@ -55,19 +57,21 @@ models = {
                                             min_samples_split=10,
                                             min_samples_leaf=5),
 
-    "lda" : LinearDiscriminantAnalysis(
+    "lda": LinearDiscriminantAnalysis(
         solver='lsqr',       # Use least squares solution, suitable for large datasets
         shrinkage='auto',    # Apply automatic shrinkage, which helps with regularization
         priors=None,         # Use uniform class priors (None means it will be inferred from data)
         n_components=None,   # Use all components (None means it will be set to min(n_classes-1, n_features))
         tol=0.0001           # Tolerance for singular matrix handling
-    )
+    ),
+
+    'SVM': SVC(kernel='rbf', C=1.0, gamma='scale', probability=True, random_state=42)
 
 }
 
 trainingModel = models["lda"]
 
-if trainingModel == models["SGD"] or trainingModel == models["lda"]:
+if trainingModel == models["SGD"] or trainingModel == models["SVM"]:
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
     finalDataset = dataPreProcessing.standardizeDataframe(finalDataset, excludeColumns)
 

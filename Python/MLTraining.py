@@ -10,7 +10,6 @@ def trainModel(data, model, filePath):
     # Load the dataset
     df = data
     model_name = type(model).__name__
-    FIthreshold = 0.005
 
     # Preprocess the data (standardization)
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
