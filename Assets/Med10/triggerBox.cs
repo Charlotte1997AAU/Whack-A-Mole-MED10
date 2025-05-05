@@ -10,6 +10,7 @@ public class triggerBox : MonoBehaviour
     public Hover hoverScript;
     public MovingTarget movingTarget;
     public Logger logger;
+    public TextMeshProUGUI textField;
     public goalZoneSlider goalZoneSlider;
     public resetPosition resetScript;
     //private TextMeshPro timerText;
@@ -117,6 +118,7 @@ public class triggerBox : MonoBehaviour
 
                     timeInside += Time.deltaTime;
                     sliderFill.FillSliderOverTime(requriedTime);
+                    textField.text = "";
 
                     if (timeInside >= requriedTime)
                     {

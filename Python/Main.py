@@ -69,7 +69,7 @@ models = {
 
 }
 
-trainingModel = models["lda"]
+trainingModel = models["random_forest"]
 
 if trainingModel == models["SGD"] or trainingModel == models["SVM"]:
     excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]

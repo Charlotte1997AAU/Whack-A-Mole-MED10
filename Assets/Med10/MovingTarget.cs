@@ -12,6 +12,7 @@ public class MovingTarget : MonoBehaviour
     public Collider activeCubeCollider;
     public resetPosition resetScript;
     public Renderer movingBoxRender;
+    public testLogger testLogger;
 
 
     public bool movingCubePhase = false;
@@ -21,6 +22,7 @@ public class MovingTarget : MonoBehaviour
     public float moveSpeed = 1.0f; // Speed of movement
     public bool isMoving = false;
     public LineRenderer lineRenderer;
+    public TextMeshProUGUI textField;
 
     private void Start()
     {
@@ -49,7 +51,8 @@ public class MovingTarget : MonoBehaviour
             {
                 movingBoxRender.material = GestureColor;
             }
-
+            testLogger.goalGesture = testLogger.selectedGoalGestures[0];
+            textField.text = "";
             MoveCube();
         }
     }
@@ -62,7 +65,6 @@ public class MovingTarget : MonoBehaviour
             {
                 movingBoxRender.material = HighLightColor;
             }
-
         }
     }
 
@@ -77,7 +79,8 @@ public class MovingTarget : MonoBehaviour
         {
             gestureCount++;
             DrawGhostPath();
-
+            Debug.Log("Goal Gesture: " + testLogger.gestureName);
+            textField.text = testLogger.gestureName;
             Renderer cubeRenderer = GetComponent<Renderer>(); // Gets the Renderer on this GameObject
             if (cubeRenderer != null && !cubeActivated)
             {
@@ -167,5 +170,6 @@ public class MovingTarget : MonoBehaviour
             Debug.Log("Deactivated Cube: ");
             resetScript.resetPosReady();
         }
+        testLogger.selectedGoalGestures.RemoveAt(0);
     }
 }

@@ -2,6 +2,7 @@
 
 import joblib
 import asyncio
+from sklearn.svm import SVC
 import websockets
 import numpy as np
 import pandas as pd
@@ -10,12 +11,14 @@ import featureSelection
 from sklearn.preprocessing import StandardScaler
 from scipy.special import softmax
 
+participantNr = 1
+
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
-loaded_model = joblib.load('TestData/Participant l/RandomForestClassifier.pkl')
+loaded_model = joblib.load(f'TestData/Participant {participantNr}/RandomForestClassifier.pkl')
 model_name = type(loaded_model).__name__
 scaler = StandardScaler()
-testSet = pd.read_csv("TestData/participant l/TrainingSet_L.csv")
+testSet = pd.read_csv(f"TestData/participant {participantNr}/TrainingSet_{participantNr}.csv")
 excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
 results_list = []
 
@@ -48,7 +51,7 @@ def modelPredict(emg_window):
         class_index = list(loaded_model.classes_).index(predicted_class)
         confidence = round(probability[class_index], 3)
 
-    if model_name == "RandomForestClassifier":
+    if model_name == "RandomForestClassifier" or model_name == "SVC":
         # Get the probabilities for each class
         probabilities = loaded_model.predict_proba(dfWithDeltas)
         
