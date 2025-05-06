@@ -44,6 +44,9 @@ def compareIDs(unityFile, EMGFile):
         unityDf['Timestamp'] = pd.to_datetime(unityDf['Timestamp'])
         emgDf['Timestamp'] = pd.to_datetime(emgDf['Timestamp'])
 
+        unityDf = unityDf.dropna(subset=['Timestamp'])
+        emgDf = emgDf.dropna(subset=['Timestamp'])
+
         gesture = unityDf['GoalGesture'].iloc[0]
         print(f"Successfully merged file for gesture: {gesture}")
 

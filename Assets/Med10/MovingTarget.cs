@@ -79,8 +79,9 @@ public class MovingTarget : MonoBehaviour
         {
             gestureCount++;
             DrawGhostPath();
-            Debug.Log("Goal Gesture: " + testLogger.gestureName);
-            textField.text = testLogger.gestureName;
+            string gestureName = testLogger.gestureMap.ContainsKey(testLogger.goalGesture) ? testLogger.gestureMap[testLogger.goalGesture] : "Unknown";
+            textField.text = gestureName;
+            Debug.Log("Goal Gesture: " + gestureName);
             Renderer cubeRenderer = GetComponent<Renderer>(); // Gets the Renderer on this GameObject
             if (cubeRenderer != null && !cubeActivated)
             {
@@ -167,7 +168,6 @@ public class MovingTarget : MonoBehaviour
             cubeRenderer.material = gridColor;
             cubeActivated = false;
             activeCubeCollider.enabled = false;
-            Debug.Log("Deactivated Cube: ");
             resetScript.resetPosReady();
         }
         testLogger.selectedGoalGestures.RemoveAt(0);
