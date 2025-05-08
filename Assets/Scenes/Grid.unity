@@ -485,7 +485,7 @@ Transform:
   m_Father: {fileID: 2109220435}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!43 &408296437
+--- !u!43 &428017685
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -709,11 +709,11 @@ PrefabInstance:
     - target: {fileID: 2348914, guid: 4d293c8e162f3874b982baadd71153d2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 884864132}
+      objectReference: {fileID: 892133689}
     - target: {fileID: 3380982, guid: 4d293c8e162f3874b982baadd71153d2, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 408296437}
+      objectReference: {fileID: 428017685}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2135,7 +2135,7 @@ MonoBehaviour:
   requiredTime: 1
   MVCRequiredTime: 5
   getMVC: 0
---- !u!21 &884864132
+--- !u!21 &892133689
 Material:
   serializedVersion: 8
   m_ObjectHideFlags: 0
@@ -2828,7 +2828,7 @@ MonoBehaviour:
   testingBoxes: 1
   gestureName: 
   isInsideLogger: 0
-  goalSquare: 2
+  goalSquare: 0
   HighLightColor: {fileID: 2100000, guid: 46a669ddb020f484aa2261a99af5bc8a, type: 2}
   GestureColor: {fileID: 2100000, guid: d7a643abfeeaf9a49948a379db1d9af0, type: 2}
   gridColor: {fileID: 2100000, guid: a062642aa3a4a0d4f97c4974caddbea8, type: 2}
