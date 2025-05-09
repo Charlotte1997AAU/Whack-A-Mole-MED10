@@ -11,7 +11,7 @@ import featureSelection
 from sklearn.preprocessing import StandardScaler
 from scipy.special import softmax
 
-participantNr = 14
+participantNr = 15
 
 WINDOW_SIZE = 40
 NUM_CHANNELS = 11
