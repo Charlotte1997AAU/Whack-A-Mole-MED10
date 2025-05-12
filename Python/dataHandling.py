@@ -109,7 +109,7 @@ emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 gesture_name = "supination"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
 #plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
 
-plot_emg_with_states("fist", states_to_include, emg_signals_to_include)
+#plot_emg_with_states("fist", states_to_include, emg_signals_to_include)
 
 #--------------------Best fitting line from here on---------------------------------
 def plot_all_emg_trends(df):
@@ -184,17 +184,103 @@ def calculateRawEMGToVisualize():
     return emgMeans
 
 
-def visualizeAllFeatures():
+
+def visualizeAllFeaturesDeltaWFlags():
     data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
-    processedData = data[data['GoalGesture'] == 0]
+    processedData = data[data['GoalGesture'] == 1]
+
+    emgData = calculateRawEMGToVisualize()
+    mav = processedData[[f"EMG{i}DELTAMAV" for i in range(1, 9)]]
+    zc = processedData[[f"EMG{i}DELTAZC" for i in range(1, 9)]]
+    slope = processedData[[f"EMG{i}DELTASlope" for i in range(1, 9)]]
+    ssc = processedData[[f"EMG{i}DELTASSC" for i in range(1, 9)]]
+    wfl = processedData[[f"EMG{i}DELTAWFL" for i in range(1, 9)]]
+
+    mavMean = mav.mean(axis=1)
+    zcMean = zc.mean(axis=1)
+    slopeMean = slope.mean(axis=1)
+    sscMean = ssc.mean(axis=1)
+    wflMean = wfl.mean(axis=1)
+
+    minRows = mavMean.shape[0]
+    emgData = emgData[:minRows]
+
+    # === Thresholds based on quantiles ===
+    mavThresh = mavMean.quantile(0.9)
+    slopeThresh = slopeMean.quantile(0.9)
+    zcThresh = zcMean.quantile(0.9)
+    wflThresh = wflMean.quantile(0.9)
+    sscThresh = sscMean.quantile(0.9)
+
+    # === Prepare the features for plotting ===
+    x = np.arange(minRows)
+    feature_info = [
+        ("RAWEMG", emgData, None),  # No threshold for raw EMG
+        ("DeltaMAV", mavMean, mavThresh),
+        ("DeltaZC", zcMean, zcThresh),
+        ("DeltaSlope", slopeMean, slopeThresh),
+        ("DeltaSSC", sscMean, sscThresh),
+        ("DeltaWFL", wflMean, wflThresh)
+    ]
+
+    fig, axes = plt.subplots(len(feature_info), 1, figsize=(10, 9), sharex=True)
+
+    for i, (featureName, featureData, threshold) in enumerate(feature_info):
+        axes[i].plot(x, featureData, label=f"{featureName}", color=f"C{i}")
+        axes[i].set_ylabel(featureName, fontsize=14)
+        axes[i].legend(loc="upper right")
+        axes[i].grid(True)
+
+        if threshold is not None:
+            # Compute onset/offset for this specific feature
+            featureFlag = featureData > threshold
+
+            # Detect start/end transitions
+            prev = False
+            for idx in range(1, len(featureFlag)):
+                if not prev and featureFlag[idx]:
+                    axes[i].axvline(idx, color="green", linestyle="-", linewidth=1.6, alpha=0.8)  # GestureStart
+                elif prev and not featureFlag[idx]:
+                    axes[i].axvline(idx, color="red", linestyle="-", linewidth=1.6, alpha=0.8)  # GestureEnd
+                prev = featureFlag[idx]
+
+            # Optional: plot threshold line for reference
+            # axes[i].axhline(threshold, color="gray", linestyle="--", linewidth=1, alpha=0.5)
+
+    axes[-1].set_xlabel("Time (windows)")
+    fig.suptitle("EMG Signals with Feature-Specific Onset/Offset Detection", fontsize=14)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig("Images/ProcessedEMGSignalsForDeltaPinch.png", dpi=300, bbox_inches="tight")
+    plt.show()
+
+
+visualizeAllFeaturesDeltaWFlags()
+
+
+def alternate_start_end(starts):
+    # Initialize start and end arrays
+    gesture_starts = []
+    gesture_ends = []
+
+    # Loop through the starts and alternate between adding them as start and end
+    for i in range(0, len(starts), 2):  # Loop over even indices (start gestures)
+        gesture_starts.append(starts[i])  # Start of gesture
+        if i + 1 < len(starts):  # If there is a next one (end of gesture)
+            gesture_ends.append(starts[i + 1])  # End of gesture
+
+    return np.array(gesture_starts), np.array(gesture_ends)
+
+def visualizeAllFeaturesNoDetails():
+    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
+    processedData = data[data['GoalGesture'] == 1]
 
     #processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)
     emgData = calculateRawEMGToVisualize()
-    mav = processedData[["EMG1DELTAMAV", "EMG2DELTAMAV", "EMG3DELTAMAV", "EMG4DELTAMAV", "EMG5DELTAMAV", "EMG6DELTAMAV", "EMG7DELTAMAV", "EMG8DELTAMAV"]]
-    zc = processedData[["EMG1DELTAZC", "EMG2DELTAZC", "EMG3DELTAZC", "EMG4DELTAZC", "EMG5DELTAZC", "EMG6DELTAZC", "EMG7DELTAZC", "EMG8DELTAZC"]]
-    slope = processedData[["EMG1DELTASlope", "EMG2DELTASlope", "EMG3DELTASlope", "EMG4DELTASlope", "EMG5DELTASlope", "EMG6DELTASlope",  "EMG7DELTASlope", "EMG8DELTASlope"]]
-    ssc = processedData[["EMG1DELTASSC",  "EMG2DELTASSC", "EMG3DELTASSC", "EMG4DELTASSC", "EMG5DELTASSC", "EMG6DELTASSC", "EMG7DELTASSC", "EMG8DELTASSC"]]
-    wfl = processedData[["EMG1DELTAWFL", "EMG2DELTAWFL", "EMG3DELTAWFL", "EMG4DELTAWFL", "EMG5DELTAWFL", "EMG6DELTAWFL", "EMG7DELTAWFL", "EMG8DELTAWFL"]]
+    mav = processedData[[f"EMG{i}DELTAMAV" for i in range(1, 9)]]
+    zc = processedData[[f"EMG{i}DELTAZC" for i in range(1, 9)]]
+    slope = processedData[[f"EMG{i}DELTASlope" for i in range(1, 9)]]
+    ssc = processedData[[f"EMG{i}DELTASSC" for i in range(1, 9)]]
+    wfl = processedData[[f"EMG{i}DELTAWFL" for i in range(1, 9)]]
 
     mavMean = mav.mean(axis=1)
     zcMean = zc.mean(axis=1)
@@ -214,7 +300,7 @@ def visualizeAllFeatures():
         ("DeltaWFL", wflMean)
     ]
 
-    fig, axes = plt.subplots(len(meanFeatures), 1, figsize=(10, 12), sharex=True)
+    fig, axes = plt.subplots(len(meanFeatures), 1, figsize=(10, 9), sharex=True)
     x = np.arange(mavMean.shape[0])
     for i, (featureName, featureData) in enumerate(meanFeatures):
         axes[i].plot(x, featureData, label=f"{featureName}", color=f"C{i}")
@@ -235,8 +321,6 @@ def visualizeAllFeatures():
     plt.savefig(f"Images/ProcessedEMGSignalsForDeltaPinch.png", dpi=300, bbox_inches="tight")
     # Show plot
     plt.show()
-
-#visualizeAllFeatures()
 
 gesture_files_All = [
     "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
