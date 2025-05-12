@@ -108,10 +108,10 @@ public class triggerBox : MonoBehaviour
                         cubeRenderer.material = testLogger.GestureColor;
                     }
 
+                    testLogger.isInsideLogger = true;
 
                     if (!isInside)
                     {
-                        testLogger.isInsideLogger = true;
                         isInside = true;
                         sliderFill.isFilling = true;
                         timeInside = 0f;

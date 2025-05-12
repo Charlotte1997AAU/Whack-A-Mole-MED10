@@ -33,7 +33,7 @@ tempfiles = [
     "tempFiles/rest.csv"
 ]
 
-emgInsight("pinchData.csv")
+#emgInsight("pinchData.csv")
 
 def readPredictions():
     gesturePredict = []
@@ -50,3 +50,16 @@ def readPredictions():
         print(f"stats for gesture {gestureNum}: \n{stats}\n")
 
 #readPredictions()
+
+def check_emg_columns_for_nan_or_empty(df):
+    """
+    Print EMG columns that contain NaN or empty string values.
+    """
+    emg_columns = [col for col in df.columns if 'EMG' in col]
+    # Create a mask for rows with NaN or empty string in any EMG column
+    mask = df[emg_columns].isna().any(axis=1) | (df[emg_columns] == '').any(axis=1)
+    cleaned_df = df[~mask].copy()
+    return cleaned_df
+
+df = pd.read_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10.csv", sep=";")
+df.to_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10Clean.csv", index=False, sep=";")

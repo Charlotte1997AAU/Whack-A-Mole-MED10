@@ -57,8 +57,18 @@ def createDataFrameWithCalculationsTraining(windowSize, stepSize, filePath):
         # Loop through the data using the window size and step size
         for start in range(0, len(dfs) - windowSize + 1, stepSize):
             # Extract the current window of data
-            currentWindow = dfs[start:start + windowSize]
+            currentWindow = dfs[start:start + windowSize].copy()
 
+            # Clean only relevant columns
+            for col in columns:
+                currentWindow[col] = pd.to_numeric(currentWindow[col], errors='coerce')
+            
+            # Drop rows with NaN in any of the selected columns
+            currentWindow.dropna(subset=columns, inplace=True)
+
+            # Skip this window if it's too small after dropping rows
+            if len(currentWindow) < windowSize:
+                continue
             # Calculate the features (each returns a list of arrays, one array per feature)
             mav = calcMAV(currentWindow, columns)  # Returns a list of arrays for each feature
             mavList.append(mav)

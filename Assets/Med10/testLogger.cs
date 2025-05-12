@@ -95,7 +95,7 @@ public class testLogger : MonoBehaviour
 
     private void Update()
     {
-        gestureName = gestureMap.ContainsKey(goalGesture) ? gestureMap[goalGesture] : "Unknown";
+        
     }
 
     private List<int> GenerateList(int size)
@@ -167,6 +167,7 @@ public class testLogger : MonoBehaviour
         {
             isCubeActivated = true;
             goalGesture = selectedGoalGestures[0];
+            gestureName = gestureMap.ContainsKey(goalGesture) ? gestureMap[goalGesture] : "Unknown";
             Debug.Log("Goal Gesture: " + gestureName);
             textField.text = gestureName;
             int randomIndex = UnityEngine.Random.Range(0, boxes.Count);
