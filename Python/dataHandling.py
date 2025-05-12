@@ -9,6 +9,8 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
+import fileManagement
+import dataCleanUp
 
 
 def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=None, color_shading=True,
@@ -254,8 +256,6 @@ def visualizeAllFeaturesDeltaWFlags():
     plt.show()
 
 
-visualizeAllFeaturesDeltaWFlags()
-
 
 def alternate_start_end(starts):
     # Initialize start and end arrays
@@ -271,16 +271,20 @@ def alternate_start_end(starts):
     return np.array(gesture_starts), np.array(gesture_ends)
 
 def visualizeAllFeaturesNoDetails():
-    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
-    processedData = data[data['GoalGesture'] == 1]
+    #ONLY WORKS IF YOU COMMENT OUT TRACKER VALUES IN CreateDataFrameWithCalculationsTest....
 
-    #processedData = featureSelection.createDataFrameWithCalculationsTraining(40, 20, data)
+    data = pd.read_csv("TestData/VisualizeData/data.csv", sep=";")
+
+    df = pd.DataFrame(data)
+    df = df.drop(columns=["Timestamp", "SessionID"])
+
+    processedData = featureSelection.createDataFrameWithCalculationsTest(df,40, 20)
     emgData = calculateRawEMGToVisualize()
-    mav = processedData[[f"EMG{i}DELTAMAV" for i in range(1, 9)]]
-    zc = processedData[[f"EMG{i}DELTAZC" for i in range(1, 9)]]
-    slope = processedData[[f"EMG{i}DELTASlope" for i in range(1, 9)]]
-    ssc = processedData[[f"EMG{i}DELTASSC" for i in range(1, 9)]]
-    wfl = processedData[[f"EMG{i}DELTAWFL" for i in range(1, 9)]]
+    mav = processedData[[f"EMG{i}MAV" for i in range(1, 9)]]
+    zc = processedData[[f"EMG{i}ZC" for i in range(1, 9)]]
+    slope = processedData[[f"EMG{i}Slope" for i in range(1, 9)]]
+    ssc = processedData[[f"EMG{i}SSC" for i in range(1, 9)]]
+    wfl = processedData[[f"EMG{i}WFL" for i in range(1, 9)]]
 
     mavMean = mav.mean(axis=1)
     zcMean = zc.mean(axis=1)
@@ -300,19 +304,33 @@ def visualizeAllFeaturesNoDetails():
         ("DeltaWFL", wflMean)
     ]
 
+
     fig, axes = plt.subplots(len(meanFeatures), 1, figsize=(10, 9), sharex=True)
     x = np.arange(mavMean.shape[0])
     for i, (featureName, featureData) in enumerate(meanFeatures):
         axes[i].plot(x, featureData, label=f"{featureName}", color=f"C{i}")
-        axes[i].set_ylabel(featureName)  # Label Y-axis for each channel
+        axes[i].set_ylabel(featureName, fontsize=16)  # Label Y-axis for each channel
         axes[i].legend(loc="upper right")
         axes[i].grid(True)
 
     # Common X-axis label
-    axes[-1].set_xlabel("Time (samples)")
+    axes[-1].set_xlabel("Time (samples)", fontsize=16)
 
     # Set a common title
-    fig.suptitle("EMG Signals", fontsize=14)
+    fig.suptitle("EMG Signals", fontsize=16)
+
+    # === Add state annotations ===
+    state_regions = [
+        (0, 12, "Relax", 'lightblue'),
+        (12, 50, "Contraction", 'lightgreen'),
+        (50, mavMean.shape[0], "Relax", 'lightblue')
+    ]
+
+    for start_idx, end_idx, label, color in state_regions:
+        for ax in axes:
+            ax.axvspan(start_idx, end_idx, color=color, alpha=0.3)
+            ax.text((start_idx + end_idx) / 2, ax.get_ylim()[1] * 0.9, label,
+                    horizontalalignment='center', fontsize=16, color='black')
 
     # Adjust layout for better spacing
     plt.tight_layout(rect=[0, 0, 1, 0.96])
@@ -321,6 +339,8 @@ def visualizeAllFeaturesNoDetails():
     plt.savefig(f"Images/ProcessedEMGSignalsForDeltaPinch.png", dpi=300, bbox_inches="tight")
     # Show plot
     plt.show()
+
+visualizeAllFeaturesNoDetails()
 
 gesture_files_All = [
     "Data_CleanUp_L/merged_file_extension_L_cleaned.csv",
