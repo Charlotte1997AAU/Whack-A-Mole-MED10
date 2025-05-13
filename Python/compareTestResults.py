@@ -9,7 +9,7 @@ from pathlib import Path
 
 pd.set_option("display.max_columns", None)
 
-participantNr = 5
+participantNr = 1
 
 
 def calculateTestStats(file, showPlot: bool):
@@ -64,7 +64,7 @@ def calculateTestStats(file, showPlot: bool):
     return results_df
 
 
-testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
+#testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
 
 
 def compareTrainAndTestSet(participantNr: int, testStats):
@@ -298,13 +298,13 @@ def calcOverallAverageScores():
     combined_df = pd.concat([comparison_df, macroDf], ignore_index=True)
 
     print(combined_df)
-    combined_df.to_csv("combinedScores.csv", index=False)
 
-    return comparison_df
+    return combined_df
+
 
 # Uncomment to plot average precision and recall scores for training and testing
-#plotGesturePerformanceComparison(calcAverageScores())
-calcOverallAverageScores()
+#plotGesturePerformanceComparison(calcOverallAverageScores())
+
 
 def presenceMatrix():
     """
@@ -351,3 +351,27 @@ def presenceMatrix():
     print(presence_matrix)
 
 # presenceMatrix()
+
+
+def avgScoresPerBox(boxNum: None):
+    root_dir = Path("TestData")
+    resultsList = []
+
+    # Loop through all participant folders and CSV files
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        if "participant" in dirpath.lower():
+            for file in filenames:
+                if file.endswith(".csv") and "Test_log" in file and "moving" not in file:
+                    full_path = Path(dirpath) / file
+                    testResults = calculateTestStats(full_path, False)
+                    resultsList.append(testResults)
+
+                    combined_df = pd.concat(resultsList, ignore_index=True)
+
+                    # Group by gesture and calculate the mean
+
+    print(combined_df)
+    combined_df.to_csv("combinedTestScores.csv", index=True)
+
+
+avgScoresPerBox(0)
