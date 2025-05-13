@@ -1,9 +1,6 @@
 import pandas as pd
 import umap
-from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.manifold import TSNE
-from sklearn.preprocessing import StandardScaler
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
@@ -12,6 +9,13 @@ import seaborn as sns
 import MLTraining
 import plotly.express as px
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.random_projection import GaussianRandomProjection
+from sklearn.manifold import MDS
+from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import StandardScaler
 
 def lda():
     df = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
@@ -84,7 +88,7 @@ def PCAcalc():
     return df_pca
 
 
-data = PCAcalc()
+#data = PCAcalc()
 
 
 def tsne_Visualization():
@@ -120,39 +124,115 @@ def tsne_Visualization():
     plt.show()
 
 def umapVisualization():
-    data = pd.read_csv("Archive/test Data set/TrainingSetWdeltas_L.csv")
+    data = pd.read_csv("Archive/test Data set/TrainingSet_L.csv")
     data = data[data['activeCube'] != -1]
     X = data.drop(columns=["GoalGesture"])
     y = data["GoalGesture"]
 
+    # Map labels to gesture names
+    label_map = {1: "extension", 2: "fist", 3: "flexion", 4: "pinch"}
+    y_named = y.map(label_map)
+
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    reducer = umap.UMAP(n_components=3, random_state=42, metric='correlation', min_dist=0.05, n_neighbors=7)
+    reducer = umap.UMAP(n_components=3, random_state=42, metric='euclidean', min_dist=0.05, n_neighbors=7)
     X_umap = reducer.fit_transform(X_scaled)
 
-    umap_df = pd.DataFrame(X_umap, columns=["Dim1", "Dim2", "Dim3"])  # ✅
-    umap_df["label"] = y.astype(str)
+    umap_df = pd.DataFrame(X_umap, columns=["Dim1", "Dim2", "Dim3"])
+    umap_df["label"] = y_named.astype(str)
 
+    # Matplotlib 3D Plot
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
     scatter = ax.scatter(X_umap[:, 0], X_umap[:, 1], X_umap[:, 2], c=y, cmap="Set2", s=50)
-    legend = ax.legend(*scatter.legend_elements(), title="Label")
+    legend = ax.legend(*scatter.legend_elements(), title="Gesture")
     ax.add_artist(legend)
     plt.title("UMAP: 3D Gesture Clusters")
     plt.show()
 
+    # Interactive Plotly 3D Plot
     fig = px.scatter_3d(
         umap_df,
         x="Dim1", y="Dim2", z="Dim3",
         color="label",
         title="UMAP: 3D Gesture Clusters (Interactive)",
-        opacity=0.8
+        opacity=0.5
     )
 
     fig.show()
+    fig.write_html("umap3DplotLEu.html")
 
-    fig.write_html("umap3DplotL.html")
 
 
+def moredimension():
+    data = pd.read_csv("Archive/test Data set/TrainingSet_L.csv")
+    data = data[data['activeCube'] != -1]  # Filter out rows where activeCube is -1
+    X = data.drop(columns=["GoalGesture", "activeCube"])  # Features (excluding label and 'activeCube')
+    y = data["GoalGesture"]  # Label (GoalGesture)
+
+    # Scale data to standardize features (important for some methods)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # PCA (Principal Component Analysis)
+    pca = PCA(n_components=3)
+    pca_result = pca.fit_transform(X_scaled)
+
+    # Random Projection
+    rp = GaussianRandomProjection(n_components=3)
+    rp_result = rp.fit_transform(X_scaled)
+
+    # MDS (Multidimensional Scaling)
+    mds = MDS(n_components=3, random_state=42)
+    mds_result = mds.fit_transform(X_scaled)
+
+    # Truncated SVD (Singular Value Decomposition)
+    svd = TruncatedSVD(n_components=3)
+    svd_result = svd.fit_transform(X_scaled)
+
+    # Create a plot to visualize the results in 3D
+    fig = plt.figure(figsize=(14, 10))
+
+    # PCA Plot
+    ax1 = fig.add_subplot(221, projection='3d')
+    scatter = ax1.scatter(pca_result[:, 0], pca_result[:, 1], pca_result[:, 2], c=y, cmap='viridis', s=5)
+    ax1.set_title('PCA')
+    ax1.set_xlabel('PC1')
+    ax1.set_ylabel('PC2')
+    ax1.set_zlabel('PC3')
+    fig.colorbar(scatter, ax=ax1)
+
+    # Random Projection Plot
+    ax2 = fig.add_subplot(222, projection='3d')
+    scatter = ax2.scatter(rp_result[:, 0], rp_result[:, 1], rp_result[:, 2], c=y, cmap='viridis', s=5)
+    ax2.set_title('Random Projection')
+    ax2.set_xlabel('RP1')
+    ax2.set_ylabel('RP2')
+    ax2.set_zlabel('RP3')
+    fig.colorbar(scatter, ax=ax2)
+
+    # MDS Plot
+    ax3 = fig.add_subplot(223, projection='3d')
+    scatter = ax3.scatter(mds_result[:, 0], mds_result[:, 1], mds_result[:, 2], c=y, cmap='viridis', s=5)
+    ax3.set_title('MDS')
+    ax3.set_xlabel('MDS1')
+    ax3.set_ylabel('MDS2')
+    ax3.set_zlabel('MDS3')
+    fig.colorbar(scatter, ax=ax3)
+
+    # Truncated SVD Plot
+    ax4 = fig.add_subplot(224, projection='3d')
+    scatter = ax4.scatter(svd_result[:, 0], svd_result[:, 1], svd_result[:, 2], c=y, cmap='viridis', s=5)
+    ax4.set_title('Truncated SVD')
+    ax4.set_xlabel('SVD1')
+    ax4.set_ylabel('SVD2')
+    ax4.set_zlabel('SVD3')
+    fig.colorbar(scatter, ax=ax4)
+
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
+
+moredimension()
 
