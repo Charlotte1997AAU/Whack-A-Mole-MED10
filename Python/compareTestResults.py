@@ -1,15 +1,17 @@
 import os
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay, precision_recall_fscore_support
 from pathlib import Path
+
 
 pd.set_option("display.max_columns", None)
 
-participantNr = 1
+participantNr = 6
 
 
 def calculateTestStats(file, showPlot: bool):
@@ -64,8 +66,8 @@ def calculateTestStats(file, showPlot: bool):
     return results_df
 
 
-#testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
-
+testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
+print(testStats)
 
 def compareTrainAndTestSet(participantNr: int, testStats):
     root_dir = Path("TestData")
@@ -353,25 +355,183 @@ def presenceMatrix():
 # presenceMatrix()
 
 
-def avgScoresPerBox(boxNum: None):
+def avgScoresPerBox(boxNum: int = None, printScores: bool = False):
     root_dir = Path("TestData")
     resultsList = []
 
-    # Loop through all participant folders and CSV files
+    # Collect all data
     for dirpath, dirnames, filenames in os.walk(root_dir):
         if "participant" in dirpath.lower():
             for file in filenames:
                 if file.endswith(".csv") and "Test_log" in file and "moving" not in file:
                     full_path = Path(dirpath) / file
-                    testResults = calculateTestStats(full_path, False)
+                    testResults = pd.read_csv(full_path, sep=";")
                     resultsList.append(testResults)
 
-                    combined_df = pd.concat(resultsList, ignore_index=True)
+    # Combine all DataFrames
+    combined_df = pd.concat(resultsList, ignore_index=True)
+    combined_df = combined_df.dropna(subset=['ActivatedCube'])
+    cube_names = sorted(
+        combined_df['ActivatedCube'].unique(),
+        key=lambda x: int(str(x).split()[-1])
+    )
 
-                    # Group by gesture and calculate the mean
+    # Helper to calculate scores for a single cube
+    def compute_scores_for_cube(df, cube_name):
+        y_true = df['GoalGesture']
+        y_pred = df['Prediction']
+        labels = sorted(df['GoalGesture'].unique())
+        gesture_names = {
+            0: "Extension",
+            1: "Fist",
+            2: "Flexion",
+            3: "Pinch"
+        }
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            y_true, y_pred, labels=labels, zero_division=0
+        )
 
-    print(combined_df)
-    combined_df.to_csv("combinedTestScores.csv", index=True)
+        gesture_labels = [gesture_names.get(label, str(label)) for label in labels]
+
+        return pd.DataFrame({
+            'gesture': gesture_labels,
+            'precision': precision,
+            'recall': recall,
+            'f1-score': f1
+        })
+
+    # If a specific cube is provided
+    if boxNum is not None:
+        cubeName = f"Cube {boxNum}"
+        filtered_df = combined_df[combined_df['ActivatedCube'] == cubeName]
+        scores_df = compute_scores_for_cube(filtered_df, cubeName)
+        return scores_df
+
+    # If no cube specified, compute for all cubes
+    else:
+        cube_scores = {}
+        for cubeName in cube_names:
+            filtered_df = combined_df[combined_df['ActivatedCube'] == cubeName]
+            scores_df = compute_scores_for_cube(filtered_df, cubeName)
+            cube_scores[cubeName] = scores_df
+
+    if printScores:
+        print(f"\nScores for {cubeName}:\n{scores_df}")
+
+    return cube_scores
+
+def plot_cube_scores(cube_scores: dict):
+    sns.set(style="whitegrid")
+
+    num_cubes = len(cube_scores)
+    rows, cols = 3, 3
+    fig, axes = plt.subplots(rows, cols, figsize=(18, 12))
+    fig.suptitle("Performance Metrics per Cube", fontsize=18, y=1.07)  # Move title up
+
+    axes = axes.flatten()
+    shared_handles, shared_labels = None, None
+
+    desired_order = [2, 5, 8, 1, 4, 7, 0, 3, 6]
+    ordered_keys = [f"Cube {i}" for i in desired_order]
+
+    for idx, cube_name in enumerate(ordered_keys):
+        df = cube_scores.get(cube_name)
+        if df is None:
+            continue  # skip if this cube isn't in the results
+
+        ax = axes[idx]
+
+        melted_df = df.melt(
+            id_vars='gesture',
+            value_vars=['precision', 'recall', 'f1-score'],
+            var_name='metric',
+            value_name='score'
+        )
+
+        show_legend = (shared_handles is None)
+        sns.barplot(
+            data=melted_df, x='gesture', y='score', hue='metric',
+            ax=ax, legend=show_legend
+        )
+        ax.set_title(cube_name)
+        ax.set_ylim(0, 1)
+        ax.set_xlabel("")
+        ax.set_ylabel("Score")
+
+        if show_legend:
+            shared_handles, shared_labels = ax.get_legend_handles_labels()
+            ax.legend_.remove()
+
+    # Remove unused subplots
+    for i in range(idx + 1, len(axes)):
+        fig.delaxes(axes[i])
+
+    # Add shared legend — move it slightly lower
+    fig.legend(
+        shared_handles,
+        shared_labels,
+        title="Metric",
+        loc='upper center',
+        ncol=3,
+        fontsize='medium',  # Slightly smaller font
+        title_fontsize='medium',  # Smaller title
+        bbox_to_anchor=(0.515, 0.915),
+        frameon=True,  # Optional: remove box around legend
+        handletextpad=0.5,  # Space between marker and text
+        columnspacing=0.8,  # Space between columns
+        labelspacing=0.3  # Vertical space between entries
+    )
 
 
-avgScoresPerBox(0)
+    # Leave more top margin for legend + title
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.subplots_adjust(top=0.9)  # Reserve space at the top
+    plt.show()
+
+
+def print_extreme_scores(cube_scores: dict):
+    metrics = ['precision', 'recall', 'f1-score']
+    gestures = cube_scores[next(iter(cube_scores))]['gesture'].tolist()
+
+    for gesture in gestures:
+        print(f"\n{gesture}:")
+        for metric in metrics:
+            highest_value = -1
+            lowest_value = 2  # precision/recall/f1 are all <= 1
+
+            highest_cube = None
+            lowest_cube = None
+
+            for cube_name, df in cube_scores.items():
+                value = df.loc[df['gesture'] == gesture, metric].values[0]
+                if value > highest_value:
+                    highest_value = value
+                    highest_cube = cube_name
+                if value < lowest_value:
+                    lowest_value = value
+                    lowest_cube = cube_name
+
+            difference = highest_value - lowest_value
+
+            print(f"  Highest {metric} in {highest_cube} ({highest_value:.2%})")
+            print(f"  Lowest  {metric} in {lowest_cube} ({lowest_value:.2%})")
+            print(f"  → Difference: {difference:.2%}")
+
+    avg_f1_scores = {}
+
+    for cube_name, df in cube_scores.items():
+        avg_f1 = df['f1-score'].mean()
+        avg_f1_scores[cube_name] = avg_f1
+
+    best_cube = max(avg_f1_scores, key=avg_f1_scores.get)
+    worst_cube = min(avg_f1_scores, key=avg_f1_scores.get)
+
+    print("\nOverall cube performance (by average f1-score):")
+    print(f"  Best performing cube: {best_cube} ({avg_f1_scores[best_cube]:.2%})")
+    print(f"  Worst performing cube: {worst_cube} ({avg_f1_scores[worst_cube]:.2%})")
+    print(f"  → Difference: {(avg_f1_scores[best_cube] - avg_f1_scores[worst_cube]):.2%}")
+
+
+#scores = avgScoresPerBox()
+#print_extreme_scores(scores)
+#plot_cube_scores(scores)
