@@ -3,10 +3,13 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib
+from scipy.stats import shapiro, kruskal, f_oneway, levene
+
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay, precision_recall_fscore_support
 from pathlib import Path
+from collections import defaultdict
 
 
 pd.set_option("display.max_columns", None)
@@ -67,7 +70,7 @@ def calculateTestStats(file, showPlot: bool):
 
 
 testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
-print(testStats)
+#print(testStats)
 
 def compareTrainAndTestSet(participantNr: int, testStats):
     root_dir = Path("TestData")
@@ -110,13 +113,13 @@ def compareTrainAndTestSet(participantNr: int, testStats):
     # Align and compare
     try:
         comparison_df = pd.concat(
-            [train_df.add_suffix(" (Train)"), test_df.add_suffix(" (Test)")],
+            [train_df.add_suffix(" (Offline)"), test_df.add_suffix(" (Online)")],
             axis=1,
             join="inner"
         )
 
         comparison_df = (comparison_df * 100).round(2)
-        comparison_df = comparison_df.drop(['gesture (Test)'], axis=1)
+        comparison_df = comparison_df.drop(['gesture (Online)'], axis=1)
 
         # Add gesture names
         gesture_names = {
@@ -137,7 +140,7 @@ def compareTrainAndTestSet(participantNr: int, testStats):
         print(f"Failed to compare classification reports: {e}")
 
 
-#comparison_df = compareTrainAndTestSet(participantNr, testStats)
+comparison_df = compareTrainAndTestSet(participantNr, testStats)
 
 
 def plotGesturePerformanceComparison(comparison_df):
@@ -152,6 +155,7 @@ def plotGesturePerformanceComparison(comparison_df):
 
     # Reset index if gesture names are in index
     df = comparison_df.copy()
+    df = df[df['Gesture'] != 'Macro']
     if df.index.name or not df.index.equals(pd.RangeIndex(len(df))):
         df = df.reset_index()
         df = df.rename(columns={'index': 'Gesture'})
@@ -168,7 +172,7 @@ def plotGesturePerformanceComparison(comparison_df):
     # Create grouped bar chart
     plt.figure(figsize=(12, 6))  # Adjusted figure size for better spacing
     metrics = ['precision', 'recall', 'f1-score']
-    sets = ['Train', 'Test']
+    sets = ['Offline', 'Online']
     bar_width = 0.1  # Reduced bar width for better separation between bars
     gap_between_groups = 0.1  # Added gap between metric groups
     gestures = df['Gesture'].tolist()
@@ -191,16 +195,18 @@ def plotGesturePerformanceComparison(comparison_df):
             plt.bar(x_pos, subset['Score'], width=bar_width, label=f"{metric.capitalize()} ({set_type})")
 
     # Formatting
-    plt.xticks([xi + bar_width for xi in x], gestures)
-    plt.ylabel("Score (%)")
-    plt.title("Train vs Test Gesture Performance")
-    plt.legend()
+    plt.xticks([xi + bar_width for xi in x], gestures, fontsize=16, fontweight='bold')
+    plt.yticks(fontsize=16, fontweight='bold')
+    plt.ylabel("Score (%)", fontsize=16, fontweight='bold')
+    plt.title("Offline vs Online Gesture Performance", fontsize=18, fontweight='bold')
+    plt.legend(fontsize=14, loc='lower center')
     plt.grid(True, axis='y', linestyle='--', alpha=0.5)
     plt.tight_layout()
+    plt.savefig("trainVsTestPerformance.png")
     plt.show()
 
 
-#plotGesturePerformanceComparison(comparison_df)
+plotGesturePerformanceComparison(comparison_df)
 
 
 def calcOverallAverageScores():
@@ -266,13 +272,13 @@ def calcOverallAverageScores():
                     averagesTestDf = combined_df.groupby("gesture").mean(numeric_only=True).reset_index()
 
     comparison_df = pd.concat(
-        [averagesTrainDf.add_suffix(" (Train)"), averagesTestDf.add_suffix(" (Test)")],
+        [averagesTrainDf.add_suffix(" (Offline)"), averagesTestDf.add_suffix(" (Online)")],
         axis=1,
         join="inner"
     )
 
     comparison_df = (comparison_df * 100).round(2)
-    comparison_df = comparison_df.drop(['gesture (Train)', 'gesture (Test)'], axis=1)
+    comparison_df = comparison_df.drop(['gesture (Offline)', 'gesture (Online)'], axis=1)
 
     # Add gesture names
     gesture_names = {
@@ -287,12 +293,12 @@ def calcOverallAverageScores():
     macroStats = []
     macroStats.append({
         'Gesture': "Macro",
-        'precision (Train)': np.mean(comparison_df['precision (Train)']),
-        'recall (Train)': np.mean(comparison_df['recall (Train)']),
-        'f1-score (Train)': np.mean(comparison_df['f1-score (Train)']),
-        'precision (Test)': np.mean(comparison_df['precision (Test)']),
-        'recall (Test)': np.mean(comparison_df['recall (Test)']),
-        'f1-score (Test)': np.mean(comparison_df['f1-score (Test)']),
+        'precision (Offline)': np.mean(comparison_df['precision (Offline)']),
+        'recall (Offline)': np.mean(comparison_df['recall (Offline)']),
+        'f1-score (Offline)': np.mean(comparison_df['f1-score (Offline)']),
+        'precision (Online)': np.mean(comparison_df['precision (Online)']),
+        'recall (Online)': np.mean(comparison_df['recall (Online)']),
+        'f1-score (Online)': np.mean(comparison_df['f1-score (Online)']),
     })
 
     macroDf = pd.DataFrame(macroStats)
@@ -405,20 +411,28 @@ def avgScoresPerBox(boxNum: int = None, printScores: bool = False):
         cubeName = f"Cube {boxNum}"
         filtered_df = combined_df[combined_df['ActivatedCube'] == cubeName]
         scores_df = compute_scores_for_cube(filtered_df, cubeName)
+        if printScores:
+            print(f"\nScores for {cubeName}:\n{scores_df}")
         return scores_df
 
     # If no cube specified, compute for all cubes
     else:
         cube_scores = {}
+        f1_scores_per_cube = {}  # This will store macro F1 scores per cube
+
         for cubeName in cube_names:
             filtered_df = combined_df[combined_df['ActivatedCube'] == cubeName]
             scores_df = compute_scores_for_cube(filtered_df, cubeName)
+            if printScores:
+                print(f"\nScores for {cubeName}:\n{scores_df}")
             cube_scores[cubeName] = scores_df
 
-    if printScores:
-        print(f"\nScores for {cubeName}:\n{scores_df}")
+            # Compute and store macro F1 score
+            macro_f1 = scores_df['f1-score'].mean()
+            f1_scores_per_cube[cubeName] = macro_f1
 
-    return cube_scores
+        return cube_scores, f1_scores_per_cube
+
 
 def plot_cube_scores(cube_scores: dict):
     sns.set(style="whitegrid")
@@ -532,6 +546,58 @@ def print_extreme_scores(cube_scores: dict):
     print(f"  → Difference: {(avg_f1_scores[best_cube] - avg_f1_scores[worst_cube]):.2%}")
 
 
-#scores = avgScoresPerBox()
+scores, f1_scores_per_cube = avgScoresPerBox(printScores=False)
 #print_extreme_scores(scores)
 #plot_cube_scores(scores)
+
+
+def computeANOVA():
+    root_dir = Path("TestData")
+    participant_f1s = defaultdict(lambda: defaultdict(list))  # participant_f1s[participant][cube] = list of f1s
+
+    for dirpath, _, filenames in os.walk(root_dir):
+        if "participant" in dirpath.lower():
+            participant_name = Path(dirpath).name
+            for file in filenames:
+                if file.endswith(".csv") and "Test_log" in file and "moving" not in file:
+                    full_path = Path(dirpath) / file
+                    df = pd.read_csv(full_path, sep=";")
+                    df = df.dropna(subset=['ActivatedCube', 'GoalGesture', 'Prediction'])
+
+                    for cube_name, cube_df in df.groupby("ActivatedCube"):
+                        y_true = cube_df['GoalGesture']
+                        y_pred = cube_df['Prediction']
+
+                        try:
+                            macro_f1 = f1_score(y_true, y_pred, average='macro', zero_division=0)
+                            participant_f1s[participant_name][cube_name].append(macro_f1)
+                        except Exception as e:
+                            print(f"Error computing F1 for {participant_name} - {cube_name}: {e}")
+
+    cube_f1_scores = defaultdict(list)
+
+    for participant, cube_scores in participant_f1s.items():
+        for cube, scores in cube_scores.items():
+            if scores:
+                cube_f1_scores[cube].extend(scores)
+
+    # Only include cubes with at least 2 samples
+    valid_groups = [scores for scores in cube_f1_scores.values() if len(scores) >= 2]
+    if len(valid_groups) >= 2:
+        levene_stat, levene_p = levene(*valid_groups)
+        print(f"Levene's test: W = {levene_stat:.4f}, p = {levene_p:.4f}")
+
+        if levene_p < 0.05:
+            print("→ Variances are significantly different (heteroscedasticity)")
+        else:
+            print("→ Variances are not significantly different (homoscedasticity assumption holds)")
+    else:
+        print("Not enough data for Levene's test.")
+
+    f_stat, p_val = f_oneway(*valid_groups)
+
+    print(f"One-way ANOVA F = {f_stat:.4f}, p = {p_val:.4f}")
+
+
+#computeANOVA()
+
