@@ -1,10 +1,13 @@
 import os
+import re
+from datetime import timedelta
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib
 from scipy.stats import shapiro, kruskal, f_oneway, levene
-
+import glob
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay, precision_recall_fscore_support
@@ -14,7 +17,7 @@ from collections import defaultdict
 
 pd.set_option("display.max_columns", None)
 
-participantNr = 6
+participantNr = 1
 
 
 def calculateTestStats(file, showPlot: bool):
@@ -69,8 +72,9 @@ def calculateTestStats(file, showPlot: bool):
     return results_df
 
 
-testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
+#testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
 #print(testStats)
+
 
 def compareTrainAndTestSet(participantNr: int, testStats):
     root_dir = Path("TestData")
@@ -140,7 +144,7 @@ def compareTrainAndTestSet(participantNr: int, testStats):
         print(f"Failed to compare classification reports: {e}")
 
 
-comparison_df = compareTrainAndTestSet(participantNr, testStats)
+#comparison_df = compareTrainAndTestSet(participantNr, testStats)
 
 
 def plotGesturePerformanceComparison(comparison_df):
@@ -206,7 +210,51 @@ def plotGesturePerformanceComparison(comparison_df):
     plt.show()
 
 
-plotGesturePerformanceComparison(comparison_df)
+#plotGesturePerformanceComparison(comparison_df)
+
+
+def plotMacroF1ByParticipant(base_path="TestData"):
+    macro_f1_scores = []
+
+    # Loop through folders in base_path that start with 'Participant '
+    for folder in os.listdir(base_path):
+        if folder.startswith("Participant "):
+            try:
+                participantNr = int(folder.split(" ")[1])
+                file_path = os.path.join(base_path, folder, f"Test_log_{participantNr}.csv")
+
+                # Get gesture-level stats
+                testStats = calculateTestStats(file_path, False)
+
+                # Compute macro F1-score
+                macro_f1 = testStats["f1-score"].mean()
+                macro_f1_scores.append((participantNr, macro_f1))
+
+            except Exception as e:
+                print(f"Skipping {folder}: {e}")
+
+    # Convert to DataFrame for plotting
+    df = pd.DataFrame(macro_f1_scores, columns=["Participant", "Macro F1"])
+    df = df.sort_values("Participant")
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.bar(df["Participant"], df["Macro F1"], color="steelblue", width=0.6)
+
+    plt.title("Macro F1-Score Across Participants", fontsize=16, fontweight='bold')
+    plt.xlabel("Participant Number", fontsize=14, fontweight='bold')
+    plt.ylabel("Macro F1-Score", fontsize=14, fontweight='bold')
+    plt.xticks(df["Participant"], fontsize=12, fontweight='bold')
+    plt.yticks(fontsize=12, fontweight='bold')
+    plt.ylim(0, 1)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend(fontsize=12)
+    plt.tight_layout()
+    plt.savefig("macro_f1_by_participant.png")
+    plt.show()
+
+
+#plotMacroF1ByParticipant()
 
 
 def calcOverallAverageScores():
@@ -546,9 +594,154 @@ def print_extreme_scores(cube_scores: dict):
     print(f"  → Difference: {(avg_f1_scores[best_cube] - avg_f1_scores[worst_cube]):.2%}")
 
 
-scores, f1_scores_per_cube = avgScoresPerBox(printScores=False)
+#scores, f1_scores_per_cube = avgScoresPerBox(printScores=False)
 #print_extreme_scores(scores)
 #plot_cube_scores(scores)
+
+
+def natural_key(string):
+    """Sorts strings containing numbers in human order."""
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(r'(\d+)', string)]
+
+
+def calcMovingBoxes():
+    root_dir = Path("TestData")
+    participant_data = defaultdict(list)  # key = participant name, value = list of DataFrames
+
+    # Step 1: Collect and group data by participant
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        if "participant" in dirpath.lower():
+            participant_name = Path(dirpath).name  # Use directory name as participant ID
+            for file in filenames:
+                if file.endswith(".csv") and "Test_log" in file:
+                    full_path = Path(dirpath) / file
+                    df = pd.read_csv(full_path, sep=";")
+                    df = df[(df['movingCube'] == 'Moving box')].copy()
+                    df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
+                    df.dropna(subset=['Timestamp'], inplace=True)
+                    if not df.empty:
+                        participant_data[participant_name].append(df)
+
+    # Step 2: Calculate stats per participant
+    participant_results = {}  # key = participant, value = results DataFrame
+    direction_results = []
+
+    for participant, df_list in participant_data.items():
+        result_stats = []
+
+        # Combine all relevant DataFrames for this participant
+        combined_df = pd.concat(df_list, ignore_index=True)
+        combined_df['GoalGesture'] = combined_df['GoalGesture'].astype(int)
+        combined_df['Prediction'] = combined_df['Prediction'].astype(int)
+
+        gesture_names = {
+            0: "Extension",
+            1: "Fist",
+            2: "Flexion",
+            3: "Pinch"
+        }
+
+        # Step 3: Compute metrics per gesture
+        for gesture in sorted(gesture_names.keys()):
+            true_labels = (combined_df['GoalGesture'] == gesture).astype(int)
+            pred_labels = (combined_df['Prediction'] == gesture).astype(int)
+
+            precision = precision_score(true_labels, pred_labels, zero_division=0)
+            recall = recall_score(true_labels, pred_labels, zero_division=0)
+            f1 = f1_score(true_labels, pred_labels, zero_division=0)
+
+            result_stats.append({
+                'gesture': gesture_names[gesture],
+                'precision': precision,
+                'recall': recall,
+                'f1-score': f1
+            })
+
+        results_df = pd.DataFrame(result_stats)
+        participant_results[participant] = results_df
+
+        # === Step 3b: Movement Direction Analysis ===
+        directions = ["Right", "Up", "Left", "Down"]
+        movement_duration = pd.Timedelta(seconds=2.5)
+
+        # Sort and label movement chunks
+        combined_df = combined_df.sort_values(by='Timestamp').reset_index(drop=True)
+        start_time = combined_df['Timestamp'].iloc[0]
+        end_time = combined_df['Timestamp'].iloc[-1]
+        current_time = start_time
+        direction_idx = 0
+
+        combined_df['MovementDirection'] = pd.Series(dtype="object")
+
+        while current_time < end_time:
+            next_time = current_time + movement_duration
+            mask = (combined_df['Timestamp'] >= current_time) & (combined_df['Timestamp'] < next_time)
+            combined_df.loc[mask, 'MovementDirection'] = directions[direction_idx % 4]
+            direction_idx += 1
+            current_time = next_time
+
+        combined_df.dropna(subset=['MovementDirection'], inplace=True)
+
+        for direction in directions:
+            df_direction = combined_df[combined_df['MovementDirection'] == direction]
+            if not df_direction.empty:
+                f1 = f1_score(df_direction['GoalGesture'], df_direction['Prediction'], average='macro', zero_division=0)
+                direction_results.append({
+                    'participant': participant,
+                    'direction': direction,
+                    'f1_score': f1
+                })
+
+    # Step 4: Print or return the results
+    for participant in sorted(participant_results.keys(), key=natural_key):
+        print(f"\n=== Results for {participant} ===")
+        print(participant_results[participant])
+
+    # Optional: return both gesture stats and direction stats
+    direction_df = pd.DataFrame(direction_results)
+    print(f"\nMacro f1 per direction: \n {direction_df.groupby('direction')['f1_score'].mean()}")
+
+    grouped = [group['f1_score'].values for _, group in direction_df.groupby('direction')]
+    stat, p = kruskal(*grouped)
+    print(f"\nKruskal-Wallis for moving: \n H = {stat:.3f}, p = {p:.3f}")
+
+    return participant_results, direction_df  # optional: return for further processing
+
+
+participantResults, directionResults = calcMovingBoxes()
+
+
+def movingBoxKruskalWallis(movingBoxResults):
+    long_data = []
+
+    for participant, df in movingBoxResults.items():
+        for _, row in df.iterrows():
+            long_data.append({
+                'participant': participant,
+                'gesture': row['gesture'],
+                'f1-score': row['f1-score']
+            })
+
+    anova_df = pd.DataFrame(long_data)
+
+    for gesture in anova_df['gesture'].unique():
+        scores = anova_df[anova_df['gesture'] == gesture]['f1-score']
+        stat, p = shapiro(scores)
+        print(f"{gesture} normality p-value: {p:.3f}")
+
+    groups = [anova_df[anova_df['gesture'] == g]['f1-score'] for g in anova_df['gesture'].unique()]
+    stat, p = levene(*groups)
+    print(f"Levene’s test p-value: {p:.3f}")
+
+    groups = [anova_df[anova_df['gesture'] == g]['f1-score'] for g in anova_df['gesture'].unique()]
+
+    # Run Kruskal-Wallis H-test
+    kruskal_result = kruskal(*groups)
+    print(f"Kruskal-Wallis H = {kruskal_result.statistic:.3f}, p = {kruskal_result.pvalue:.3f}")
+
+
+#movingBoxKruskalWallis(participantResults)
 
 
 def computeANOVA():
