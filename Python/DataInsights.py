@@ -1,7 +1,7 @@
 import pandas as pd
 
 def emgInsight(filePath):
-    data = pd.read_csv(filePath, delimiter=",", header=0, skipinitialspace=True)
+    data = pd.read_csv(filePath, delimiter=";", header=0, skipinitialspace=True)
     emgData = data.filter(items=['EMG1', 'EMG2', 'EMG3', 'EMG4', 'EMG5', 'EMG6', 'EMG7', 'EMG8'])
 
     stats = emgData.agg(['mean', 'median', 'min', 'max']).round(2)
@@ -33,7 +33,7 @@ tempfiles = [
     "tempFiles/rest.csv"
 ]
 
-#emgInsight("pinchData.csv")
+emgInsight("TestData/Participant 1/EMG_log_2025_05_06_10_15_56_Med10.csv")
 
 def readPredictions():
     gesturePredict = []
@@ -61,5 +61,5 @@ def check_emg_columns_for_nan_or_empty(df):
     cleaned_df = df[~mask].copy()
     return cleaned_df
 
-df = pd.read_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10.csv", sep=";")
-df.to_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10Clean.csv", index=False, sep=";")
+#df = pd.read_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10.csv", sep=";")
+#df.to_csv("tempTestData/EMG_log_2025_05_06_14_21_03_Med10Clean.csv", index=False, sep=";")

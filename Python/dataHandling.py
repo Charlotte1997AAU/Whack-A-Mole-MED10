@@ -28,8 +28,8 @@ def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include
     """
 
     # Load the appropriate CSV file based on the gesture_name
-    file_path = f"fistData.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
-    df = pd.read_csv(file_path, delimiter=",")
+    file_path = f"Archive/Data_CleanUp_L/merged_file_fist_L_cleaned.csv" #Change to Data_CleanUp_L and to "L" after the gesture name
+    df = pd.read_csv(file_path, sep=";")
 
     # Convert Timestamp column to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"])
@@ -84,14 +84,12 @@ def plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include
 
     # Formatting the plot
     plt.xlabel("Time", fontsize=14, fontweight='bold')  # Bold label for x-axis
-    plt.ylabel("EMG Signal", fontweight='bold')  # Bold label for y-axis
+    plt.ylabel("EMG Value", fontweight='bold')  # Bold label for y-axis
     plt.title(f"EMG Signals Over Time with State Annotations ({gesture_name.capitalize()} Gesture)", fontsize=16,
               fontweight='bold')  # Dynamic title based on gesture
     plt.legend()
     plt.grid(True)
-
-    # Remove the timestamp from the x-axis by hiding the xticks
-    plt.xticks([])  # This removes the x-axis tick labels
+    plt.xticks()
 
     # Make y-axis ticks bold and larger
     plt.tick_params(axis='y', labelsize=12, labelcolor='black', width=2)  # Change size and boldness
@@ -108,8 +106,8 @@ states_to_include = ["MVC", "In box", "Moving to Box", "Resting", "Moving to res
 emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 
 # Example usage:
-gesture_name = "supination"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
-#plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
+gesture_name = "fist"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
+plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
 
 #plot_emg_with_states("fist", states_to_include, emg_signals_to_include)
 

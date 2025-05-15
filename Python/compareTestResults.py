@@ -704,7 +704,7 @@ def calcMovingBoxes():
 
     grouped = [group['f1_score'].values for _, group in direction_df.groupby('direction')]
     stat, p = kruskal(*grouped)
-    print(f"\nKruskal-Wallis for moving: \n H = {stat:.3f}, p = {p:.3f}")
+    print(f"\nKruskal-Wallis for directions: \n H = {stat:.3f}, p = {p:.3f}")
 
     return participant_results, direction_df  # optional: return for further processing
 
@@ -738,10 +738,10 @@ def movingBoxKruskalWallis(movingBoxResults):
 
     # Run Kruskal-Wallis H-test
     kruskal_result = kruskal(*groups)
-    print(f"Kruskal-Wallis H = {kruskal_result.statistic:.3f}, p = {kruskal_result.pvalue:.3f}")
+    print(f"Kruskal-Wallis for moving overall: H = {kruskal_result.statistic:.3f}, p = {kruskal_result.pvalue:.3f}")
 
 
-#movingBoxKruskalWallis(participantResults)
+movingBoxKruskalWallis(participantResults)
 
 
 def computeANOVA():
