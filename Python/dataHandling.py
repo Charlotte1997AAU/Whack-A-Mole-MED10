@@ -107,7 +107,7 @@ emg_signals_to_include = [1, 2, 3, 4, 5, 6, 7, 8]
 
 # Example usage:
 gesture_name = "fist"  # choose which gesture to look at. "extension", "fist", "flexion", "pinch", "pronation" or "supination"
-plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
+#plot_emg_with_states(gesture_name, states_to_include, emg_signals_to_include=emg_signals_to_include, color_shading=True)
 
 #plot_emg_with_states("fist", states_to_include, emg_signals_to_include)
 
@@ -277,6 +277,7 @@ def visualizeAllFeaturesNoDetails():
     df = df.drop(columns=["Timestamp", "SessionID"])
 
     processedData = featureSelection.createDataFrameWithCalculationsTest(df,40, 20)
+
     emgData = calculateRawEMGToVisualize()
     mav = processedData[[f"EMG{i}MAV" for i in range(1, 9)]]
     zc = processedData[[f"EMG{i}ZC" for i in range(1, 9)]]

@@ -3,7 +3,9 @@ from sklearn.model_selection import train_test_split, learning_curve
 import dataPreProcessing
 import joblib
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 import seaborn as sns
 
 def trainModel(data, model, filePath):
@@ -41,7 +43,7 @@ def trainModel(data, model, filePath):
     joblib.dump(model, f"{filePath}/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
-    '''
+
     train_sizes, train_scores, val_scores = learning_curve(
        model, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
     )
@@ -51,13 +53,16 @@ def trainModel(data, model, filePath):
     plt.plot(train_sizes, val_scores.mean(axis=1), label='Validation Accuracy', color='blue', marker='o')
     plt.plot(train_sizes, train_scores.mean(axis=1), label='Training Accuracy', color='green', marker='x')
 
-    plt.title("Learning Curve for RandomForest Model")
-    plt.xlabel("Training Set Size")
-    plt.ylabel("Accuracy")
-    plt.legend(loc='best')
+    plt.title("Learning Curve for RandomForest Model", fontsize=16, fontweight='bold')
+    plt.xlabel("Training Set Size", fontsize=16, fontweight='bold')
+    plt.xticks(fontsize=16, fontweight='bold')
+    plt.yticks(fontsize=16, fontweight='bold')
+    plt.ylabel("Accuracy", fontsize=16, fontweight='bold')
+    plt.legend(loc='best', fontsize=16)
+    plt.savefig("Images/bestModelLearningCurve.png")
 
     plt.show()
-    '''
+
 
 def trainPCA(data, model):
     # Load the dataset
