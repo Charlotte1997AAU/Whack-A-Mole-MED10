@@ -9,54 +9,71 @@ import pandas as pd
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
+import numpy as np
 
 
-def trainModelAllDataframes(dataframes, model, filePath):
-    # Combine all DataFrames into one
-    dfNormalized = pd.concat(dataframes, ignore_index=True)
-    model_name = type(model).__name__
+def generate_learning_curve(participant_datasets, train_sizes, model, n_repeats=3):
+    all_train_acc = {size: [] for size in train_sizes}
+    all_val_acc = {size: [] for size in train_sizes}
 
-    # Preprocess the data
-    excludeColumns = ["activeCube", "activeCubeX", "activeCubeY", "GoalGesture"]
+    for participant, (X, y) in participant_datasets.items():
+        for size in train_sizes:
+            train_accs = []
+            val_accs = []
+            for _ in range(n_repeats):
+                # Split once to keep test set fixed
+                X_train_full, X_test, y_train_full, y_test = train_test_split(
+                    X, y, test_size=0.2, random_state=None, stratify=y)
 
-    X = dfNormalized.drop(columns=excludeColumns)  # Features
-    y = dfNormalized['GoalGesture']  # Target
+                # Sample subset of training data
+                if size < len(X_train_full):
+                    idx = np.random.choice(len(X_train_full), size=size, replace=False)
+                    X_train = X_train_full[idx]
+                    y_train = y_train_full[idx]
+                else:
+                    X_train = X_train_full
+                    y_train = y_train_full
 
-    # Split into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+                # Train model
+                model.fit(X_train, y_train)
 
-    model.fit(X_train, y_train)
+                # Accuracy
+                train_preds = model.predict(X_train)
+                test_preds = model.predict(X_test)
+                train_accs.append(accuracy_score(y_train, train_preds))
+                val_accs.append(accuracy_score(y_test, test_preds))
 
-    y_pred_best_model = model.predict(X_test)
-    model_accuracy_best = accuracy_score(y_test, y_pred_best_model)
-    model_cm = confusion_matrix(y_test, y_pred_best_model)
+            all_train_acc[size].append(np.mean(train_accs))
+            all_val_acc[size].append(np.mean(val_accs))
 
-    print(f"Best accuracy for {model_name}: {model_accuracy_best:.2f}")
-    print("Confusion Matrix for Best Model:")
-    print(model_cm)
-    print("Classification Report for Best Model:")
-    print(classification_report(y_test, y_pred_best_model))
+    mean_train = [np.mean(all_train_acc[size]) for size in train_sizes]
+    std_train = [np.std(all_train_acc[size]) for size in train_sizes]
+    mean_val = [np.mean(all_val_acc[size]) for size in train_sizes]
+    std_val = [np.std(all_val_acc[size]) for size in train_sizes]
 
-    # Learning curve
-    train_sizes, train_scores, val_scores = learning_curve(
-        model, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
-    )
+    return mean_train, std_train, mean_val, std_val
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(train_sizes, val_scores.mean(axis=1), label='Validation Accuracy', color='blue', marker='o')
-    plt.plot(train_sizes, train_scores.mean(axis=1), label='Training Accuracy', color='green', marker='x')
-
-    plt.title("Overall Learning Curve", fontsize=16, fontweight='bold')
+def plot_learning_curve(train_sizes, mean_train, std_train, mean_val, std_val):
+    plt.figure(figsize=(8, 5))
+    plt.plot(train_sizes, mean_train, label='Training Accuracy', color='green')
+    plt.plot(train_sizes, mean_val, label='Validation Accuracy', color='blue')
+    plt.fill_between(train_sizes,
+                     np.array(mean_train) - np.array(std_train),
+                     np.array(mean_train) + np.array(std_train),
+                     alpha=0.2, color='green')
+    plt.fill_between(train_sizes,
+                     np.array(mean_val) - np.array(std_val),
+                     np.array(mean_val) + np.array(std_val),
+                     alpha=0.2, color='blue')
     plt.xlabel("Training Set Size", fontsize=16, fontweight='bold')
+    plt.ylabel("Accuracy", fontsize=16, fontweight='bold')
+    plt.title("Learning Curve Averaged Across Participants", fontsize=18, fontweight='bold')
     plt.xticks(fontsize=16, fontweight='bold')
     plt.yticks(fontsize=16, fontweight='bold')
-    plt.ylabel("Accuracy", fontsize=16, fontweight='bold')
-    plt.legend(loc='best', fontsize=16)
-    plt.savefig("Images/overallLearningCurve.png")
+    plt.legend(fontsize=16)
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
-
 
 
 def load_all_training_data(root_dir, file_pattern="TrainingSet"):
@@ -79,5 +96,14 @@ def load_all_training_data(root_dir, file_pattern="TrainingSet"):
 
 all_dataframes = load_all_training_data("TestData")
 
+participant_datasets = {}
+for i, df in enumerate(all_dataframes):
+    X = df.drop(columns=["GoalGesture"]).values
+    y = df["GoalGesture"].values
+    participant_datasets[f"P{i+1}"] = (X, y)
+
+
+trainsizes = [500, 1000, 2000, 3000, 4000]
 model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_split=10, min_samples_leaf=5)
-trainModelAllDataframes(all_dataframes, model, "Results")
+mean_train, std_train, mean_val, std_val = generate_learning_curve(participant_datasets, trainsizes, model)
+plot_learning_curve(trainsizes, mean_train, std_train, mean_val, std_val)
