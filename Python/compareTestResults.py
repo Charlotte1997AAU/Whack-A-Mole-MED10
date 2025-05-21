@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import timedelta
-
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -17,7 +16,7 @@ from collections import defaultdict
 
 pd.set_option("display.max_columns", None)
 
-participantNr = 1
+participantNr = 6
 
 
 def calculateTestStats(file, showPlot: bool):
@@ -72,7 +71,7 @@ def calculateTestStats(file, showPlot: bool):
     return results_df
 
 
-#testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
+testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
 #print(testStats)
 
 
@@ -144,8 +143,40 @@ def compareTrainAndTestSet(participantNr: int, testStats):
         print(f"Failed to compare classification reports: {e}")
 
 
-#comparison_df = compareTrainAndTestSet(participantNr, testStats)
+comparison_df = compareTrainAndTestSet(participantNr, testStats)
 
+
+def plot_connected_f1_scores(df):
+    # Convert percentages to 0–1 scale
+    df["f1-score (Offline)"] = df["f1-score (Offline)"] / 100
+    df["f1-score (Online)"] = df["f1-score (Online)"] / 100
+
+    plt.figure(figsize=(8, 5))
+
+    for idx, row in df.iterrows():
+        offline_score = row["f1-score (Offline)"]
+        online_score = row["f1-score (Online)"]
+        diff = online_score - offline_score
+
+        # Plot line with markers
+        plt.plot(["Offline", "Online"],
+                 [offline_score, online_score],
+                 marker="o",
+                 label=f"{row['Gesture']} (Delta={diff:+.2f})")  # Δ in legend
+
+    plt.title("F1-Score: Online vs Offline per Gesture", fontsize=16, fontweight="bold")
+    plt.ylabel("F1-Score", fontsize=16, fontweight="bold")
+    plt.xticks(fontsize=16, fontweight="bold")
+    plt.yticks(fontsize=16, fontweight="bold")
+    plt.ylim(0.7, 1.0)
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.legend(title="Gesture (Delta F1)", fontsize=14, title_fontsize=16)
+    plt.tight_layout()
+    plt.savefig("connected_f1_scores.png")
+    plt.show()
+
+
+plot_connected_f1_scores(comparison_df)
 
 def plotGesturePerformanceComparison(comparison_df):
     """
@@ -213,6 +244,88 @@ def plotGesturePerformanceComparison(comparison_df):
 #plotGesturePerformanceComparison(comparison_df)
 
 
+def collect_online_f1_scores(base_path="TestData"):
+    all_data = []
+
+    for folder in os.listdir(base_path):
+        if folder.startswith("Participant "):
+            try:
+                participantNr = int(folder.split(" ")[1])
+                file_path = os.path.join(base_path, folder, f"Test_log_{participantNr}.csv")
+
+                testStats = calculateTestStats(file_path, False)
+                for _, row in testStats.iterrows():
+                    all_data.append({
+                        "Participant": participantNr,
+                        "Gesture": row["gesture"],
+                        "F1-score": row["f1-score"]
+                    })
+            except Exception as e:
+                print(f"Skipping {folder}: {e}")
+
+    return pd.DataFrame(all_data)
+
+
+def collect_offline_f1_scores(base_path="TestData"):
+    all_data = []
+
+    gesture_names = {
+        0: "Extension",
+        1: "Fist",
+        2: "Flexion",
+        3: "Pinch"
+    }
+
+    for folder in os.listdir(base_path):
+        if folder.startswith("Participant "):
+            try:
+                participantNr = int(folder.split(" ")[1])
+                report_path = os.path.join(base_path, folder, "classification_report.csv")
+
+                if not os.path.exists(report_path):
+                    print(f"Missing classification report for Participant {participantNr}")
+                    continue
+
+                df = pd.read_csv(report_path)
+
+                # Ensure we only use the first 4 rows (per gesture)
+                df = df.iloc[:4]
+
+                for i, row in df.iterrows():
+                    gesture = gesture_names.get(i, f"Gesture {i}")
+                    f1_score = row["f1-score"]
+                    all_data.append({
+                        "Participant": participantNr,
+                        "Gesture": gesture,
+                        "F1-score": f1_score
+                    })
+
+            except Exception as e:
+                print(f"Skipping {folder}: {e}")
+
+    return pd.DataFrame(all_data)
+
+
+def plot_violin_by_gesture(f1_df):
+    plt.figure(figsize=(10, 6))
+    sns.violinplot(data=f1_df, x="Gesture", y="F1-score", inner="box", palette="Set2")
+
+    plt.title("Distribution of F1-Scores by Gesture Across Participants for Offline test", fontsize=16, fontweight='bold')
+    plt.xlabel("Gesture", fontsize=16, fontweight='bold')
+    plt.ylabel("F1-Score", fontsize=16, fontweight='bold')
+    plt.xticks(fontsize=14, fontweight='bold')
+    plt.yticks(fontsize=14, fontweight='bold')
+    plt.ylim(0.5, 1)
+    plt.grid(True, linestyle='--', alpha=0.4)
+    plt.tight_layout()
+    plt.savefig("Images/violin_f1_scores_by_gesture_Offline.png")
+    plt.show()
+
+
+#f1_df = collect_offline_f1_scores()
+#plot_violin_by_gesture(f1_df)
+
+
 def plotMacroF1ByParticipant(base_path="TestData"):
     macro_f1_scores = []
 
@@ -228,27 +341,27 @@ def plotMacroF1ByParticipant(base_path="TestData"):
 
                 # Compute macro F1-score
                 macro_f1 = testStats["f1-score"].mean()
-                macro_f1_scores.append((participantNr, macro_f1))
+                macro_f1_scores.append((participantNr, float(macro_f1)))
 
             except Exception as e:
                 print(f"Skipping {folder}: {e}")
 
+
     # Convert to DataFrame for plotting
     df = pd.DataFrame(macro_f1_scores, columns=["Participant", "Macro F1"])
-    df = df.sort_values("Participant")
+    df = df.sort_values("Macro F1")
+
 
     # Plot
     plt.figure(figsize=(10, 6))
-    plt.bar(df["Participant"], df["Macro F1"], color="steelblue", width=0.6)
-
+    plt.bar(range(len(df)), df["Macro F1"], color="steelblue", width=0.6)
     plt.title("Macro F1-Score Across Participants", fontsize=16, fontweight='bold')
     plt.xlabel("Participant Number", fontsize=14, fontweight='bold')
     plt.ylabel("Macro F1-Score", fontsize=14, fontweight='bold')
-    plt.xticks(df["Participant"], fontsize=12, fontweight='bold')
+    plt.xticks(range(len(df)), df["Participant"], fontsize=12, fontweight='bold')
     plt.yticks(fontsize=12, fontweight='bold')
     plt.ylim(0, 1)
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend(fontsize=12)
     plt.tight_layout()
     plt.savefig("macro_f1_by_participant.png")
     plt.show()
@@ -709,7 +822,7 @@ def calcMovingBoxes():
     return participant_results, direction_df  # optional: return for further processing
 
 
-participantResults, directionResults = calcMovingBoxes()
+#participantResults, directionResults = calcMovingBoxes()
 
 
 def movingBoxKruskalWallis(movingBoxResults):
@@ -741,7 +854,7 @@ def movingBoxKruskalWallis(movingBoxResults):
     print(f"Kruskal-Wallis for moving overall: H = {kruskal_result.statistic:.3f}, p = {kruskal_result.pvalue:.3f}")
 
 
-movingBoxKruskalWallis(participantResults)
+#movingBoxKruskalWallis(participantResults)
 
 
 def computeANOVA():

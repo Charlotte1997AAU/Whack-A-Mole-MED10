@@ -1,14 +1,12 @@
 import os
-
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.ensemble import RandomForestClassifier
-import dataPreProcessing
-import joblib
 import pandas as pd
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 
@@ -51,26 +49,50 @@ def generate_learning_curve(participant_datasets, train_sizes, model, n_repeats=
     mean_val = [np.mean(all_val_acc[size]) for size in train_sizes]
     std_val = [np.std(all_val_acc[size]) for size in train_sizes]
 
-    return mean_train, std_train, mean_val, std_val
+    participant_ids = list(participant_datasets.keys())
+    individual_train_curves = {
+        pid: [all_train_acc[size][i] for size in train_sizes]
+        for i, pid in enumerate(participant_ids)
+    }
+    individual_val_curves = {
+        pid: [all_val_acc[size][i] for size in train_sizes]
+        for i, pid in enumerate(participant_ids)
+    }
 
-def plot_learning_curve(train_sizes, mean_train, std_train, mean_val, std_val):
+    return mean_train, std_train, mean_val, std_val, individual_train_curves, individual_val_curves
+
+
+def plot_learning_curve(train_sizes, mean_train, std_train, mean_val, std_val,
+                        individual_train_curves=None, individual_val_curves=None):
     plt.figure(figsize=(8, 5))
-    plt.plot(train_sizes, mean_train, label='Training Accuracy', color='green')
-    plt.plot(train_sizes, mean_val, label='Validation Accuracy', color='blue')
-    plt.fill_between(train_sizes,
-                     np.array(mean_train) - np.array(std_train),
-                     np.array(mean_train) + np.array(std_train),
-                     alpha=0.2, color='green')
-    plt.fill_between(train_sizes,
-                     np.array(mean_val) - np.array(std_val),
-                     np.array(mean_val) + np.array(std_val),
-                     alpha=0.2, color='blue')
+
+    # Plot individual participant curves (if provided)
+    if individual_train_curves and individual_val_curves:
+        for participant in individual_train_curves:
+            plt.plot(train_sizes, individual_train_curves[participant],
+                     color='green', alpha=0.2, linewidth=0.8)
+        for participant in individual_val_curves:
+            plt.plot(train_sizes, individual_val_curves[participant],
+                     color='blue', alpha=0.2, linewidth=0.8)
+
+    # Plot mean curves
+    plt.plot(train_sizes, mean_train, label='Training Accuracy', color='green', linewidth=2.5)
+    plt.plot(train_sizes, mean_val, label='Validation Accuracy', color='blue', linewidth=2.5)
+
     plt.xlabel("Training Set Size", fontsize=16, fontweight='bold')
     plt.ylabel("Accuracy", fontsize=16, fontweight='bold')
     plt.title("Learning Curve Averaged Across Participants", fontsize=18, fontweight='bold')
     plt.xticks(fontsize=16, fontweight='bold')
     plt.yticks(fontsize=16, fontweight='bold')
-    plt.legend(fontsize=16)
+
+    custom_lines = [
+        Line2D([0], [0], color='green', lw=2.5, label='Avg Training Accuracy'),
+        Line2D([0], [0], color='blue', lw=2.5, label='Avg Validation Accuracy'),
+        Line2D([0], [0], color='green', lw=1, alpha=0.2, label='Individual Training Curves'),
+        Line2D([0], [0], color='blue', lw=1, alpha=0.2, label='Individual Validation Curves'),
+    ]
+
+    plt.legend(handles=custom_lines, fontsize=16, loc='lower right')
     plt.grid(True)
     plt.tight_layout()
     plt.show()
@@ -105,5 +127,8 @@ for i, df in enumerate(all_dataframes):
 
 trainsizes = [500, 1000, 2000, 3000, 4000]
 model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_split=10, min_samples_leaf=5)
-mean_train, std_train, mean_val, std_val = generate_learning_curve(participant_datasets, trainsizes, model)
-plot_learning_curve(trainsizes, mean_train, std_train, mean_val, std_val)
+mean_train, std_train, mean_val, std_val, indiv_train, indiv_val = generate_learning_curve(
+    participant_datasets, trainsizes, model)
+
+plot_learning_curve(trainsizes, mean_train, std_train, mean_val, std_val,
+                    individual_train_curves=indiv_train, individual_val_curves=indiv_val)
