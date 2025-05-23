@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load the CSV file
-df = pd.read_csv('Test_log_2025_05_05_14_39_11_Med10.csv', delimiter=";")
+df = pd.read_csv('TestData/VisualizeData/data.csv', delimiter=";")
 
 # Convert the timestamp column to datetime
 df['Timestamp'] = pd.to_datetime(df['Timestamp'], format='%Y-%m-%d %H:%M:%S.%f')
