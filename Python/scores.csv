@@ -1,0 +1,6 @@
+Gesture,precision (Offline),recall (Offline),f1-score (Offline),precision (Online),recall (Online),f1-score (Online)
+Extension,93.58,87.09,90.0,62.45,49.94,50.47
+Fist,87.57,86.95,87.06,60.83,43.72,48.39
+Flexion,93.61,82.83,87.58,69.9,60.17,62.91
+Pinch,77.28,88.47,81.93,47.37,55.92,45.17
+Macro,88.00999999999999,86.33500000000001,86.6425,60.1375,52.4375,51.735

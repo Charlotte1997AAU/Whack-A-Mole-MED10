@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib
 from scipy.stats import shapiro, kruskal, f_oneway, levene
-import glob
+from typing import Union, List
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay, precision_recall_fscore_support
@@ -19,34 +19,47 @@ pd.set_option("display.max_columns", None)
 participantNr = 6
 
 
-def calculateTestStats(file, showPlot: bool):
-    # Load and parse the CSV with semicolon delimiter
-    df = pd.read_csv(file, delimiter=';')
+def calculateTestStats(files: Union[str, Path, List[Union[str, Path]]], showPlot: bool):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 
+    # Convert single Path or str to list
+    if isinstance(files, (str, Path)):
+        files = [files]
+
+    # Ensure all file paths are strings for pd.read_csv
+    files = [str(f) for f in files]
+
+    # Load and concatenate all datasets
+    df_list = [pd.read_csv(file, delimiter=';') for file in files]
+    df = pd.concat(df_list, ignore_index=True)
+
+    # Filter and preprocess
     valid_df = df[(df['InCube'] == 'InCube')].copy()
     valid_df['GoalGesture'] = valid_df['GoalGesture'].astype(int)
     valid_df['Prediction'] = valid_df['Prediction'].astype(int)
 
     result_stats = []
 
+    gesture_names = {
+        0: "Extension",
+        1: "Fist",
+        2: "Flexion",
+        3: "Pinch"
+    }
+
     # Loop over each gesture class
     for gesture in sorted(valid_df['GoalGesture'].unique()):
         true_labels = (valid_df['GoalGesture'] == gesture).astype(int)
         pred_labels = (valid_df['Prediction'] == gesture).astype(int)
-
-        gesture_names = {
-            0: "Extension",
-            1: "Fist",
-            2: "Flexion",
-            3: "Pinch"
-        }
 
         precision = precision_score(true_labels, pred_labels, zero_division=0)
         recall = recall_score(true_labels, pred_labels, zero_division=0)
         f1 = f1_score(true_labels, pred_labels, zero_division=0)
 
         result_stats.append({
-            'gesture': gesture_names[gesture],
+            'gesture': gesture_names.get(gesture, f"Unknown ({gesture})"),
             'precision': precision,
             'recall': recall,
             'f1-score': f1
@@ -55,23 +68,41 @@ def calculateTestStats(file, showPlot: bool):
     results_df = pd.DataFrame(result_stats)
 
     if showPlot:
-        # Get all valid GoalGesture classes (assuming these are always integers)
         gesture_labels = sorted(valid_df['GoalGesture'].unique())
-
-        # Create the confusion matrix
         cm = confusion_matrix(valid_df['GoalGesture'], valid_df['Prediction'], labels=gesture_labels)
 
-        # Display the confusion matrix
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=gesture_labels)
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm,
+                                      display_labels=[gesture_names.get(g, str(g)) for g in gesture_labels])
+        fig, ax = plt.subplots(figsize=(8, 6))  # Adjust figure size if needed
+        disp.plot(cmap=plt.cm.Blues, ax=ax, colorbar=False)
+
+        # Make all text larger and bold
+        for label in ax.texts:
+            label.set_fontsize(14)
+            label.set_fontweight('bold')
+
+        ax.set_title("Confusion Matrix", fontsize=18, fontweight='bold')
+        ax.set_xlabel("Predicted Label", fontsize=14, fontweight='bold')
+        ax.set_ylabel("True Label", fontsize=14, fontweight='bold')
+
+        ax.tick_params(axis='both', labelsize=12)  # Tick label size
+        for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+            label.set_fontweight('bold')
+
         plt.tight_layout()
         plt.show()
 
     return results_df
 
+allFiles = []
+for folder in os.listdir("TestData"):
+    if folder.startswith("Participant "):
+        participantNr = int(folder.split(" ")[1])
+        file_path = os.path.join("TestData" , folder, f"Test_log_{participantNr}.csv")
+        allFiles.append(file_path)
 
-testStats = calculateTestStats(f"TestData/Participant {participantNr}/Test_log_{participantNr}.csv", False)
+
+#testStats = calculateTestStats(f"TestData/Participant {participantNr}/test_log_{participantNr}.csv", False)
 #print(testStats)
 
 
@@ -143,7 +174,7 @@ def compareTrainAndTestSet(participantNr: int, testStats):
         print(f"Failed to compare classification reports: {e}")
 
 
-comparison_df = compareTrainAndTestSet(participantNr, testStats)
+#comparison_df = compareTrainAndTestSet(participantNr, testStats)
 
 
 def plot_connected_f1_scores(df):
@@ -176,7 +207,7 @@ def plot_connected_f1_scores(df):
     plt.show()
 
 
-plot_connected_f1_scores(comparison_df)
+#plot_connected_f1_scores(comparison_df)
 
 def plotGesturePerformanceComparison(comparison_df):
     """
@@ -346,22 +377,25 @@ def plotMacroF1ByParticipant(base_path="TestData"):
             except Exception as e:
                 print(f"Skipping {folder}: {e}")
 
-
-    # Convert to DataFrame for plotting
+    # Convert to DataFrame and sort by Macro F1 ascending
     df = pd.DataFrame(macro_f1_scores, columns=["Participant", "Macro F1"])
     df = df.sort_values("Macro F1")
 
-
-    # Plot
+    # Plot: Points + line
     plt.figure(figsize=(10, 6))
-    plt.bar(range(len(df)), df["Macro F1"], color="steelblue", width=0.6)
-    plt.title("Macro F1-Score Across Participants", fontsize=16, fontweight='bold')
-    plt.xlabel("Participant Number", fontsize=14, fontweight='bold')
-    plt.ylabel("Macro F1-Score", fontsize=14, fontweight='bold')
+    plt.plot(range(len(df)), df["Macro F1"], marker='o', linestyle='-', color='steelblue', linewidth=2, markersize=8)
+
+    # Set x-ticks to show participant numbers in sorted order
     plt.xticks(range(len(df)), df["Participant"], fontsize=12, fontweight='bold')
+
+    # Formatting
+    plt.title("Macro F1-Score Across Participants", fontsize=16, fontweight='bold')
+    plt.xlabel("Participant Number (sorted by F1)", fontsize=14, fontweight='bold')
+    plt.ylabel("Macro F1-Score", fontsize=14, fontweight='bold')
     plt.yticks(fontsize=12, fontweight='bold')
     plt.ylim(0, 1)
     plt.grid(True, linestyle='--', alpha=0.5)
+
     plt.tight_layout()
     plt.savefig("macro_f1_by_participant.png")
     plt.show()
@@ -472,6 +506,8 @@ def calcOverallAverageScores():
 
 
 # Uncomment to plot average precision and recall scores for training and testing
+calcOverallAverageScores().to_csv("scores.csv", index=False)
+
 #plotGesturePerformanceComparison(calcOverallAverageScores())
 
 
@@ -593,6 +629,63 @@ def avgScoresPerBox(boxNum: int = None, printScores: bool = False):
             f1_scores_per_cube[cubeName] = macro_f1
 
         return cube_scores, f1_scores_per_cube
+
+
+def macroF1_per_participant_per_cube():
+    root_dir = Path("TestData")
+    records = []
+
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        if "participant" in dirpath.lower():
+            # Try to extract participant ID from the folder path
+            participant_id_match = re.search(r'participant[\s_\-]?(\d+)', dirpath.lower())
+            if participant_id_match:
+                participant_id = int(participant_id_match.group(1))
+            else:
+                continue
+
+            for file in filenames:
+                if file.endswith(".csv") and "Test_log" in file:
+                    full_path = Path(dirpath) / file
+                    df = pd.read_csv(full_path, sep=";")
+                    df = df.dropna(subset=["ActivatedCube"])
+
+                    for cube in df['ActivatedCube'].unique():
+                        cube_df = df[df['ActivatedCube'] == cube]
+                        y_true = cube_df['GoalGesture']
+                        y_pred = cube_df['Prediction']
+                        labels = sorted(cube_df['GoalGesture'].unique())
+                        _, _, f1, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, zero_division=0)
+                        macro_f1 = f1.mean()
+
+                        records.append({
+                            "participant": participant_id,
+                            "cube": cube,
+                            "macro_f1": macro_f1
+                        })
+
+    df = pd.DataFrame(records)
+
+    if df.empty:
+        print("No data collected. Check your file paths or filters.")
+        return df
+
+    if 'cube' not in df.columns:
+        print("Column 'cube' not found in DataFrame.")
+        return df
+
+    groups = [group['macro_f1'].values for name, group in df.groupby('cube')]
+
+    # Run one-way ANOVA
+    f_stat, p_val = f_oneway(*groups)
+
+    print("ANOVA results:")
+    print(f"F-statistic: {f_stat:.4f}, p-value: {p_val:.4f}")
+
+    return df
+
+
+#macroF1_per_participant_per_cube()
 
 
 def plot_cube_scores(cube_scores: dict):

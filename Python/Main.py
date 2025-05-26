@@ -3,14 +3,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
 from sklearn.svm import SVC
-
 import dataPreProcessing
 import featureSelection
 import fileManagement
 import pandas as pd
 import dataCleanUp
 import MLTraining
-#import NNTraining
+
 
 # Path to the data the training set should be created from
 fileManagement.moveUnityData(file_extension=".csv")

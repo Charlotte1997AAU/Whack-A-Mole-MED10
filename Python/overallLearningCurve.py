@@ -118,6 +118,13 @@ def load_all_training_data(root_dir, file_pattern="TrainingSet"):
 
 all_dataframes = load_all_training_data("TestData")
 
+df = pd.concat(all_dataframes)
+df.to_csv("AllDataInOne.csv")
+print("data saved")
+
+
+
+
 participant_datasets = {}
 for i, df in enumerate(all_dataframes):
     X = df.drop(columns=["GoalGesture"]).values
@@ -130,5 +137,5 @@ model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_split=
 mean_train, std_train, mean_val, std_val, indiv_train, indiv_val = generate_learning_curve(
     participant_datasets, trainsizes, model)
 
-plot_learning_curve(trainsizes, mean_train, std_train, mean_val, std_val,
-                    individual_train_curves=indiv_train, individual_val_curves=indiv_val)
+#plot_learning_curve(trainsizes, mean_train, std_train, mean_val, std_val,
+                    #individual_train_curves=indiv_train, individual_val_curves=indiv_val)

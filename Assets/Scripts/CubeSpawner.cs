@@ -18,6 +18,8 @@ public class CubeSpawner : MonoBehaviour
         float cubeWidth = (spawnAreaSize.x - totalPaddingX) / cubesAlongX;
         float cubeHeight = (spawnAreaSize.y - totalPaddingY) / cubesAlongY;
 
+        Debug.Log("Width: " + cubeWidth + "| Height: " + cubeHeight);
+
         int cubeCount = 0;
 
         for (int x = 0; x < cubesAlongX; x++)

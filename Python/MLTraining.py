@@ -1,4 +1,5 @@
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, learning_curve
 import dataPreProcessing
 import joblib
@@ -31,6 +32,36 @@ def trainModel(data, model, filePath):
     # Calculate accuracy and print confusion matrix for the best model
     model_accuracy_best = accuracy_score(y_test, y_pred_best_model)
     model_cm = confusion_matrix(y_test, y_pred_best_model)
+
+    gesture_names = {
+        0: "Extension",
+        1: "Fist",
+        2: "Flexion",
+        3: "Pinch"
+    }
+    labels_sorted = sorted(gesture_names.keys())
+
+    # Display the confusion matrix
+    disp = ConfusionMatrixDisplay(confusion_matrix=model_cm, display_labels=[gesture_names[g] for g in labels_sorted])
+    fig, ax = plt.subplots(figsize=(8, 6))
+    disp.plot(cmap=plt.cm.Blues, ax=ax, colorbar=False)
+
+    # Make all text bold and bigger
+    for label in ax.texts:
+        label.set_fontsize(16)
+        label.set_fontweight('bold')
+
+    ax.set_title(f"Confusion Matrix for offline data", fontsize=18, fontweight='bold')
+    ax.set_xlabel("Predicted Label", fontsize=14, fontweight='bold')
+    ax.set_ylabel("True Label", fontsize=14, fontweight='bold')
+    ax.tick_params(axis='both', labelsize=12)
+
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontweight('bold')
+
+    plt.tight_layout()
+    plt.show()
+
     print(f"Best accuracy for {model_name}: {model_accuracy_best:.2f}")
     print("Confusion Matrix for Best Model:")
     print(model_cm)
@@ -40,10 +71,11 @@ def trainModel(data, model, filePath):
     report_df = pd.DataFrame(report_dict).transpose()
     report_df.to_csv(f"{filePath}/classification_report.csv", index=False)
 
-    joblib.dump(model, f"{filePath}/{model_name}.pkl")
+    #joblib.dump(model, f"{filePath}/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
 
+    """
     train_sizes, train_scores, val_scores = learning_curve(
        model, X, y, train_sizes=[0.1, 0.3, 0.5, 0.7, 1.0], cv=5
     )
@@ -62,7 +94,11 @@ def trainModel(data, model, filePath):
     plt.savefig("Images/bestModelLearningCurve.png")
 
     plt.show()
+    """
 
+df = pd.read_csv()
+model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_split=10, min_samples_leaf=5)
+trainModel(df, model, "tempTestData")
 
 def trainPCA(data, model):
     # Load the dataset
