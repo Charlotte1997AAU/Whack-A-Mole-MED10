@@ -35,8 +35,8 @@ def modelPredict(emg_window):
     # Call the feature extraction function on the current window of data
     dfCalculated = featureSelection.createDataFrameWithCalculationsTest(df)
 
-    # Normalize the features using the pre-trained scaler
-    dfNormalized = scaler.transform(dfCalculated)
+    # Standardize the features using the pre-trained scaler
+    dfNormalized = scaler.transform(dfCalculated) #actually standardizes tihi f9s
     dfNormalized = pd.DataFrame(dfNormalized, columns=dfCalculated.columns)
     dfWithDeltas = featureSelection.calculateDeltaFeatures(dfNormalized)
 

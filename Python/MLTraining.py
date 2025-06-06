@@ -71,7 +71,7 @@ def trainModel(data, model, filePath):
     report_df = pd.DataFrame(report_dict).transpose()
     report_df.to_csv(f"{filePath}/classification_report.csv", index=False)
 
-    #joblib.dump(model, f"{filePath}/{model_name}.pkl")
+    joblib.dump(model, f"{filePath}/{model_name}.pkl")
     print(f"Trained and saved {model_name}")
 
 
@@ -96,9 +96,6 @@ def trainModel(data, model, filePath):
     plt.show()
     """
 
-df = pd.read_csv()
-model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_split=10, min_samples_leaf=5)
-trainModel(df, model, "tempTestData")
 
 def trainPCA(data, model):
     # Load the dataset
